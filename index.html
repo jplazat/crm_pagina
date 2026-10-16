@@ -1,4 +1,2515 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CRM</title>
-<style>body{font-family:system-ui,sans-serif;background:#f6f7f9;color:#1d2433;display:grid;place-items:center;min-height:100vh;margin:0}main{text-align:center;padding:24px}</style></head>
-<body><main><h1>CRM</h1><p>Página en preparación. Pronto estará aquí el CRM.</p></main></body></html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16252a" media="(prefers-color-scheme: dark)">
+<title>CRM</title>
+<link rel="icon" id="icono" href="CRM.ico">
+<style>
+:root{
+  --bg:#f3f5f5; --panel:#ffffff; --ink:#18282d; --muted:#5b6e73; --line:#d7e0e2;
+  --accent:#1f4e5f; --accent-soft:#e3eef1; --accent-ink:#ffffff;
+  --ok:#2e7d4f; --ok-soft:#e1f2e7; --warn:#a36a00; --warn-soft:#fbefd6; --bad:#b3261e; --bad-soft:#fbe3e1;
+  --grey-soft:#eceff0;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#101a1d; --panel:#16252a; --ink:#e3ecee; --muted:#96abb0; --line:#2a3d43;
+    --accent:#6fb3c9; --accent-soft:#1d3a44; --accent-ink:#0c1a1f;
+    --ok:#7fd3a0; --ok-soft:#173526; --warn:#f0c064; --warn-soft:#3a2e12; --bad:#ff8f86; --bad-soft:#3d1a18; --grey-soft:#22343a;
+    color-scheme: dark; }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:6;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+header h1{font-size:17px;margin:0;color:var(--accent);letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+header h1 .marca{display:inline-flex;gap:3px}
+header h1 .marca i{width:8px;height:8px;border-radius:50%;display:inline-block}
+#estado{font-size:12.5px;color:var(--muted);flex:1 1 140px;min-width:0}
+#estado.sucio{color:var(--warn)}
+#estado.error{color:var(--bad)}
+.acciones{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.txt-corto{display:none}
+.solo-movil{display:none}
+button,.boton{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primario{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.peligro{color:var(--bad);border-color:var(--bad)}
+button.mini{padding:2px 8px;font-size:12.5px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.barra{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;padding:10px 16px 0}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border-radius:6px 6px 0 0;border-bottom:none;background:transparent}
+nav button[aria-selected="true"]{background:var(--panel);border-color:var(--line);font-weight:600;color:var(--accent)}
+.productos{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:6px;background:var(--panel)}
+.productos button{border:none;border-radius:0;border-right:1px solid var(--line);padding:5px 12px;display:inline-flex;align-items:center;gap:6px}
+.productos button:last-child{border-right:none}
+.productos button[aria-pressed="true"]{background:var(--accent-soft);font-weight:700;color:var(--accent)}
+.punto{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+/* Los puntos y chips de cada producto (.p-xxx, .chip.xxx) los genera la pagina desde la configuracion del negocio. */
+main{padding:0 16px 40px}
+.hoja{background:var(--panel);border:1px solid var(--line);border-radius:0 8px 8px 8px;padding:16px}
+.inicio{max-width:860px;margin:40px auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}
+.inicio h2{margin-top:0;color:var(--accent)}
+.inicio p{color:var(--muted)}
+/* Pantalla de inicio: una tarjeta por negocio. Su acento claro (--c) y oscuro (--c-oscuro) van en el style de cada tarjeta; por eso el modo oscuro lleva !important */
+.tarjetas-negocio{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin:14px 0}
+.tarjeta-negocio{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:12px 14px}
+.tarjeta-negocio.destacada{box-shadow:0 0 0 2px var(--c)}
+.tarjeta-negocio h3{margin:0 0 4px;font-size:16px;color:var(--c)}
+.tarjeta-negocio .fila{margin-top:10px;gap:8px}
+.tarjeta-negocio button.primario{background:var(--c);border-color:var(--c)}
+@media (prefers-color-scheme: dark){ .tarjeta-negocio{--c:var(--c-oscuro)!important} }
+/* Conexión con GitHub (pantalla de inicio): plegable, debajo de las tarjetas */
+.conexion{margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
+.conexion summary{cursor:pointer;color:var(--accent);font-weight:600}
+.conexion .campos{margin:12px 0}
+.conexion .sub{margin:8px 0 0}
+.conexion button:disabled{opacity:.5;cursor:default}
+#ghEstado.error{color:var(--bad)}
+.fila{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.cuadricula{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:4px 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+button.kpi{position:relative;text-align:left;background:var(--panel);cursor:pointer}
+button.kpi:hover{border-color:var(--accent);background:var(--accent-soft)}
+button.kpi::after{content:"›";position:absolute;right:10px;top:6px;font-size:20px;line-height:1;color:var(--muted)}
+.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.kpi.atras b{color:var(--bad)}
+.tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:18px}
+.tprod{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:8px;padding:10px 12px;cursor:pointer}
+.tprod h3{margin:0 0 8px;font-size:15px;color:var(--c)}
+.barras{display:flex;flex-direction:column;gap:3px}
+.barras div{display:grid;grid-template-columns:118px 1fr 34px;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.barras .b{height:8px;border-radius:4px;background:var(--grey-soft);overflow:hidden}
+.barras .b i{display:block;height:100%;background:var(--c)}
+.barras .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.tprod .pie{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.lista-tareas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lista-tareas li{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:7px 10px;cursor:pointer}
+.lista-tareas li.atrasado{border-left-color:var(--bad)}
+.lista-tareas li .t1{font-weight:600;display:flex;gap:6px;align-items:center}
+.lista-tareas li .t2{font-size:12.5px;color:var(--muted)}
+.vacio{color:var(--muted);font-style:italic}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+.filtros input[type=search]{flex:1 1 220px}
+.filtros label.chk{display:inline-flex;gap:5px;align-items:center;font-size:13px;color:var(--muted);white-space:nowrap}
+.filtros label.chk input{width:auto}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+.filtros select{width:auto;max-width:220px}
+.tabla-caja{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--accent-soft)}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--grey-soft);color:var(--muted)}
+.i1,.i2{background:var(--accent-soft);color:var(--accent)}
+.i3,.i4{background:var(--warn-soft);color:var(--warn)}
+.i5{background:var(--ok-soft);color:var(--ok)}
+.i7,.excl{background:var(--bad-soft);color:var(--bad)}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 8px 1px 6px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid var(--line);margin:0 4px 3px 0}
+.sub{font-size:12.5px;color:var(--muted)}
+.fecha-atrasada{color:var(--bad);font-weight:600}
+/* embudo en columnas */
+.tablero{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(165px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--bg);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;max-height:70vh;min-height:120px}
+.col.sobre{outline:2px dashed var(--accent);outline-offset:-3px}
+.col h4{margin:0;padding:8px 10px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.col h4 span{color:var(--muted);font-variant-numeric:tabular-nums}
+.col .cartas{padding:8px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.carta{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));border-radius:6px;padding:6px 8px;cursor:grab;font-size:13px}
+.carta .t1{font-weight:600}
+.carta .t2{font-size:12px;color:var(--muted)}
+.carta.arr{opacity:.5}
+.carta .mover{margin-top:6px}
+.vacio-col{font-size:12.5px;color:var(--muted);font-style:italic;padding:2px 2px 6px}
+.mas{font-size:12.5px;color:var(--muted);text-align:center;padding:4px}
+/* agenda */
+.grupo{margin-bottom:16px}
+.grupo h3{font-size:14px;margin:0 0 8px;display:flex;gap:8px;align-items:baseline}
+.grupo h3 span{color:var(--muted);font-weight:400;font-size:12.5px}
+/* ficha */
+#ficha{position:fixed;inset:0;background:rgba(10,20,24,.45);display:flex;justify-content:flex-end;z-index:20}
+#ficha[hidden]{display:none}
+.ficha-caja{background:var(--panel);width:min(780px,100%);height:100%;overflow-y:auto;padding:0 18px 40px;border-left:1px solid var(--line)}
+/* La cabecera de la ficha se queda arriba al bajar. Va sin relleno de arriba en la caja: un elemento «sticky» se pega al borde del contenido, no al del relleno. */
+.ficha-cab{display:flex;gap:10px;align-items:flex-start;position:sticky;top:0;z-index:3;background:var(--panel);margin:0 -18px 8px;padding:14px 18px 10px;border-bottom:1px solid var(--line)}
+.ficha-cab h2{margin:0;font-size:19px;flex:1;min-width:0;overflow-wrap:anywhere}
+.aviso{border-radius:6px;padding:8px 10px;margin:8px 0;font-weight:600}
+.aviso.malo{background:var(--bad-soft);color:var(--bad)}
+.aviso.aten{background:var(--warn-soft);color:var(--warn)}
+.aviso.nota{background:var(--accent-soft);color:var(--accent);font-weight:400}
+.campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 12px}
+.campos label,.bloque label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);font-weight:600}
+.ancho{grid-column:1/-1}
+textarea{min-height:60px;resize:vertical}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:14px 0 0;min-width:0}
+legend{font-weight:700;color:var(--accent);padding:0 6px}
+.op{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.op.marcada{box-shadow:0 0 0 2px var(--c)}
+.op-cab{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.op-cab b{color:var(--c);flex:1}
+.pista{font-size:12px;color:var(--muted);margin-top:4px}
+.historial{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:6px}
+.historial li{border-left:3px solid var(--line);padding:3px 0 3px 10px}
+.historial .h1{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.guion{white-space:pre-wrap;background:var(--grey-soft);border-radius:6px;padding:8px 10px;font-size:13px}
+.enlaces{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;margin:4px 0 6px}
+.oculto{display:none!important}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);max-width:640px;width:calc(100% - 32px);padding:20px}
+dialog::backdrop{background:rgba(10,20,24,.45)}
+dialog h2{margin-top:0;color:var(--accent)}
+dialog li{margin-bottom:6px}
+/* cabecera: búsqueda global, aviso de deshacer y menú «⋯» */
+.busqueda{position:relative;flex:1 1 240px;max-width:400px;min-width:170px}
+.resultados-busqueda{position:absolute;left:0;top:calc(100% + 4px);z-index:30;width:max(100%,min(520px,calc(100vw - 24px)));margin:0;padding:4px;list-style:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.22);max-height:min(60vh,460px);overflow-y:auto}
+.resultados-busqueda[hidden]{display:none}
+.resultados-busqueda li{padding:7px 9px;border-radius:6px;cursor:pointer;display:grid;gap:1px}
+.resultados-busqueda li[aria-selected="true"]{background:var(--accent-soft)}
+.resultados-busqueda li.sin-resultados{color:var(--muted);cursor:default}
+.res-tipo{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+#zonaDeshacer button{color:var(--accent);border-color:var(--accent)}
+.menu-caja{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:250px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.22);padding:6px;display:flex;flex-direction:column;gap:2px}
+.menu[hidden]{display:none}
+.menu button{border:none;background:transparent;text-align:left;border-radius:6px;padding:8px 10px;width:100%}
+.menu button:hover,.menu button:focus-visible{background:var(--accent-soft)}
+.menu label{display:flex;flex-direction:column;gap:3px;padding:6px 10px;font-size:12px;color:var(--muted);font-weight:600}
+.menu hr{border:none;border-top:1px solid var(--line);margin:4px 0;width:100%}
+.menu-vistas{right:auto;left:auto}
+/* cuadros propios (sustituyen a confirm y prompt) */
+#cuadro{max-width:480px}
+#cuadro h2{font-size:17px;margin-bottom:8px}
+#cuadro p{margin:6px 0}
+#cuadro label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);font-weight:600;margin:10px 0 0}
+#cuadroBotones{justify-content:flex-end;margin-top:16px}
+.lista-fases{display:grid;gap:6px;margin-top:8px}
+.lista-fases button{text-align:left;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lista-fases button[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700;color:var(--accent)}
+/* agenda: cada elemento se trabaja desde ella */
+.tarea .acciones-tarea{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tarea .aviso{margin:6px 0 0;padding:5px 9px;font-weight:400;font-size:12.5px}
+.en-linea{margin-top:8px;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);cursor:default}
+.en-linea[hidden]{display:none}
+.en-linea .campos{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.en-linea .fila{margin-top:8px}
+.fila-aplazar{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end}
+.fila-aplazar label{flex:0 1 160px}
+/* ficha */
+.datos-principales{margin:12px 0 0}
+.enlaces{gap:8px;margin:10px 0 0}
+.enlaces a{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;text-decoration:none;font-weight:600}
+.enlaces a:hover{border-color:var(--accent);background:var(--accent-soft)}
+details.plegable{border:1px solid var(--line);border-radius:8px;margin:14px 0 0}
+details.plegable>summary{cursor:pointer;font-weight:700;color:var(--accent);padding:10px 12px}
+details.plegable[open]>summary{border-bottom:1px solid var(--line)}
+details.plegable>summary .sub{font-weight:400;margin-left:8px}
+details.plegable>.cuerpo{padding:12px}
+.sub-titulo{font-size:12px;margin:14px 0 0;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.ver-todas{margin-top:8px}
+/* inicio: hoy en todos los negocios */
+.hoy-todos{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+.hoy-todos .fila{justify-content:space-between}
+.hoy-todos h3{margin:0;font-size:16px;color:var(--accent)}
+.hoy-negocio{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:8px;padding:8px 12px 4px;margin:10px 0}
+.hoy-negocio h4{margin:0 0 4px;font-size:14px;color:var(--c);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.hoy-negocio h4 .sub{font-weight:400}
+.hoy-negocio p{margin:4px 0 6px}
+.hoy-negocio .error{color:var(--bad)}
+.linea-hoy{display:block;width:100%;text-align:left;border:none;border-top:1px solid var(--line);border-radius:0;background:transparent;padding:7px 2px}
+.linea-hoy:hover{background:var(--accent-soft)}
+.linea-hoy .t1{font-weight:600}
+.linea-hoy .t2{font-size:12.5px;color:var(--muted)}
+@media (prefers-color-scheme: dark){ .hoy-negocio{--c:var(--c-oscuro)!important} }
+/* contactos: añadir rápido, y estados vacíos con guía */
+.rapido{display:flex;gap:8px;margin-bottom:12px}
+.rapido input{flex:1 1 auto}
+.guia-vacia{padding:18px 10px;text-align:center;color:var(--muted)}
+tr.fila-vacia{cursor:default}
+tr.fila-vacia:hover{background:transparent}
+/* barra de abajo, solo en el móvil */
+.barra-inferior{display:none}
+.barra-inferior button{border:none;border-radius:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;color:var(--muted);padding:6px 4px}
+.barra-inferior button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.barra-inferior button[aria-current="page"]{color:var(--accent);font-weight:700}
+/* móvil y pantallas táctiles: letra de 16 px en los campos (si no, iOS amplía la pantalla al tocarlos) y botones de al menos 44 px */
+@media (max-width:720px), (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  input:not([type=checkbox]):not([type=radio]),select{min-height:44px}
+  button,.boton,.enlaces a{min-height:44px}
+  button.mini{padding:6px 12px;font-size:14px}
+  .filtros label.chk{min-height:44px}
+  .filtros label.chk input{width:22px;height:22px}
+  details.plegable>summary{padding:13px 12px}
+}
+/* móvil: barra de pestañas abajo, tablas en tarjetas, embudo en lista por fases y ficha a pantalla completa */
+@media (max-width:720px){
+  header{position:static;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;gap:8px}
+  header h1{flex:1 1 0;min-width:0;font-size:16px}
+  #tituloNegocio{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .acciones{margin-left:0;flex-wrap:nowrap}
+  #selNegocio{max-width:120px}
+  .busqueda{order:3;flex:1 1 100%;max-width:none;min-width:0}
+  #zonaDeshacer{order:4}
+  #estado{order:5;flex:1 1 100%}
+  /* un error (por ejemplo, que no se ha podido guardar) sale pegado abajo, encima de la barra, para que se vea aunque la cabecera ya no esté a la vista; al tocarlo se queda en la cabecera */
+  #estado.error:not(.visto){position:fixed;left:12px;right:12px;bottom:calc(70px + env(safe-area-inset-bottom));z-index:25;background:var(--bad-soft);border:1px solid var(--bad);border-radius:10px;padding:10px 12px;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .txt-largo{display:none}
+  .txt-corto{display:inline}
+  #bHoyTodos{display:none}   /* en el móvil «Hoy en todos» va dentro del menú «⋯», donde cabe */
+  .menu .solo-movil{display:block}
+  .menu{position:fixed;left:12px;right:12px;top:auto;bottom:calc(70px + env(safe-area-inset-bottom));min-width:0}
+  header .menu{top:60px;bottom:auto}
+  nav[role=tablist]{display:none}
+  .barra{padding:8px 12px 0}
+  main{padding:0 12px calc(86px + env(safe-area-inset-bottom))}
+  .hoja{border-radius:10px;padding:12px}
+  .inicio{margin:12px;padding:16px}
+  .tarjetas-negocio{grid-template-columns:1fr}
+  .barra-inferior{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .barra-inferior button{min-height:58px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .barras div{grid-template-columns:96px 1fr 30px}
+  .filtros select,.filtros input[type=search]{flex:1 1 100%;max-width:none;width:100%}
+  .tabla-caja{overflow:visible}
+  table,tbody{display:block}
+  thead{display:none}
+  tbody tr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+  td{display:block;border:none;padding:0;min-width:0}
+  td.num{white-space:normal}
+  th.opc,td.opc{display:none}
+  #cuerpoOps td.opc{display:block;font-size:12.5px;color:var(--muted)}
+  #cuerpoOps td:nth-child(1),#cuerpoContactos td:nth-child(1),tr.fila-vacia td{grid-column:1/-1}
+  #cuerpoOps td:nth-child(3),#cuerpoOps td:nth-child(5),#cuerpoOps td:nth-child(7){text-align:right}
+  #cuerpoContactos td:nth-child(2){grid-column:2;grid-row:2;text-align:right}
+  #cuerpoContactos td:nth-child(3){grid-column:1;grid-row:2}
+  .tablero{display:block;overflow:visible}
+  .col{max-height:none;margin-bottom:10px;min-height:0}
+  .col h4[role=button]{cursor:pointer;min-height:44px}
+  .col h4[role=button] span{margin-left:auto}
+  .col h4[role=button]::after{content:"";width:8px;height:8px;margin:0 4px 3px 12px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);flex:none}
+  .col.plegada h4[role=button]::after{transform:rotate(-45deg);margin-bottom:0}
+  .col.plegada h4{border-bottom:none}
+  .col.plegada .cartas{display:none}
+  .col .cartas{overflow:visible}
+  .lista-tareas li{padding:10px 12px}
+  #ficha{background:var(--panel)}
+  .ficha-caja{width:100%;border-left:none;padding:0 14px calc(40px + env(safe-area-inset-bottom))}
+  .ficha-cab{margin:0 -14px 8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+  .ficha-cab h2{font-size:18px}
+  .campos,.en-linea .campos{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .campos .ancho,.en-linea .campos>label{grid-column:1/-1}
+  .campos input[type=date]{min-width:0}
+  fieldset{padding:10px}
+  .op{padding:10px}
+  .rapido input{min-width:0}
+  .filtros{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .filtros>input[type=search],.filtros>.sub,.filtros>select{grid-column:1/-1}
+  .filtros select{min-width:0}
+  .productos{display:flex;flex-wrap:nowrap;width:100%;border:none;background:transparent;overflow-x:auto;gap:6px;margin-bottom:8px;padding-bottom:2px;scrollbar-width:none}
+  .productos::-webkit-scrollbar{display:none}
+  .productos button{flex:none;border:1px solid var(--line);border-radius:999px;background:var(--panel);padding:6px 12px}
+  .productos button:last-child{border-right:1px solid var(--line)}
+  body.con-negocio #tituloNegocio{display:none}
+  #cuadro{margin:auto 0 0;width:100%;max-width:none;border-radius:14px 14px 0 0;border-bottom:none;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+  #cuadroBotones{flex-direction:column-reverse;align-items:stretch}
+}
+@media (prefers-reduced-motion:no-preference){ .tprod,.lista-tareas li,.carta{transition:border-color .15s,box-shadow .15s} }
+</style>
+</head>
+<body>
+<header>
+  <h1><span id="marca" class="marca" aria-hidden="true"></span><span id="tituloNegocio">CRM</span></h1>
+  <div id="cajaBusqueda" class="busqueda oculto">
+    <input id="busqueda" type="search" placeholder="Buscar en todo (pulsa /)" aria-label="Buscar en todo el CRM" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="resultadosBusqueda" aria-autocomplete="list">
+    <ul id="resultadosBusqueda" class="resultados-busqueda" role="listbox" aria-label="Resultados de la búsqueda" hidden></ul>
+  </div>
+  <span id="estado" role="status" aria-live="polite">Sin datos abiertos</span>
+  <span id="zonaDeshacer" role="status" aria-live="polite"><button id="bDeshacerLocal" class="mini oculto" type="button"></button></span>
+  <div class="acciones">
+    <select id="selNegocio" class="oculto" aria-label="Negocio" style="width:auto"></select>
+    <button id="bNuevo" class="primario oculto" type="button"><span class="txt-largo">Nuevo contacto</span><span class="txt-corto">+ Nuevo</span></button>
+    <button id="bHoyTodos" class="oculto" type="button" title="Lo atrasado y lo de hoy de todos los negocios">Hoy en todos</button>
+    <div class="menu-caja">
+      <button id="bMas" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menuMas" aria-label="Más opciones" title="Más opciones"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" style="vertical-align:middle"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg></button>
+      <div id="menuMas" class="menu" hidden>
+        <button id="bCsv" class="oculto" type="button" title="Descarga la lista que estás viendo para abrirla en Excel">Exportar a Excel</button>
+        <button id="bCopia" class="oculto" type="button">Descargar copia</button>
+        <button id="bCambiar" class="oculto" type="button">Abrir otro archivo</button>
+        <button id="bHoyTodosMenu" class="oculto solo-movil" type="button">Hoy en todos los negocios</button>
+        <button id="bNegocio" class="oculto" type="button">Cambiar de negocio</button>
+        <button id="bConexion" type="button">Conexión con GitHub</button>
+        <button id="bDeshacer" class="oculto" type="button" title="Vuelve el archivo a la versión anterior de GitHub">Deshacer el último cambio</button>
+        <hr>
+        <label>Tu nombre en el registro<input id="rAutor" type="text" autocomplete="off"></label>
+        <hr>
+        <button id="bAyuda" type="button">Ayuda</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="pantallaInicio" class="inicio">
+  <h2>Abrir los datos</h2>
+  <p id="textoInicio">Cada negocio guarda sus datos en su propio archivo y nunca se mezclan. Elige el negocio y abre su archivo. Usa Chrome o Edge para que los cambios se guarden solos.</p>
+  <div id="negocios" class="tarjetas-negocio"></div>
+  <section id="hoyTodos" class="hoy-todos oculto" aria-labelledby="hoyTodosTitulo">
+    <div class="fila"><h3 id="hoyTodosTitulo">Hoy en todos los negocios</h3><button id="bHoyActualizar" class="mini" type="button">Actualizar</button></div>
+    <div id="hoyTodosCuerpo" aria-live="polite"></div>
+  </section>
+  <p id="sinApi" class="oculto">Este navegador no permite guardar directamente en el archivo. Puedes abrirlo aquí y, al terminar, pulsar «Descargar copia» y sustituir el archivo en la carpeta. Mejor con Chrome o Edge.</p>
+  <details id="conexion" class="conexion">
+    <summary id="resumenConexion">Conexión con GitHub</summary>
+    <div class="campos">
+      <label>Repositorio<input id="ghRepo" type="text" placeholder="propietario/repositorio" autocomplete="off" spellcheck="false"></label>
+      <label>Rama<input id="ghRama" type="text" value="principal" placeholder="principal" autocomplete="off" spellcheck="false"></label>
+      <label>Clave de acceso<input id="ghClave" type="password" autocomplete="new-password" spellcheck="false"></label>
+    </div>
+    <div class="fila"><button id="bConectar" class="primario" type="button">Conectar</button><button id="bDesconectar" type="button">Desconectar</button><span id="ghEstado" class="sub" role="status"></span></div>
+    <p class="sub">Con una clave de GitHub de permisos finos sobre el repositorio de datos. Se guarda solo en este navegador.</p>
+  </details>
+  <input id="entradaArchivo" type="file" accept=".json,application/json" class="oculto">
+</section>
+
+<div id="app" class="oculto">
+  <div class="barra">
+    <nav role="tablist" aria-label="Vistas">
+      <button role="tab" id="t-panel" data-vista="panel" aria-selected="true" aria-controls="v-panel" type="button">Panel</button>
+      <button role="tab" id="t-embudo" data-vista="embudo" aria-selected="false" aria-controls="v-embudo" tabindex="-1" type="button">Embudo</button>
+      <button role="tab" id="t-ops" data-vista="ops" aria-selected="false" aria-controls="v-ops" tabindex="-1" type="button">Oportunidades</button>
+      <button role="tab" id="t-contactos" data-vista="contactos" aria-selected="false" aria-controls="v-contactos" tabindex="-1" type="button">Contactos</button>
+      <button role="tab" id="t-agenda" data-vista="agenda" aria-selected="false" aria-controls="v-agenda" tabindex="-1" type="button">Agenda</button>
+      <button role="tab" id="t-registro" data-vista="registro" aria-selected="false" aria-controls="v-registro" tabindex="-1" type="button">Registro</button>
+    </nav>
+    <div id="selProducto" class="productos" role="group" aria-label="Producto"></div>
+  </div>
+  <main>
+    <section id="v-panel" class="hoja" role="tabpanel" aria-labelledby="t-panel">
+      <div id="kpis" class="kpis"></div>
+      <div id="tarjetas" class="tarjetas"></div>
+      <div class="cuadricula">
+        <div><h2 class="sec">Para hoy y atrasados</h2><ul id="lHoy" class="lista-tareas"></ul></div>
+        <div><h2 class="sec">Próximos 7 días</h2><ul id="lSemana" class="lista-tareas"></ul></div>
+        <div><h2 class="sec">Últimas anotaciones</h2><ul id="lUltimas" class="lista-tareas"></ul></div>
+      </div>
+    </section>
+
+    <section id="v-embudo" class="hoja oculto" role="tabpanel" aria-labelledby="t-embudo">
+      <div class="filtros">
+        <input id="eTexto" type="search" placeholder="Buscar en el embudo" aria-label="Buscar en el embudo">
+        <select id="ePrioridad" aria-label="Prioridad"><option value="">Todas las prioridades</option><option>A</option><option>B</option><option>C</option><option>Después</option></select>
+        <span id="embudoAyuda" class="sub"></span>
+      </div>
+      <p id="embudoGuia" class="guia-vacia oculto"></p>
+      <div id="tablero" class="tablero"></div>
+    </section>
+
+    <section id="v-ops" class="hoja oculto" role="tabpanel" aria-labelledby="t-ops">
+      <div class="filtros">
+        <input id="oTexto" type="search" placeholder="Buscar por nombre, localidad, segmento o nota" aria-label="Buscar oportunidades">
+        <select id="oServicio" aria-label="Servicio"></select>
+        <select id="oFase" aria-label="Fase"></select>
+        <select id="oPrioridad" aria-label="Prioridad"><option value="">Todas las prioridades</option><option>A</option><option>B</option><option>C</option><option>Después</option></select>
+        <select id="oSemana" aria-label="Semana del plan"></select>
+        <select id="oOrden" aria-label="Ordenar"><option value="fecha">Ordenar por fecha</option><option value="prioridad">Ordenar por prioridad</option><option value="fase">Ordenar por fase</option><option value="nombre">Ordenar por nombre</option><option value="importe">Ordenar por importe</option></select>
+      </div>
+      <div class="tabla-caja">
+        <table>
+          <thead><tr><th>Contacto</th><th>Producto y servicio</th><th>Fase</th><th>Próximo paso</th><th>Fecha</th><th class="opc">Importe</th><th class="opc">Prioridad</th></tr></thead>
+          <tbody id="cuerpoOps"></tbody>
+        </table>
+      </div>
+      <p id="cuentaOps" class="sub"></p>
+    </section>
+
+    <section id="v-contactos" class="hoja oculto" role="tabpanel" aria-labelledby="t-contactos">
+      <form id="formRapido" class="rapido" autocomplete="off">
+        <input id="cRapido" type="text" placeholder="Añadir rápido: Empresa, persona, correo" aria-label="Añadir un contacto de golpe: empresa, persona, correo">
+        <button type="submit" class="primario">Añadir</button>
+      </form>
+      <div class="filtros">
+        <input id="cTexto" type="search" placeholder="Buscar" aria-label="Buscar contactos">
+        <select id="cRolF" aria-label="Rol"><option value="">Todos los roles</option><option>Cliente potencial</option><option>Prescriptor</option><option>Ambos</option></select>
+        <select id="cSegF" aria-label="Segmento"></select>
+        <select id="cLocF" aria-label="Localidad"></select>
+        <label class="chk"><input id="cConCorreo" type="checkbox"> Solo con correo</label>
+        <label class="chk"><input id="cSinExcl" type="checkbox" checked> Ocultar excluidos</label>
+      </div>
+      <div class="tabla-caja">
+        <table>
+          <thead><tr><th>Contacto</th><th>Rol</th><th>Productos</th><th class="opc">Teléfono</th><th class="opc">Correo</th></tr></thead>
+          <tbody id="cuerpoContactos"></tbody>
+        </table>
+      </div>
+      <p id="cuentaContactos" class="sub"></p>
+    </section>
+
+    <section id="v-agenda" class="hoja oculto" role="tabpanel" aria-labelledby="t-agenda">
+      <div id="agenda"></div>
+    </section>
+
+    <section id="v-registro" class="hoja oculto" role="tabpanel" aria-labelledby="t-registro">
+      <div class="filtros">
+        <input id="rTexto" type="search" placeholder="Filtrar por contacto, hilo o quién lo hizo" aria-label="Filtrar el registro">
+      </div>
+      <p class="sub" id="textoRegistro"></p>
+      <ul id="lRegistro" class="historial"></ul>
+    </section>
+  </main>
+  <nav id="barraInferior" class="barra-inferior" aria-label="Secciones">
+    <button type="button" data-vista="agenda"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Hoy</span></button>
+    <button type="button" data-vista="embudo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="10" rx="1.5"/><rect x="16.5" y="4" width="4" height="13" rx="1.5"/></svg><span>Embudo</span></button>
+    <button type="button" data-vista="contactos"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 14.8c1.8.7 3 2.4 3 5.2"/></svg><span>Contactos</span></button>
+    <button type="button" id="bMasVistas" aria-haspopup="true" aria-expanded="false" aria-controls="menuVistas"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="1.7" style="fill:currentColor"/><circle cx="12" cy="12" r="1.7" style="fill:currentColor"/><circle cx="19" cy="12" r="1.7" style="fill:currentColor"/></svg><span>Más</span></button>
+  </nav>
+  <div id="menuVistas" class="menu menu-vistas" hidden>
+    <button type="button" data-vista="panel">Panel</button>
+    <button type="button" data-vista="ops">Oportunidades</button>
+    <button type="button" data-vista="registro">Registro</button>
+  </div>
+</div>
+
+<div id="ficha" hidden>
+  <div class="ficha-caja" role="dialog" aria-modal="true" aria-labelledby="fichaTitulo">
+    <div class="ficha-cab">
+      <h2 id="fichaTitulo" tabindex="-1">Contacto</h2>
+      <button id="bCerrar" type="button">Cerrar</button>
+    </div>
+    <div id="fichaChips"></div>
+    <div id="fichaAviso"></div>
+    <div id="enlaces" class="enlaces"></div>
+
+    <div id="datosFicha" class="campos datos-principales">
+      <label><span id="etEntidad">Empresa</span><input data-c="entidad" type="text" autocomplete="off"></label>
+      <label>Persona<input data-c="persona" type="text" autocomplete="off"></label>
+      <label>Teléfono<input data-c="telefono" type="text" inputmode="tel" autocomplete="off"></label>
+      <label>Correo<input data-c="email" type="text" inputmode="email" autocomplete="off" autocapitalize="none"></label>
+      <label>Hilo que la lleva<input data-c="hilo" type="text" list="listaHilos" placeholder="General" autocomplete="off"></label>
+      <label>Rol<select data-c="rol"><option>Cliente potencial</option><option>Prescriptor</option><option>Ambos</option></select></label>
+    </div>
+
+    <fieldset id="bloqueAnotar">
+      <legend>Anotar lo que ha pasado</legend>
+      <div class="campos">
+        <label class="ancho">Qué ha pasado<textarea id="aTexto" placeholder=""></textarea></label>
+        <label class="ancho">Sobre<select id="aOp"></select></label>
+        <label>Tipo<select id="aTipo"></select></label>
+        <label>Fecha<input id="aFecha" type="date"></label>
+        <label>Cambiar la fase a<select id="aFase"></select></label>
+        <label class="ancho">Próximo paso<input id="aProx" type="text"></label>
+        <label>Fecha del próximo paso<input id="aProxFecha" type="date"></label>
+        <label id="atajoRecordatorio">Atajo<button id="bRecordatorio" type="button"></button></label>
+      </div>
+      <div class="fila" style="margin-top:10px"><button id="bAnotar" class="primario" type="button">Anotar</button><span id="fichaEstado" class="sub" role="status"></span></div>
+      <h3 class="sub-titulo">Historial</h3>
+      <ul id="historial" class="historial"></ul>
+      <button id="bVerTodas" class="mini ver-todas oculto" type="button"></button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Oportunidades</legend>
+      <div id="opsFicha"></div>
+      <div class="fila">
+        <select id="nuevoProd" aria-label="Producto de la nueva oportunidad" style="width:auto"></select>
+        <button id="bAddOp" type="button">Añadir oportunidad</button>
+      </div>
+    </fieldset>
+
+    <details id="masDatos" class="plegable">
+      <summary>Más datos<span id="pistaMasDatos" class="sub"></span></summary>
+      <div class="cuerpo">
+        <div class="campos">
+          <label>Segmento<input data-c="segmento" type="text" list="listaSeg" autocomplete="off"></label>
+          <label>Localidad<input data-c="localidad" type="text" list="listaLoc" autocomplete="off"></label>
+          <label>Web<input data-c="web" type="text" inputmode="url" autocomplete="off" autocapitalize="none"></label>
+          <label>Canal preferido<input data-c="canal" type="text" autocomplete="off"></label>
+          <label>Marca del dato<select data-c="marca"><option value="">Sin marca</option><option>V</option><option>S</option><option>E</option></select></label>
+          <label class="ancho">Motivo del contacto<textarea data-c="motivo"></textarea></label>
+          <label class="ancho">Fuente<input data-c="fuente" type="text" autocomplete="off"></label>
+          <label class="ancho">Notas<textarea data-c="notas"></textarea></label>
+        </div>
+        <div id="bloqueGuion">
+          <h3 class="sub-titulo">Primer mensaje propuesto</h3>
+          <div id="cGuion" class="guion"></div>
+          <div class="fila" style="margin-top:8px"><button id="bCopiarGuion" class="mini" type="button">Copiar el texto</button></div>
+        </div>
+        <datalist id="listaSeg"></datalist><datalist id="listaLoc"></datalist><datalist id="listaHilos"></datalist>
+      </div>
+    </details>
+
+    <details id="permisosFicha" class="plegable">
+      <summary>Permisos y exclusión</summary>
+      <div class="cuerpo">
+        <div class="campos">
+          <label>Permiso para escribirle<select data-c="permiso"><option>No</option><option>Sí</option><option>Retirado</option></select></label>
+          <label>Fecha del permiso<input data-c="permisoFecha" type="date"></label>
+          <label class="ancho">Qué autoriza y cómo lo dio<input data-c="permisoDetalle" type="text" placeholder="" autocomplete="off"></label>
+          <label>Lista Robinson<select data-c="robinson"><option>No aplica (empresa)</option><option>No aplica (relación previa)</option><option>Pendiente</option><option>Consultado sin coincidencia</option><option>Coincidencia: excluir</option></select></label>
+          <label>No contactar<select data-c="excluido"><option value="no">No</option><option value="si">Sí, excluido</option></select></label>
+          <label class="ancho">Motivo de la exclusión<input data-c="motivoExclusion" type="text" autocomplete="off"></label>
+        </div>
+      </div>
+    </details>
+
+    <div class="fila" style="margin-top:14px">
+      <span class="sub">Los cambios se guardan solos al salir de cada campo.</span>
+      <button id="bBorrar" class="peligro" type="button" style="margin-left:auto" title="Borra el contacto con todas sus oportunidades y anotaciones. Para quitar solo una oportunidad, usa «Quitar» en ella.">Eliminar contacto</button>
+    </div>
+  </div>
+</div>
+
+<dialog id="ayuda">
+  <h2 id="ayudaTitulo">Cómo funciona</h2>
+  <ul id="listaAyuda"></ul>
+  <div class="fila"><button id="bCerrarAyuda" class="primario" type="button">Entendido</button></div>
+</dialog>
+
+<dialog id="cuadro" aria-labelledby="cuadroTitulo">
+  <h2 id="cuadroTitulo"></h2>
+  <div id="cuadroCuerpo"></div>
+  <div id="cuadroBotones" class="fila"></div>
+</dialog>
+
+<script id="motor">
+// Parte sin pantalla: negocios, catálogo, comprobación del archivo y «varios a la vez». Se prueba aparte con Node.
+// Cada negocio se declara en negocios/<CODIGO>.js con una llamada a CRM_NEGOCIO({...}) cuyo contenido es JSON estricto.
+// El motor da por hecho que cada producto tiene OCHO fases en este orden:
+// 0 Pendiente, 1 Contactado, 2 Conversación, 3 y 4 «en juego», 5 Cliente, 6 Aplazado, 7 Perdido.
+const NEGOCIOS = [];
+const PRIOS = ['A','B','C','Después'];
+const SEMANAS = Array.from({length: 20}, (_, i) => 'S' + (i + 1));
+const I_CLIENTE = 5, I_APLAZADO = 6, I_PERDIDO = 7;
+let NEG = null, PRODUCTOS = {}, CODIGOS = [], GENERICAS = [], FASES = [], TIPOS = [];
+function CRM_NEGOCIO(n){
+  const falta = ['codigo','nombre','titulo','archivo','bd','fases','productos'].filter(k => !n[k]);
+  if(falta.length) throw new Error('Configuración de negocio incompleta: falta ' + falta.join(', '));
+  if(!Array.isArray(n.fases) || n.fases.length !== 8) throw new Error('El negocio ' + n.codigo + ' debe tener ocho fases');
+  if(!Array.isArray(n.productos) || !n.productos.length) throw new Error('El negocio ' + n.codigo + ' no tiene productos');
+  if(negocioPorCodigo(n.codigo)) throw new Error('El negocio ' + n.codigo + ' está repetido');
+  n.mapa = {}; n.codigos = [];
+  n.productos.forEach(p => {
+    p.c = String(p.codigo).toLowerCase(); p.n = p.nombre; p.corto = p.corto || p.nombre; p.fases = p.fases || n.fases; p.servicios = p.servicios || [];
+    if(p.fases.length !== 8) throw new Error('El producto ' + p.codigo + ' de ' + n.codigo + ' debe tener ocho fases');
+    if(!p.colores || !p.colores.claro || !p.colores.oscuro) throw new Error('El producto ' + p.codigo + ' de ' + n.codigo + ' no tiene colores');
+    n.mapa[p.codigo] = p; n.codigos.push(p.codigo);
+  });
+  ['escritos','hilos','fabricantes','ayuda'].forEach(k => { if(!Array.isArray(n[k])) n[k] = []; });
+  if(!Array.isArray(n.tipos) || !n.tipos.length) n.tipos = ['Nota'];
+  n.textos = n.textos || {}; n.rolPorSegmento = n.rolPorSegmento || {}; n.colores = n.colores || {};
+  NEGOCIOS.push(n);
+  return n;
+}
+function negocioPorCodigo(c){ return NEGOCIOS.find(n => n.codigo === c) || null; }
+function activarNegocio(codigo){
+  const n = negocioPorCodigo(codigo); if(!n) throw new Error('No conozco el negocio ' + codigo);
+  NEG = n; PRODUCTOS = n.mapa; CODIGOS = n.codigos; GENERICAS = n.fases; FASES = n.fases; TIPOS = n.tipos;
+  return n;
+}
+// De qué negocio es un archivo: por su marca «negocio», si no por los productos de sus oportunidades, si no por el nombre del archivo.
+function elegirNegocio(d, nombreArchivo){
+  if(d && d.negocio && negocioPorCodigo(d.negocio)) return d.negocio;
+  const prods = [...new Set(((d && Array.isArray(d.oportunidades)) ? d.oportunidades : []).map(o => o && o.producto).filter(Boolean))];
+  if(prods.length){ const c = NEGOCIOS.filter(n => prods.every(p => n.mapa[p])); if(c.length === 1) return c[0].codigo; }
+  if(nombreArchivo){ const c = NEGOCIOS.filter(n => n.archivo === nombreArchivo); if(c.length === 1) return c[0].codigo; }
+  return null;
+}
+// Comprueba que el archivo es del CRM y de este negocio. No convierte formatos antiguos.
+function comprobar(d, n){
+  if(!d || !Array.isArray(d.contactos) || !Array.isArray(d.actividades)) throw new Error('El archivo no tiene el formato del CRM.');
+  if(!(d.version >= 2) || !Array.isArray(d.oportunidades)) throw new Error('El archivo es de un formato antiguo que este CRM no convierte.');
+  if(d.negocio && d.negocio !== n.codigo) throw new Error('Este archivo es de otro negocio (' + d.negocio + '), no de ' + n.nombre + '.');
+  const raros = [...new Set(d.oportunidades.map(o => o.producto).filter(p => !n.mapa[p]))];
+  if(raros.length) throw new Error('El archivo tiene productos que ' + n.nombre + ' no conoce (' + raros.join(', ') + '). Parece de otro negocio.');
+  if(!Array.isArray(d.registro)) d.registro = [];
+  d.negocio = n.codigo;
+  return d;
+}
+function idxFase(o){ const p = PRODUCTOS[o.producto]; const i = p ? p.fases.indexOf(o.fase) : -1; return i < 0 ? 0 : i; }
+// Texto sin tildes ni mayúsculas, para comparar al buscar: «Cañería» y «caneria» salen iguales. No sirve para mostrar.
+function normalizar(t){ return String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+function rolPorSegmento(s){
+  s = String(s || '').toLowerCase(); const r = NEG ? NEG.rolPorSegmento : {};
+  if(r.ambos && new RegExp(r.ambos).test(s)) return 'Ambos';
+  if(r.prescriptor && new RegExp(r.prescriptor).test(s)) return 'Prescriptor';
+  return 'Cliente potencial';
+}
+// ---------- Varios a la vez (sin pantalla; se puede probar aparte) ----------
+// Mismo criterio que herramientas/crm_io.py: qué ha cambiado, cómo se juntan los cambios de dos
+// fuentes y cómo se apunta en el registro quién tocó qué y cuándo.
+const COLES = ['contactos','oportunidades','actividades'];
+const SELLOS = ['actualizado','tocadoPor','tocadoEn'];
+const RAIZ_FUERA = ['actualizado','actualizadoPor','registro','_leeme'];   // _leeme: la nota para las IA que ponen las herramientas; no es un cambio
+const MAX_REGISTRO_PAGINA = 1000;
+function vacioANulo(v){ return v === undefined || v === null || v === '' ? null : v; }
+function igualV(a, b){ a = vacioANulo(a); b = vacioANulo(b); if(a === b) return true; if(a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false; return JSON.stringify(a) === JSON.stringify(b); }
+function indiceDe(l){ const m = new Map(); (l || []).forEach(x => { if(x && x.id != null) m.set(x.id, x); }); return m; }
+function clonar(x){ return x === undefined ? undefined : JSON.parse(JSON.stringify(x)); }
+function camposDe(a, b){ return [...new Set(Object.keys(a || {}).concat(Object.keys(b || {})))]; }
+function mismaFicha(a, b){ return camposDe(a, b).every(k => SELLOS.includes(k) || igualV(a[k], b[k])); }
+function contactoDe(col, x){ return col === 'contactos' ? x.id : x.contactoId; }
+function resumenFicha(col, x){
+  if(col === 'contactos') return x.entidad || x.persona || '';
+  if(col === 'oportunidades') return ((x.producto || '') + ' ' + (x.servicio || '')).trim();
+  return ((x.tipo || '') + ': ' + String(x.texto || '').slice(0, 80)).trim();
+}
+function diferencias(antes, despues){
+  const cambios = [];
+  COLES.forEach(col => {
+    const A = indiceDe(antes[col]), B = indiceDe(despues[col]);
+    B.forEach((x, i) => {
+      if(!A.has(i)){ cambios.push({ col, ficha: i, contacto: contactoDe(col, x), accion: 'alta', resumen: resumenFicha(col, x) }); return; }
+      const a = A.get(i);
+      camposDe(a, x).sort().forEach(k => { if(!SELLOS.includes(k) && !igualV(a[k], x[k])) cambios.push({ col, ficha: i, contacto: contactoDe(col, x), campo: k, antes: a[k] ?? null, despues: x[k] ?? null }); });
+    });
+    A.forEach((x, i) => { if(!B.has(i)) cambios.push({ col, ficha: i, contacto: contactoDe(col, x), accion: 'baja', resumen: resumenFicha(col, x) }); });
+  });
+  camposDe(antes, despues).sort().forEach(k => { if(!COLES.includes(k) && !RAIZ_FUERA.includes(k) && !igualV(antes[k], despues[k])) cambios.push({ col: 'raiz', campo: k, antes: antes[k] ?? null, despues: despues[k] ?? null }); });
+  return cambios;
+}
+// Junta mis cambios (de «base» a «mio») sobre lo que hay ahora en el archivo («suyo»).
+// Si los dos han cambiado el mismo campo hay choque: con ganaMio se queda lo mío y el choque se apunta.
+function fusionar(base, mio, suyo, ganaMio, idNuevo){
+  const res = clonar(suyo), choques = [];
+  COLES.forEach(col => {
+    const B = indiceDe(base[col]), M = indiceDe(mio[col]);
+    if(!Array.isArray(res[col])) res[col] = [];
+    let S = indiceDe(res[col]);
+    M.forEach((x, i) => {
+      if(B.has(i)) return;
+      if(!S.has(i)) res[col].push(clonar(x));
+      else if(!mismaFicha(S.get(i), x)){
+        if(col === 'actividades'){ const nx = clonar(x); nx.id = idNuevo('A'); res[col].push(nx); }
+        else choques.push({ col, ficha: i, motivo: 'se ha creado a la vez con el mismo identificador y datos distintos' });
+      }
+    });
+    B.forEach((b, i) => {
+      if(M.has(i) || !S.has(i)) return;
+      const s = S.get(i);
+      if(mismaFicha(s, b)) res[col] = res[col].filter(y => y !== s);
+      else choques.push({ col, ficha: i, motivo: 'lo has quitado, pero otro lo ha cambiado entretanto, así que se queda' });
+    });
+    S = indiceDe(res[col]);
+    M.forEach((x, i) => {
+      if(!B.has(i)) return;
+      const b = B.get(i), campos = camposDe(b, x).filter(k => !igualV(b[k], x[k]));
+      if(!campos.length) return;
+      if(!S.has(i)){ if(campos.some(k => !SELLOS.includes(k))) choques.push({ col, ficha: i, motivo: 'lo has cambiado, pero otro lo ha quitado entretanto' }); return; }
+      const s = S.get(i);
+      campos.forEach(k => {
+        if(SELLOS.includes(k)){ if(k === 'actualizado' && String(x[k] || '') > String(s[k] || '')) s[k] = x[k]; return; }
+        const libre = igualV(s[k], b[k]) || igualV(s[k], x[k]);
+        if(!libre) choques.push({ col, ficha: i, campo: k, base: b[k] ?? null, mio: x[k] ?? null, suyo: s[k] ?? null, motivo: 'lo habíais cambiado los dos' });
+        if(libre || ganaMio){ if(k in x) s[k] = clonar(x[k]); else delete s[k]; }
+      });
+    });
+  });
+  camposDe(base, mio).forEach(k => {
+    if(COLES.includes(k) || RAIZ_FUERA.includes(k) || igualV(base[k], mio[k])) return;
+    const libre = igualV(suyo[k], base[k]) || igualV(suyo[k], mio[k]);
+    if(!libre) choques.push({ col: 'raiz', campo: k, motivo: 'lo habíais cambiado los dos' });
+    if(libre || ganaMio) res[k] = clonar(mio[k]);
+  });
+  const vistos = new Set((res.registro || []).map(e => e.id));
+  (mio.registro || []).forEach(e => { if(!vistos.has(e.id)){ if(!Array.isArray(res.registro)) res.registro = []; res.registro.push(clonar(e)); } });
+  return { res, choques };
+}
+function sellar(d, cambios, autor, cuando){
+  const C = indiceDe(d.contactos), O = indiceDe(d.oportunidades), A = indiceDe(d.actividades);
+  const marcar = x => { if(x){ x.tocadoPor = autor; x.tocadoEn = cuando; } };
+  cambios.forEach(c => {
+    if(c.col === 'contactos') marcar(C.get(c.ficha));
+    else if(c.col === 'oportunidades'){ marcar(O.get(c.ficha)); marcar(C.get(c.contacto)); }
+    else if(c.col === 'actividades'){
+      const a = A.get(c.ficha);
+      if(a && c.accion === 'alta' && !a.autor){ a.autor = autor; a.creadaEn = cuando; }
+      marcar(C.get(c.contacto)); if(a && a.oportunidadId) marcar(O.get(a.oportunidadId));
+    }
+  });
+}
+function registrar(d, entrada){ if(!Array.isArray(d.registro)) d.registro = []; d.registro.push(entrada); if(d.registro.length > MAX_REGISTRO_PAGINA) d.registro.splice(0, d.registro.length - MAX_REGISTRO_PAGINA); }
+const NOMBRE_CAMPO = { proximoPaso: 'próximo paso', fechaProximo: 'fecha del próximo paso', fechaCierre: 'fecha de firma', motivoPerdida: 'motivo de pérdida', estadoServicio: 'estado del servicio', entidad: 'empresa', email: 'correo', telefono: 'teléfono', motivoExclusion: 'motivo de exclusión', permisoDetalle: 'detalle del permiso', permisoFecha: 'fecha del permiso', excluido: 'no contactar' };
+// El cambio en palabras. Con «nombrar» (una función (col, id, cambio) que da el nombre legible de una ficha, o vacío si no lo sabe)
+// sale el nombre del contacto en vez de su identificador; sin ella, el texto es el de siempre (el que va a los mensajes de GitHub).
+function textoCambio(c, nombrar){
+  const v = x => { x = x === undefined || x === null || x === '' ? '(vacío)' : String(x); return x.length > 90 ? x.slice(0, 90) + '…' : x; };
+  const r = c.resumen ? ': ' + v(c.resumen) : '';
+  const n = (col, id) => (nombrar && id != null ? nombrar(col, id, c) : '') || '';
+  if(c.accion === 'alta' || c.accion === 'baja'){
+    const alta = c.accion === 'alta';
+    if(c.col === 'actividades') return (alta ? 'Anotación nueva en ' : 'Anotación quitada en ') + (n('contactos', c.contacto) || c.contacto) + r;
+    if(c.col === 'contactos') return (alta ? 'Contacto nuevo' : 'Contacto eliminado') + (nombrar && c.resumen ? '' : ' ' + c.ficha) + r;
+    return (alta ? 'Oportunidad nueva' : 'Oportunidad quitada') + (n('contactos', c.contacto) ? ' de ' + n('contactos', c.contacto) : ' ' + c.ficha) + r;
+  }
+  return (n(c.col, c.ficha) || c.ficha || 'General') + ', ' + (NOMBRE_CAMPO[c.campo] || c.campo) + ': de «' + v(c.antes) + '» a «' + v(c.despues) + '»';
+}
+if(typeof module !== 'undefined') module.exports = { NEGOCIOS, CRM_NEGOCIO, negocioPorCodigo, activarNegocio, elegirNegocio, comprobar, idxFase, normalizar, rolPorSegmento, diferencias, fusionar, sellar, registrar, textoCambio, clonar, PRIOS, SEMANAS, I_CLIENTE, I_APLAZADO, I_PERDIDO, actual: () => ({ NEG, PRODUCTOS, CODIGOS, GENERICAS, FASES, TIPOS }) };
+</script>
+
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+let datos = null, manejador = null, ultimaModif = 0, sucio = false, temporizador = null, fichaId = null, guardando = false, base = null, cargaPendiente = false, edicion = 0;
+// GitHub: dónde guarda este navegador la conexión y la configuración de los negocios, la dirección de la API y el correo de los commits.
+const CLAVE_GH = 'crm-global-github', CLAVE_CONFIG = 'crm-global-negocios', API_GH = 'https://api.github.com', CORREO_GH = 'crm@crm-global.invalid';
+let AUTOR = 'Jorge · navegador';
+// Si aún no hay nombre global, vale el de la clave antigua de cada negocio (<bd>-autor).
+try { AUTOR = localStorage.getItem('crm-global-autor') || NEGOCIOS.map(n => localStorage.getItem(n.bd + '-autor')).find(Boolean) || AUTOR; } catch(e){}
+let vista = 'panel', prod = '', opMarcada = null;
+// Pantalla: a qué elemento vuelve el foco al cerrar la ficha, lo último que se quitó (para «Deshacer» unos segundos), el formulario
+// abierto en la Agenda, las fases plegadas del embudo en el móvil, si el historial de la ficha se ve entero, y lo de «Hoy en todos».
+let origenFoco = null, pendienteDeshacer = null, formAgenda = null, plegadas = {}, historialCompleto = false, resolverCuadro = null;
+const lectoresHoy = new Map();
+let vecesHoy = 0, enRepoActual = null;
+const VISTAS = ['panel', 'embudo', 'ops', 'contactos', 'agenda', 'registro'], MAS_VISTAS = ['panel', 'ops', 'registro'];
+// Pantalla de inicio: archivo que recuerda el navegador de cada negocio, negocio de la tarjeta cuyo «Abrir» se ha pulsado
+// (sin la API de archivos) y cuántas veces se han pintado las tarjetas, para que solo cuente el último pintado.
+let recordados = {}, codigoEntrada = '', vecesTarjetas = 0;
+// Conexión con GitHub (null = modo local) y si lo que se enseña es la copia que el navegador guardó (sin conexión: no se guarda).
+// remotos: negocios que han venido del repositorio. sinRed: negocios cuyo último «Abrir» desde GitHub falló por falta de red.
+let conexion = leerConexion(), modoCopia = false, textoInicioLocal = '';
+const remotos = new Set(), sinRed = new Set();
+const hayApi = 'showOpenFilePicker' in window;
+const ICONO_BASE = $('icono').getAttribute('href') || '';   // el icono de la página cuando no hay ningún negocio abierto
+
+// ---------- utilidades ----------
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function hoyISO(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+function sumarDias(iso, n){ const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+function fechaES(iso){ if(!iso) return ''; const [a,m,d] = iso.split('-'); return d + '/' + m + '/' + a; }
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+function fechaLarga(iso){ const d = new Date(iso + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + fechaES(iso); }
+// «dd/mm/aaaa hh:mm» en la hora de este ordenador; vacío si no es una fecha.
+function fechaHoraCorta(iso){ const d = new Date(iso || ''); if(!iso || isNaN(d)) return ''; const p = x => String(x).padStart(2, '0'); return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
+function ahora(){ return new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }
+function nuevoId(pref){ return pref + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function euros(n){ if(n == null || n === '') return ''; const v = Math.round(Number(n)); return (v < 0 ? '-' : '') + String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' €'; }
+function personaCorta(p){ return String(p || '').split(/[,(]/)[0].trim(); }
+function nombre(c){ const p = personaCorta(c.persona); return p && c.entidad ? p + ' · ' + c.entidad : (c.entidad || p || 'Sin nombre'); }
+function estado(txt, clase){ const e = $('estado'); e.textContent = txt; e.className = clase || ''; }
+function contacto(id){ return datos.contactos.find(x => x.id === id); }
+function opsDe(cid){ return datos.oportunidades.filter(o => o.contactoId === cid); }
+function chip(o, conFase){ const p = PRODUCTOS[o.producto]; return '<span class="chip ' + p.c + '"><i class="punto p-' + p.c + '"></i>' + esc(p.corto) + (conFase ? ' · ' + esc(o.fase) : '') + '</span>'; }
+function pillFase(o){ return '<span class="pill i' + idxFase(o) + '">' + esc(o.fase) + '</span>'; }
+function importe(o){ const a = o.alta, c = o.cuota; if(a == null && c == null) return ''; return (a != null ? euros(a) : '') + (c != null ? (a != null ? ' + ' : '') + euros(c) + '/mes' : ''); }
+function vivaIdx(i){ return i <= 4; }
+function enProducto(o){ return !prod || o.producto === prod; }
+function opsVisibles(){ return datos.oportunidades.filter(o => { const c = contacto(o.contactoId); return c && enProducto(o); }); }
+function conAgenda(o){ const c = contacto(o.contactoId); return c && !c.excluido && o.fechaProximo && idxFase(o) !== I_PERDIDO; }
+function conToques(){ return NEG.escritos.length > 0 && !!NEG.respuesta && !!NEG.maxToques; }
+function escritosA(cid){ const hoy = hoyISO(); return datos.actividades.filter(a => a.contactoId === cid && NEG.escritos.includes(a.tipo) && (a.fecha || '') <= hoy).length; }
+function haRespondido(cid){ return datos.actividades.some(a => a.contactoId === cid && a.tipo === NEG.respuesta); }
+function avisoDe(c){
+  if(c.excluido) return '<div class="aviso malo">No contactar' + (c.motivoExclusion ? ': ' + esc(c.motivoExclusion) : '') + '</div>';
+  if(c.robinson === 'Coincidencia: excluir') return '<div class="aviso malo">Está en la Lista Robinson: no contactar</div>';
+  if(!conToques()) return '';
+  const n = escritosA(c.id);
+  if(n && !haRespondido(c.id)) return n >= NEG.maxToques
+    ? '<div class="aviso aten">Ya se le ha escrito ' + n + (n === 1 ? ' vez' : ' veces') + ' sin respuesta. Regla del plan: no más mensajes por escrito.</div>'
+    : '<div class="aviso nota">Se le ha escrito ' + (n === 1 ? 'una vez' : n + ' veces') + ' y no ha contestado. ' + esc(NEG.textos.quedaToque || '') + '</div>';
+  return '';
+}
+function opciones(sel, lista, primera){ sel.innerHTML = (primera !== undefined ? '<option value="">' + esc(primera) + '</option>' : '') + lista.map(v => '<option>' + esc(v) + '</option>').join(''); }
+const esMovil = () => window.matchMedia('(max-width:720px)').matches;
+function prioIdx(p){ const i = PRIOS.indexOf(p); return i < 0 ? PRIOS.length : i; }   // lo que no tiene prioridad va al final
+function opPorId(id){ return datos.oportunidades.find(o => o.id === id); }
+const enCampoDeTexto = el => !!el && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable);
+
+// ---------- cuadros propios ----------
+// Sustituyen a confirm() y prompt(). cuadro() devuelve una promesa con { boton, valor }: boton es el «v» del botón pulsado
+// ('' si se cierra con Escape o pulsando fuera) y valor lo escrito en el campo, si lo hay.
+// Opciones: titulo, texto (llano), html (ya escapado), entrada ({ etiqueta, valor, ejemplo }), botones ([{ t, v, primario, peligro }])
+// y foco (el «v» del botón que recibe el foco; si no, el primer control).
+function cuadro(o){
+  if(resolverCuadro) cerrarCuadro('');
+  return new Promise(resolver => {
+    resolverCuadro = resolver;
+    $('cuadroTitulo').textContent = o.titulo || '';
+    $('cuadroCuerpo').innerHTML = (o.texto ? '<p>' + esc(o.texto) + '</p>' : '') + (o.html || '') +
+      (o.entrada ? '<label>' + esc(o.entrada.etiqueta) + '<input id="cuadroEntrada" type="text" autocomplete="off" value="' + esc(o.entrada.valor || '') + '" placeholder="' + esc(o.entrada.ejemplo || '') + '"></label>' : '');
+    $('cuadroBotones').innerHTML = (o.botones || [{ t: 'Aceptar', v: 'ok', primario: true }]).map(b =>
+      '<button type="button" data-v="' + esc(b.v) + '"' + (b.primario ? ' class="primario"' : b.peligro ? ' class="peligro"' : '') + '>' + esc(b.t) + '</button>').join('');
+    $('cuadro').returnValue = '';
+    $('cuadro').showModal();
+    const foco = o.foco != null ? $('cuadroBotones').querySelector('[data-v="' + CSS.escape(o.foco) + '"]') : null;
+    if(foco) foco.focus();
+  });
+}
+function cerrarCuadro(valor){
+  const d = $('cuadro'), r = resolverCuadro, e = $('cuadroEntrada');
+  resolverCuadro = null;
+  if(d.open) d.close(valor);
+  if(r) r({ boton: valor, valor: e ? e.value.trim() : '' });
+}
+
+// ---------- menús: el «⋯» de la cabecera y «Más» de la barra de abajo ----------
+function cerrarMenus(){ [['menuMas', 'bMas'], ['menuVistas', 'bMasVistas']].forEach(([m, b]) => { $(m).hidden = true; $(b).setAttribute('aria-expanded', 'false'); }); }
+function alternarMenu(menu, boton){
+  const abrir = $(menu).hidden;
+  cerrarMenus();
+  if(abrir){ $(menu).hidden = false; $(boton).setAttribute('aria-expanded', 'true'); }
+}
+
+// ---------- GitHub: el repositorio de datos ----------
+// La conexión (repositorio, rama, clave y, solo en las pruebas, otra dirección de la API) se guarda solo en este navegador.
+// Los archivos se leen siempre en crudo, sin caché y con «If-None-Match»: si no han cambiado GitHub contesta 304 y esa lectura
+// no gasta cuota. Al guardar se manda la huella (sha) del archivo que se leyó: si ya no es la actual, GitHub contesta 409.
+function leerConexion(){
+  try {
+    const c = JSON.parse(localStorage.getItem(CLAVE_GH) || 'null');
+    if(c && /^[\w.-]+\/[\w.-]+$/.test(c.repo || '') && c.token) return { repo: c.repo, rama: c.rama || 'principal', token: c.token, apiBase: String(c.apiBase || API_GH).replace(/\/+$/, '') };
+  } catch(e){}
+  return null;
+}
+// Si la página la sirve el servidor local del PC (herramientas\servidor_local.py), este responde en /gh/estado con el
+// repositorio de datos: la página se conecta a través de él, sin ninguna clave en el navegador y sin guardar nada.
+async function conexionDelServidor(){
+  if(!/^https?:$/.test(location.protocol)) return null;
+  try {
+    const r = await fetch(location.origin + '/gh/estado', { cache: 'no-store', signal: AbortSignal.timeout(2500) });
+    if(!r.ok) return null;
+    const e = await r.json();
+    if(e && e.modo === 'servidor' && /^[\w.-]+\/[\w.-]+$/.test(e.repo || '')) return { repo: e.repo, rama: e.rama || 'principal', token: 'servidor', apiBase: location.origin + '/gh', servidor: true };
+  } catch(err){}
+  return null;
+}
+function guardarConexion(c){
+  const o = { repo: c.repo, rama: c.rama, token: c.token };
+  if(c.apiBase && c.apiBase !== API_GH) o.apiBase = c.apiBase;
+  try { localStorage.setItem(CLAVE_GH, JSON.stringify(o)); return true; } catch(e){ return false; }
+}
+function olvidarConexion(){ try { localStorage.removeItem(CLAVE_GH); localStorage.removeItem(CLAVE_CONFIG); } catch(e){} }
+function errorGH(nombre, mensaje){ const e = new Error(mensaje); e.name = nombre; return e; }
+const rutaGH = ruta => String(ruta).split('/').map(encodeURIComponent).join('/');
+function urlGH(cfg, ruta, conRama){ return cfg.apiBase + '/repos/' + cfg.repo + '/contents/' + rutaGH(ruta) + (conRama === false ? '' : '?ref=' + encodeURIComponent(cfg.rama)); }
+// La huella de un archivo es su ETag sin comillas ni «W/»: coincide con su sha en GitHub.
+const shaDe = r => String(r.headers.get('ETag') || '').replace(/^W\//, '').replace(/"/g, '');
+function aBase64(blob){
+  return new Promise((ok, mal) => { const l = new FileReader(); l.onload = () => ok(String(l.result).split(',')[1] || ''); l.onerror = () => mal(l.error); l.readAsDataURL(blob); });
+}
+async function pedirGH(cfg, metodo, url, cabeceras, cuerpo, ms){
+  const corte = new AbortController(), reloj = setTimeout(() => corte.abort(), ms || 30000);
+  try { return await fetch(url, { method: metodo, headers: Object.assign({ Authorization: 'Bearer ' + cfg.token }, cabeceras), body: cuerpo, cache: 'no-store', signal: corte.signal }); }
+  catch(e){ throw errorGH('SinRedGitHub', 'No hay conexión con GitHub (' + (e && e.name === 'AbortError' ? 'tarda demasiado' : (e && e.message || e)) + ')'); }
+  finally { clearTimeout(reloj); }
+}
+// Una respuesta que no ha ido bien, como Error con nombre: LimiteGitHub, ClaveGitHub, NoExisteGitHub o ConflictoGitHub.
+async function falloGH(r, que){
+  let detalle = ''; try { detalle = String(((await r.json()) || {}).message || ''); } catch(e){}
+  if((r.status === 403 || r.status === 429) && (r.headers.get('X-RateLimit-Remaining') === '0' || r.headers.get('Retry-After')))
+    return errorGH('LimiteGitHub', 'GitHub pide esperar antes de seguir (hay demasiadas peticiones): prueba de nuevo en unos minutos');
+  if(r.status === 401 || r.status === 403) return errorGH('ClaveGitHub', 'La clave de acceso no vale o ha caducado: revísala en el inicio');
+  if(r.status === 404) return errorGH('NoExisteGitHub', 'GitHub no encuentra ' + que + ' (¿repositorio o rama mal escritos, o la clave no tiene acceso?)');
+  if(r.status === 409 || (r.status === 422 && /sha/i.test(detalle))) return errorGH('ConflictoGitHub', 'GitHub tiene una versión más nueva de ' + que);
+  return new Error('GitHub respondió ' + r.status + (detalle ? ' (' + detalle.slice(0, 160) + ')' : ''));
+}
+// Un «archivo» de GitHub con la forma de los que da el navegador (getFile, createWritable...), más sha y github: true.
+// getFile da un File con la propiedad sha. createWritable acepta { mensaje, sha }: el mensaje del commit y la sha del archivo sobre
+// el que se preparó el cambio. Lo que se hace con un mismo archivo va en fila, para que una lectura no se cruce con un guardado.
+function archivoGitHub(cfg, nombre){
+  let sha = '', ultimo = null, textoUltimo = '', fila = Promise.resolve();
+  const enFila = tarea => { const p = fila.then(tarea); fila = p.catch(() => {}); return p; };
+  const recordar = (texto, nueva) => { textoUltimo = texto; sha = nueva; ultimo = new File([texto], nombre, { type: 'application/json', lastModified: Date.now() }); ultimo.sha = nueva; return ultimo; };
+  async function leer(){
+    const cab = { Accept: 'application/vnd.github.raw+json' };
+    if(sha && ultimo) cab['If-None-Match'] = '"' + sha + '"';
+    const r = await pedirGH(cfg, 'GET', urlGH(cfg, nombre), cab);
+    if(r.status === 304 && ultimo) return ultimo;
+    if(!r.ok) throw await falloGH(r, 'el archivo ' + nombre);
+    const nueva = shaDe(r);
+    if(!nueva) throw new Error('GitHub no ha dado la huella (ETag) del archivo ' + nombre);
+    return recordar(await r.text(), nueva);
+  }
+  async function poner(blob, op){
+    const texto = await blob.text(), desde = op.sha || sha;
+    if(desde && desde === sha && texto === textoUltimo) return;   // es igual que lo último leído: no hay nada que guardar (evita commits vacíos)
+    const cuerpo = { message: op.mensaje || (AUTOR + ': cambios en ' + nombre), content: await aBase64(blob), branch: cfg.rama, committer: { name: AUTOR, email: CORREO_GH } };
+    if(desde) cuerpo.sha = desde;
+    const r = await pedirGH(cfg, 'PUT', urlGH(cfg, nombre, false), { Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }, JSON.stringify(cuerpo), 120000);
+    if(r.status === 404) throw new Error('GitHub no encuentra el repositorio ' + cfg.repo + ' ni su rama ' + cfg.rama + ', o la clave no puede escribir en él');
+    if(!r.ok) throw await falloGH(r, 'el archivo ' + nombre);
+    let nueva = ''; try { nueva = ((await r.json()).content || {}).sha || ''; } catch(e){}
+    if(nueva) recordar(texto, nueva); else { sha = ''; ultimo = null; textoUltimo = ''; }   // sin la huella nueva, la próxima lectura es entera
+  }
+  return {
+    kind: 'file', name: nombre, github: true,
+    get sha(){ return sha; },
+    getFile: () => enFila(leer),
+    async createWritable(op){
+      let partes = [];
+      return {
+        async write(t){ partes.push(t instanceof Blob || t instanceof ArrayBuffer || ArrayBuffer.isView(t) ? t : String(t)); },
+        async abort(){ partes = []; },
+        async close(){ const blob = new Blob(partes); partes = []; return enFila(() => poner(blob, op || {})); }
+      };
+    },
+    async requestPermission(){ return 'granted'; },
+    async queryPermission(){ return 'granted'; }
+  };
+}
+async function textoGH(cfg, ruta){
+  const r = await pedirGH(cfg, 'GET', urlGH(cfg, ruta), { Accept: 'application/vnd.github.raw+json' });
+  if(!r.ok) throw await falloGH(r, ruta);
+  return r.text();
+}
+async function listaGH(cfg, ruta, ms){
+  const r = await pedirGH(cfg, 'GET', urlGH(cfg, ruta), { Accept: 'application/vnd.github+json' }, undefined, ms);
+  if(!r.ok) throw await falloGH(r, ruta ? 'la carpeta ' + ruta : 'el repositorio');
+  const l = await r.json();
+  return Array.isArray(l) ? l : [];
+}
+// ---------- GitHub: la configuración de los negocios ----------
+// Cada negocio es un negocios/<CODIGO>.js del repositorio, con una llamada CRM_NEGOCIO({...}). Uno que ya esté registrado
+// (por las etiquetas script de la página) no se registra otra vez.
+function registrarNegocio(n){
+  const ya = n && negocioPorCodigo(n.codigo);
+  if(ya) return ya;
+  const r = CRM_NEGOCIO(n); remotos.add(r.codigo);
+  return r;
+}
+function olvidarRemotos(){ remotos.forEach(c => { const i = NEGOCIOS.findIndex(n => n.codigo === c); if(i >= 0) NEGOCIOS.splice(i, 1); }); remotos.clear(); }
+// La última configuración leída se recuerda en este navegador, por si un día no hay red.
+function configLocal(cfg){ try { const c = JSON.parse(localStorage.getItem(CLAVE_CONFIG) || 'null'); return c && c.repo === cfg.repo && c.rama === cfg.rama && Array.isArray(c.archivos) ? c.archivos : null; } catch(e){ return null; } }
+function guardarConfigLocal(cfg, archivos){ try { localStorage.setItem(CLAVE_CONFIG, JSON.stringify({ repo: cfg.repo, rama: cfg.rama, archivos })); } catch(e){} }
+// Lee y ejecuta los negocios/*.js del repositorio. Si el listado falla, el error sube. Si falla un archivo, se avisa y se sigue con los demás.
+// Si no hay red, usa la última configuración que este navegador leyó (salvo con conMemoria === false). Devuelve los avisos (vacío si todo fue bien).
+async function cargarConfiguracion(cfg, conMemoria){
+  const avisos = [];
+  let archivos;
+  try {
+    const lista = (await listaGH(cfg, 'negocios')).filter(x => x.type === 'file' && /\.js$/i.test(x.name)).sort((a, b) => a.name.localeCompare(b.name));
+    archivos = await Promise.all(lista.map(x => textoGH(cfg, 'negocios/' + x.name).then(texto => ({ nombre: x.name, texto }), error => ({ nombre: x.name, error }))));
+    if(archivos.length && archivos.every(a => a.texto !== undefined)) guardarConfigLocal(cfg, archivos);
+  } catch(e){
+    const guardados = conMemoria !== false && e && e.name === 'SinRedGitHub' ? configLocal(cfg) : null;
+    if(!guardados) throw e;
+    archivos = guardados; avisos.push('Sin conexión: se usan los negocios que este navegador recordaba');
+  }
+  olvidarRemotos();
+  archivos.forEach(a => {
+    if(a.error){ avisos.push(a.nombre + ': ' + a.error.message); return; }
+    try { registrarNegocio(objetoDeConfig(a.texto)); } catch(e){ avisos.push(a.nombre + ': ' + e.message); }
+  });
+  return avisos;
+}
+// El archivo de un negocio es CRM_NEGOCIO({...}); con JSON estricto dentro, igual que lo lee negocios.py: se lee como datos,
+// nunca se ejecuta como código. Se admiten líneas de comentario que empiecen por // fuera de la llamada.
+function objetoDeConfig(texto){
+  const t = String(texto).split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n').trim();
+  if(!t.startsWith('CRM_NEGOCIO(') || !t.endsWith(');')) throw new Error('no tiene la forma CRM_NEGOCIO({...});');
+  return JSON.parse(t.slice('CRM_NEGOCIO('.length, -2));
+}
+
+// ---------- IndexedDB para recordar el archivo ----------
+function idb(bd){ return new Promise((ok, mal) => { const r = indexedDB.open(bd, 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => ok(r.result); r.onerror = () => mal(r.error); }); }
+async function idbSet(bd, k, v){ try { const db = await idb(bd); await new Promise((ok, mal) => { const t = db.transaction('kv','readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = ok; t.onerror = () => mal(t.error); }); } catch(e){} }
+async function idbGet(bd, k){ try { const db = await idb(bd); return await new Promise((ok) => { const t = db.transaction('kv','readonly'); const r = t.objectStore('kv').get(k); r.onsuccess = () => ok(r.result); r.onerror = () => ok(undefined); }); } catch(e){ return undefined; } }
+
+// ---------- abrir y guardar ----------
+function cargarMismo(texto){ return comprobar(JSON.parse(texto), NEG); }
+// Abre un archivo nuevo. Desde una tarjeta (codigoEsperado) tiene que ser de ese negocio, o no saberse de cuál es.
+// Desde «Abrir otro archivo» tiene que saberse de qué negocio es. Comprueba el archivo antes de cambiar de negocio,
+// para que un archivo rechazado no deje la página a medias.
+function cargarNuevo(texto, nombreArchivo, codigoEsperado){
+  const d = JSON.parse(texto);
+  const detectado = elegirNegocio(d, nombreArchivo);
+  const esperado = codigoEsperado ? negocioPorCodigo(codigoEsperado) : null;
+  if(codigoEsperado && !esperado) throw new Error('No conozco el negocio ' + codigoEsperado);
+  if(esperado && detectado && detectado !== esperado.codigo) throw new Error('Este archivo es de ' + negocioPorCodigo(detectado).nombre + ', no de ' + esperado.nombre + '. Ábrelo desde su tarjeta.');
+  if(!esperado && !detectado) throw new Error('no sé de qué negocio es este archivo. Ábrelo desde su tarjeta en la pantalla de inicio');
+  const n = esperado || negocioPorCodigo(detectado);
+  comprobar(d, n);
+  activarNegocio(n.codigo); aplicarNegocio();
+  return d;
+}
+// Con qué se reconoce que un archivo ha cambiado: su sha si viene de GitHub, si no su fecha de modificación.
+function huella(f){ return f.sha || f.lastModified; }
+async function leerManejador(h, codigoEsperado){
+  const f = await h.getFile();
+  const d = cargarNuevo(await f.text(), f.name, codigoEsperado);
+  manejador = h; ultimaModif = huella(f); datos = d; base = clonar(d); sucio = false; modoCopia = false;
+  if(!h.github) await idbSet(NEG.bd, 'archivo', h);   // el de GitHub se vuelve a crear desde la conexión, no hay nada que recordar
+  sinRed.delete(NEG.codigo);
+  recordarUso();
+  arrancar('Abierto ' + f.name + ' (' + NEG.nombre + ')' + (h.github ? ' desde GitHub' : '') + ' a las ' + ahora());
+}
+// Apunta qué negocio se ha abierto y cuándo, y pone su código en la dirección (CRM.html#CODIGO), para que al recargar salga su tarjeta.
+function recordarUso(){
+  try { localStorage.setItem('crm-global-ultimo', NEG.codigo); localStorage.setItem(NEG.bd + '-ultimo', new Date().toISOString()); } catch(e){}
+  try { history.replaceState(null, '', location.href.split('#')[0] + '#' + NEG.codigo); } catch(e){}
+}
+async function abrirConSelector(codigoEsperado){
+  try {
+    const [h] = await window.showOpenFilePicker({ types: [{ description: 'Datos del CRM', accept: { 'application/json': ['.json'] } }], multiple: false });
+    await leerManejador(h, codigoEsperado);
+  } catch(e){ if(e.name !== 'AbortError') estado('No se pudo abrir: ' + e.message, 'error'); }
+}
+// «Crear un archivo vacío» de una tarjeta. El negocio cambia cuando ya se ha elegido dónde guardarlo.
+async function crearArchivo(codigo){
+  const n = negocioPorCodigo(codigo); if(!n) return;
+  const vacio = comprobar({ version: 2, negocio: n.codigo, actualizado: new Date().toISOString(), contactos: [], oportunidades: [], actividades: [] }, n);
+  if(hayApi){
+    try {
+      const h = await window.showSaveFilePicker({ suggestedName: n.archivo, types: [{ description: 'Datos del CRM', accept: { 'application/json': ['.json'] } }] });
+      activarNegocio(n.codigo); aplicarNegocio();
+      manejador = h; datos = vacio; base = null; await escribir(); await idbSet(NEG.bd, 'archivo', h); recordarUso(); arrancar('Archivo nuevo creado');
+    } catch(e){ if(e.name !== 'AbortError') estado('No se pudo crear: ' + e.message, 'error'); }
+  } else { activarNegocio(n.codigo); aplicarNegocio(); datos = vacio; recordarUso(); arrancar('Datos nuevos en este navegador. Recuerda descargar una copia'); }
+}
+// «Crear en GitHub» de una tarjeta: escribe el documento vacío en el repositorio (sin sha, así que falla si ya existe) y lo abre.
+async function crearEnGitHub(codigo){
+  const n = negocioPorCodigo(codigo); if(!n || !conexion) return;
+  const vacio = comprobar({ version: 2, negocio: n.codigo, actualizado: new Date().toISOString(), actualizadoPor: AUTOR, contactos: [], oportunidades: [], actividades: [] }, n);
+  const h = archivoGitHub(conexion, n.archivo);
+  estado('Creando ' + n.archivo + ' en GitHub...');
+  try {
+    const w = await h.createWritable({ mensaje: AUTOR + ': archivo nuevo de ' + n.nombre });
+    await w.write(JSON.stringify(vacio, null, 1)); await w.close();
+    await leerManejador(h, n.codigo);
+  } catch(e){
+    await pintarTarjetas();
+    estado(e && e.name === 'ConflictoGitHub' ? 'El archivo ' + n.archivo + ' ya existe en GitHub: ábrelo con su botón «Abrir»' : 'No se pudo crear: ' + e.message, 'error');
+  }
+}
+// Mensaje del commit en GitHub, en una línea: quién, hasta tres cambios con las mismas palabras del registro y cuántos más.
+function mensajeCommit(cambios){
+  if(!cambios || !cambios.length) return AUTOR + ': datos nuevos';
+  const m = AUTOR + ': ' + cambios.slice(0, 3).map(textoCambio).join('; ') + (cambios.length > 3 ? ', y ' + (cambios.length - 3) + ' más' : '');
+  const una = m.replace(/\s+/g, ' ').trim();
+  return una.length > 500 ? una.slice(0, 499) + '…' : una;
+}
+// Guarda en el archivo abierto. Si no es el de antes (otro ha escrito), vuelve a leer, junta y guarda. Si GitHub dice que su versión
+// es más nueva justo al guardar (ConflictoGitHub), se repite todo el proceso, hasta tres veces más.
+async function escribir(intento){
+  const vez = typeof intento === 'number' ? intento : 0;   // 0 en el primer intento; los reintentos por ConflictoGitHub van contando
+  if(!manejador){ sucio = true; estado(modoCopia ? 'Copia sin conexión: lo que cambies no se guarda' : 'Cambios sin guardar en archivo: pulsa «Descargar copia»', 'sucio'); return; }
+  if(guardando){ clearTimeout(temporizador); temporizador = setTimeout(escribir, 400); return; }
+  guardando = true;
+  const ed = edicion, enGitHub = !!manejador.github;
+  let previo = base, entrada = null;
+  try {
+    const f0 = await manejador.getFile();
+    let fusion = null, choques = [];
+    if(base){
+      const suyo = cargarMismo(await f0.text());
+      if((suyo.actualizado || '') !== (base.actualizado || '') || (f0.sha && f0.sha !== ultimaModif)){
+        // Otro (un hilo de Claude u otra persona) ha escrito mientras tanto: se juntan sus cambios con los tuyos.
+        const r = fusionar(base, datos, suyo, true, nuevoId);
+        datos = r.res; choques = r.choques; previo = suyo;
+        fusion = { conQuien: suyo.actualizadoPor || 'otra fuente', suyoActualizado: suyo.actualizado || '' };
+      }
+    } else if(ultimaModif && (f0.sha ? f0.sha !== ultimaModif : f0.lastModified > ultimaModif + 1000)){
+      estado('El archivo ha cambiado fuera de esta página. Recarga la página antes de seguir; tus últimos cambios están en «Descargar copia».', 'error');
+      guardando = false; return;
+    }
+    const cambios = previo ? diferencias(previo, datos) : null;
+    if(cambios && !cambios.length){
+      base = clonar(datos); ultimaModif = huella(f0); sucio = edicion !== ed; guardando = false;
+      if(fusion){ refrescarVista(); estado('Actualizado a las ' + ahora() + quienEscribio()); } else estado('Guardado a las ' + ahora());
+      return;
+    }
+    const cuando = new Date().toISOString();
+    if(cambios){
+      sellar(datos, cambios, AUTOR, cuando);
+      entrada = { id: 'R' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), cuando, quien: AUTOR, hilo: 'Jorge', con: 'CRM.html', cambios };
+      if(fusion) entrada.fusion = fusion;
+      if(choques.length) entrada.choques = choques;
+      registrar(datos, entrada);
+    }
+    datos.actualizado = cuando; datos.actualizadoPor = AUTOR;
+    const texto = JSON.stringify(datos, null, 1);
+    const w = await (enGitHub ? manejador.createWritable({ mensaje: mensajeCommit(cambios), sha: f0.sha }) : manejador.createWritable());
+    await w.write(texto);
+    await w.close();
+    ultimaModif = huella(await manejador.getFile());
+    base = JSON.parse(texto);
+    sucio = edicion !== ed;
+    try { localStorage.setItem(NEG.bd + '-copia', texto); } catch(e){}
+    if(fusion) refrescarVista();
+    if(choques.length) estado('Guardado a las ' + ahora() + ', junto con lo de ' + fusion.conQuien + '. Ojo: ' + (choques.length === 1 ? 'un campo lo habíais cambiado los dos' : choques.length + ' campos los habíais cambiado los dos') + '; se ha quedado lo tuyo y lo anterior está en «Registro»', 'sucio');
+    else if(fusion) estado('Guardado a las ' + ahora() + ', junto con lo de ' + fusion.conQuien);
+    else estado('Guardado a las ' + ahora());
+  } catch(e){
+    // En GitHub, donde un fallo es más corriente, lo apuntado en el registro en este intento no se llegó a guardar: se quita
+    // para que el siguiente intento no lo repita.
+    if(enGitHub && entrada && Array.isArray(datos.registro)) datos.registro = datos.registro.filter(x => x !== entrada);
+    if(e && e.name === 'ConflictoGitHub' && vez < 3){
+      base = previo; guardando = false;   // la base pasa a ser lo último que se leyó, con lo que ya está juntado
+      return escribir(vez + 1);
+    }
+    estado('No se pudo guardar: ' + (e && e.name === 'ConflictoGitHub' ? 'otra persona ha guardado a la vez en GitHub y no se han podido juntar los cambios' : e.message) + '. Usa «Descargar copia».', 'error');
+  }
+  guardando = false;
+}
+function programarGuardado(){ edicion++; sucio = true; estado('Guardando...', 'sucio'); clearTimeout(temporizador); temporizador = setTimeout(escribir, 500); }
+function descargar(nombreArchivo, contenido, tipo){
+  const blob = new Blob([contenido], { type: tipo });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombreArchivo;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function descargarCopia(){ descargar(NEG.archivo, JSON.stringify(datos, null, 1), 'application/json'); }
+// Si alguien está escribiendo (en la ficha o en un formulario de la Agenda), lo que llegue de fuera espera para no borrarle lo que lleva.
+function escribiendoEnFicha(){ const a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && ((!$('ficha').hidden && $('ficha').contains(a)) || !!a.closest('.en-linea')); }
+function quienEscribio(){ return datos && datos.actualizadoPor ? ' (último cambio: ' + datos.actualizadoPor + ')' : ''; }
+function refrescarVista(){
+  pintarTodo();
+  if(!fichaId || escribiendoEnFicha()) return;
+  if(!contacto(fichaId)){ ocultarFicha(); return; }
+  const ids = ['aOp','aFecha','aTipo','aFase','aTexto','aProx','aProxFecha'], antes = ids.map(id => $(id).value), enCurso = $('aTexto').value.trim() !== '';
+  abrirFicha(fichaId);
+  if(enCurso){ $('aOp').value = antes[0]; prepararAnotar(); ids.forEach((id, i) => { if(i) $(id).value = antes[i]; }); }
+}
+// Mira el archivo al volver a la ventana y cada 15 segundos. Si otro (un hilo de Claude u otra persona) ha escrito, recoge sus cambios.
+async function mirarArchivo(){
+  if(!manejador || sucio || guardando) return;
+  try {
+    const f = await manejador.getFile();
+    if(huella(f) === ultimaModif) return;
+    if(escribiendoEnFicha()){ if(!cargaPendiente){ cargaPendiente = true; estado('Hay cambios nuevos en el archivo: se cargan al salir del campo o al cerrar el contacto', 'sucio'); } return; }
+    const d = cargarMismo(await f.text());
+    if(!manejador || sucio || guardando) return;
+    ultimaModif = huella(f); cargaPendiente = false;
+    // Con la misma marca «actualizado» no hay nada nuevo, salvo en GitHub si el contenido es distinto (alguien lo ha tocado a mano).
+    if((d.actualizado || '') === (datos.actualizado || '') && (!f.sha || JSON.stringify(d) === JSON.stringify(datos))) return;
+    datos = d; base = clonar(d);
+    refrescarVista();
+    estado('Actualizado a las ' + ahora() + quienEscribio());
+  } catch(e){}
+}
+window.addEventListener('focus', mirarArchivo);
+document.addEventListener('focusout', () => { if(cargaPendiente) setTimeout(mirarArchivo, 300); });
+setInterval(() => { if(document.visibilityState === 'visible') mirarArchivo(); }, 15000);
+window.addEventListener('beforeunload', e => { if(sucio){ e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- arranque ----------
+async function inicio(){
+  opciones($('oSemana'), SEMANAS, 'Todas las semanas');
+  $('selNegocio').addEventListener('change', () => irANegocio($('selNegocio').value));
+  $('negocios').addEventListener('click', e => {
+    const b = e.target.closest('button[data-accion]'), t = b && b.closest('.tarjeta-negocio'); if(!t) return;
+    const codigo = t.dataset.codigo, accion = b.dataset.accion;
+    if(accion === 'seguir') seguirCon(codigo);
+    else if(accion === 'crear') crearArchivo(codigo);
+    else if(accion === 'abrir'){ if(hayApi) abrirConSelector(codigo); else { codigoEntrada = codigo; $('entradaArchivo').click(); } }
+    else if(accion === 'abrir-gh') abrirDeGitHub(codigo);
+    else if(accion === 'crear-gh') crearEnGitHub(codigo);
+    else if(accion === 'copia') abrirCopia(codigo);
+  });
+  // Sin la API de archivos: el archivo elegido se abre como el negocio de la tarjeta (o, desde la cabecera, como el que se detecte).
+  $('entradaArchivo').onchange = async ev => {
+    const f = ev.target.files[0]; ev.target.value = ''; if(!f) return;
+    try { datos = cargarNuevo(await f.text(), f.name, codigoEntrada); base = clonar(datos); manejador = null; modoCopia = false; recordarUso(); arrancar('Abierto ' + f.name + ' (' + NEG.nombre + ', sin guardado directo)'); } catch(e){ estado('No se pudo abrir: ' + e.message, 'error'); }
+  };
+  $('bConectar').onclick = conectar;
+  $('bDesconectar').onclick = desconectar;
+  $('bCopia').onclick = descargarCopia;
+  $('bCsv').onclick = exportarCsv;
+  // «Abrir otro archivo»: antes guarda lo pendiente del negocio abierto; si se cancela el selector, no cambia nada.
+  $('bCambiar').onclick = async () => { if(datos && !await guardarAntesDeCambiar()) return; if(hayApi) abrirConSelector(); else { codigoEntrada = ''; $('entradaArchivo').click(); } };
+  $('bNegocio').onclick = cambiarNegocio;
+  $('bNuevo').onclick = () => nuevoContacto();
+  $('bAyuda').onclick = () => { pintarAyuda(); $('ayuda').showModal(); };   // se vuelve a pintar cada vez: siempre la del negocio abierto, o la general en el inicio
+  $('bCerrarAyuda').onclick = () => $('ayuda').close();
+  document.querySelectorAll('nav[role=tablist] [role=tab]').forEach(b => b.onclick = () => ponerVista(b.dataset.vista));
+  document.querySelector('nav[role=tablist]').addEventListener('keydown', moverEntrePestanas);
+  ['oTexto','oServicio','oFase','oPrioridad','oSemana','oOrden'].forEach(id => $(id).addEventListener('input', pintarOps));
+  ['cTexto','cRolF','cSegF','cLocF','cConCorreo','cSinExcl'].forEach(id => $(id).addEventListener('input', pintarContactos));
+  ['eTexto','ePrioridad'].forEach(id => $(id).addEventListener('input', pintarEmbudo));
+  $('rAutor').value = AUTOR;
+  $('rAutor').addEventListener('change', () => { AUTOR = $('rAutor').value.trim() || 'Jorge · navegador'; $('rAutor').value = AUTOR; try { localStorage.setItem('crm-global-autor', AUTOR); } catch(e){} });
+  $('rTexto').addEventListener('input', pintarRegistro);
+  $('lRegistro').addEventListener('click', e => { const a = e.target.closest('[data-ficha]'); if(a){ e.preventDefault(); abrirFicha(a.dataset.ficha); } });
+  $('bCerrar').onclick = cerrarFicha;
+  $('ficha').addEventListener('click', e => { if(e.target.id === 'ficha') cerrarFicha(); });
+  $('ficha').addEventListener('keydown', retenerFoco);
+  $('bAnotar').onclick = anotar;
+  $('aTipo').onchange = sugerirFase;
+  $('bRecordatorio').onclick = () => { if($('aProx').disabled || !NEG.recordatorio) return; $('aProx').value = NEG.recordatorio.texto; $('aProxFecha').value = sumarDias($('aFecha').value || hoyISO(), NEG.recordatorio.dias || 9); };
+  $('aOp').onchange = prepararAnotar;
+  $('bAddOp').onclick = anadirOp;
+  $('bBorrar').onclick = borrarContacto;
+  $('bVerTodas').onclick = () => { historialCompleto = !historialCompleto; const c = contacto(fichaId); if(c) pintarHistorial(c); };
+  $('bCopiarGuion').onclick = async () => { try { await navigator.clipboard.writeText($('cGuion').textContent); $('bCopiarGuion').textContent = 'Copiado'; setTimeout(() => $('bCopiarGuion').textContent = 'Copiar el texto', 1500); } catch(e){} };
+  $('opsFicha').addEventListener('change', cambioOp);
+  $('opsFicha').addEventListener('click', e => { const b = e.target.closest('[data-quitar]'); if(b) quitarOp(b.dataset.quitar); });
+  $('ficha').addEventListener('change', e => { if(e.target.dataset && e.target.dataset.c) cambioContacto(e.target); });
+  enlazarPantalla();
+  textoInicioLocal = $('textoInicio').textContent;
+  if(!conexion) conexion = await conexionDelServidor();
+  pintarConexion();
+  if(conexion) await cargarDeGitHub();
+  rellenarSelNegocio();
+  if(!NEGOCIOS.length) $('conexion').open = true;   // sin ningún negocio, lo primero es conectar (o revisar la conexión)
+  await pintarTarjetas();
+}
+// Lo que no depende del negocio abierto: cuadros propios, menús, barra de abajo, búsqueda global, teclas, y los formularios de la Agenda y de Contactos.
+function enlazarPantalla(){
+  const dlg = $('cuadro');
+  dlg.addEventListener('click', e => {
+    const b = e.target.closest('button[data-v]');
+    if(b){ cerrarCuadro(b.dataset.v); return; }
+    if(e.target === dlg){ const r = dlg.getBoundingClientRect(); if(e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) cerrarCuadro(''); }   // pulsar fuera, en el fondo
+  });
+  // Escape: el navegador avisa con «cancel» en el momento (el evento «close» llega después y en algunos casos tarde), así que se cierra y se contesta aquí.
+  dlg.addEventListener('cancel', e => { e.preventDefault(); cerrarCuadro(''); });
+  dlg.addEventListener('close', () => { if(!dlg.open && resolverCuadro) cerrarCuadro(''); });   // por si se cierra de cualquier otra forma
+  dlg.addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.id === 'cuadroEntrada'){ e.preventDefault(); const p = $('cuadroBotones').querySelector('.primario'); if(p) p.click(); } });
+  $('bMas').onclick = () => alternarMenu('menuMas', 'bMas');
+  $('bMasVistas').onclick = () => alternarMenu('menuVistas', 'bMasVistas');
+  $('menuMas').addEventListener('click', e => { if(e.target.closest('button')) cerrarMenus(); });
+  $('menuVistas').addEventListener('click', e => { const b = e.target.closest('[data-vista]'); if(b){ cerrarMenus(); ponerVista(b.dataset.vista); } });
+  document.querySelectorAll('#barraInferior [data-vista]').forEach(b => b.onclick = () => { cerrarMenus(); ponerVista(b.dataset.vista); });
+  document.addEventListener('click', e => { if(!e.target.closest('.menu-caja, #menuVistas, #bMasVistas')) cerrarMenus(); });
+  $('estado').addEventListener('click', () => { if($('estado').classList.contains('error')) $('estado').classList.add('visto'); });   // en el móvil, un error sale pegado abajo; al tocarlo se queda en la cabecera
+  $('bConexion').onclick = verConexion;
+  $('bHoyTodos').onclick = verHoyTodos;
+  $('bHoyTodosMenu').onclick = verHoyTodos;
+  $('bDeshacer').onclick = deshacerUltimo;
+  $('bDeshacerLocal').onclick = deshacerLocal;
+  $('bHoyActualizar').onclick = () => pintarHoyTodos();
+  $('hoyTodosCuerpo').addEventListener('click', e => { const b = e.target.closest('.linea-hoy'); if(b) abrirDesdeHoy(b.dataset.codigo, b.dataset.id, b.dataset.op); });
+  $('kpis').addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if(b) ponerVista(b.dataset.ir); });
+  $('agenda').addEventListener('click', accionAgenda);
+  $('agenda').addEventListener('submit', e => { e.preventDefault(); hechoAgenda(e.target); });
+  $('agenda').addEventListener('input', e => { if(e.target.dataset.f === 'tipo') avisoFaseHecho(e.target.closest('form')); });
+  $('formRapido').addEventListener('submit', e => { e.preventDefault(); const t = $('cRapido').value.trim(); if(!t){ $('cRapido').focus(); return; } $('cRapido').value = ''; anadirRapido(t); });
+  const caja = $('busqueda');
+  caja.addEventListener('input', pintarBusqueda);
+  caja.addEventListener('focus', () => { clearTimeout(relojBusqueda); if(caja.value.trim()) pintarBusqueda(); });
+  caja.addEventListener('blur', () => { clearTimeout(relojBusqueda); relojBusqueda = setTimeout(cerrarBusqueda, 180); });   // con retraso, para que un toque en un resultado llegue a hacerse
+  caja.addEventListener('keydown', teclasBusqueda);
+  $('resultadosBusqueda').addEventListener('mousedown', e => e.preventDefault());
+  $('resultadosBusqueda').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if(li) abrirResultado(Number(li.dataset.i)); });
+  document.addEventListener('keydown', teclasGlobales);
+  // Al pasar de móvil a ordenador (o al revés) cambian el embudo y las listas, así que se vuelven a pintar.
+  window.matchMedia('(max-width:720px)').addEventListener('change', () => { cerrarMenus(); if(datos) pintarTodo(); });
+}
+// Escape cierra el menú abierto o, si no, la ficha. «/» y Ctrl+K llevan a la búsqueda, salvo si ya se está escribiendo en un campo.
+function teclasGlobales(e){
+  if(e.key === 'Escape'){
+    if(!$('menuMas').hidden || !$('menuVistas').hidden){ const boton = !$('menuMas').hidden ? $('bMas') : $('bMasVistas'); cerrarMenus(); boton.focus(); }   // y el foco vuelve al botón que lo abrió
+    else if(!$('ficha').hidden && !$('ayuda').open && !$('cuadro').open) cerrarFicha();
+    return;
+  }
+  if(!datos || !$('ficha').hidden || $('ayuda').open || $('cuadro').open || enCampoDeTexto(e.target) || e.altKey) return;
+  const barra = e.key === '/' && !e.ctrlKey && !e.metaKey, ctrlK = (e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k';
+  if(barra || ctrlK){ e.preventDefault(); $('busqueda').focus(); $('busqueda').select(); }
+}
+// Las flechas pasan de una pestaña a otra (y Inicio y Fin van a la primera y la última).
+function moverEntrePestanas(e){
+  const tabs = [...e.currentTarget.querySelectorAll('[role=tab]')], i = tabs.indexOf(document.activeElement);
+  if(i < 0) return;
+  const j = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i + tabs.length - 1) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+  if(j < 0) return;
+  e.preventDefault(); ponerVista(tabs[j].dataset.vista); tabs[j].focus();
+}
+// Con la ficha abierta, el Tabulador no sale de ella: del último control vuelve al primero.
+function retenerFoco(e){
+  if(e.key !== 'Tab') return;
+  const f = [...$('ficha').querySelectorAll('button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])')].filter(x => !x.disabled && x.offsetParent !== null);
+  if(!f.length) return;
+  const a = document.activeElement;
+  if(e.shiftKey && (a === f[0] || !$('ficha').contains(a))){ e.preventDefault(); f[f.length - 1].focus(); }
+  else if(!e.shiftKey && (a === f[f.length - 1] || !$('ficha').contains(a))){ e.preventDefault(); f[0].focus(); }
+}
+// El Tabulador no tiene que poder llegar al fondo mientras la ficha está abierta (inert lo saca del orden de foco y de la lectura de pantalla).
+function bloquearFondo(si){ ['pantallaInicio', 'app'].forEach(id => { $(id).inert = si; }); }
+// Dónde estaba el foco al abrir la ficha, para devolverlo al cerrarla: la fila (o tarjeta) de ese contacto, si sigue ahí, o el control que fuera.
+function recordarOrigenFoco(){
+  const a = document.activeElement; if(!a || a === document.body) return null;
+  const fila = a.closest && a.closest('#app [data-id]');
+  if(fila) return { id: fila.dataset.id, op: fila.dataset.op || '' };
+  return a.id ? { dom: a.id } : null;
+}
+function devolverFoco(){
+  const o = origenFoco; origenFoco = null;
+  let el = null;
+  if(o && o.id){ const sel = '#app [data-id="' + CSS.escape(o.id) + '"]' + (o.op ? '[data-op="' + CSS.escape(o.op) + '"]' : ''); el = [...document.querySelectorAll(sel)].find(x => x.offsetParent !== null) || null; }
+  if(!el && o && o.dom) el = $(o.dom);
+  if(!el) el = document.querySelector('nav[role=tablist] [aria-selected="true"]');
+  if(el && el.offsetParent !== null) el.focus({ preventScroll: true });
+  else { const b = document.querySelector('#barraInferior [aria-current="page"]'); if(b && b.offsetParent !== null) b.focus({ preventScroll: true }); }
+}
+
+// ---------- búsqueda global ----------
+// Un campo en la cabecera que busca, sin tildes ni mayúsculas, en contactos (nombre, correo, teléfono, localidad, segmento),
+// oportunidades (servicio, próximo paso, notas) y anotaciones (texto). Todas las palabras escritas tienen que estar. Enseña hasta 20.
+const MAX_RESULTADOS = 20;
+let resultadosBusq = [], activoBusq = -1, relojBusqueda = null;
+function buscarGlobal(texto){
+  const palabras = normalizar(texto).split(/\s+/).filter(Boolean);
+  if(!palabras.length) return [];
+  const coincide = campos => { const b = normalizar(campos.join(' ')); return palabras.every(p => b.includes(p)); };
+  const res = [], libre = () => res.length < MAX_RESULTADOS;
+  datos.contactos.forEach(c => {
+    if(libre() && coincide([c.entidad, c.persona, c.email, c.telefono, c.localidad, c.segmento]))
+      res.push({ tipo: 'Contacto', cid: c.id, titulo: nombre(c), detalle: [c.email, c.telefono, c.localidad, c.segmento].filter(Boolean).join(' · '), excluido: !!c.excluido });
+  });
+  datos.oportunidades.forEach(o => {
+    const c = contacto(o.contactoId), P = PRODUCTOS[o.producto];
+    if(libre() && c && P && coincide([o.servicio, o.proximoPaso, o.notas]))
+      res.push({ tipo: 'Oportunidad', cid: c.id, op: o.id, titulo: nombre(c), detalle: [P.corto + (o.servicio ? ': ' + o.servicio : ''), o.fase, o.proximoPaso].filter(Boolean).join(' · ') });
+  });
+  datos.actividades.forEach(a => {
+    const c = contacto(a.contactoId);
+    if(libre() && c && coincide([a.texto]))
+      res.push({ tipo: 'Anotación', cid: c.id, op: a.oportunidadId || '', titulo: nombre(c), detalle: fechaES(a.fecha) + ' · ' + a.tipo + ': ' + String(a.texto || '').slice(0, 110) });
+  });
+  return res;
+}
+function pintarBusqueda(){
+  clearTimeout(relojBusqueda);
+  const t = $('busqueda').value;
+  if(!datos || !t.trim()){ cerrarBusqueda(); return; }
+  resultadosBusq = buscarGlobal(t);
+  activoBusq = resultadosBusq.length ? 0 : -1;
+  $('resultadosBusqueda').innerHTML = resultadosBusq.length
+    ? resultadosBusq.map((r, i) => '<li role="option" id="res-' + i + '" data-i="' + i + '" aria-selected="' + (i === 0) + '"><span class="res-tipo">' + esc(r.tipo) + (r.excluido ? ' · excluido' : '') + '</span><b>' + esc(r.titulo) + '</b><span class="sub">' + esc(r.detalle) + '</span></li>').join('')
+    : '<li class="sin-resultados" role="option" aria-disabled="true">Nada encontrado. Prueba con otra palabra o con menos.</li>';
+  $('resultadosBusqueda').hidden = false;
+  $('busqueda').setAttribute('aria-expanded', 'true');
+  if(activoBusq >= 0) $('busqueda').setAttribute('aria-activedescendant', 'res-0'); else $('busqueda').removeAttribute('aria-activedescendant');
+}
+function cerrarBusqueda(){
+  $('resultadosBusqueda').hidden = true; $('resultadosBusqueda').innerHTML = '';
+  $('busqueda').setAttribute('aria-expanded', 'false'); $('busqueda').removeAttribute('aria-activedescendant');
+  resultadosBusq = []; activoBusq = -1;
+}
+function marcarActivoBusqueda(){
+  $('resultadosBusqueda').querySelectorAll('li[data-i]').forEach(li => li.setAttribute('aria-selected', Number(li.dataset.i) === activoBusq));
+  const li = $('res-' + activoBusq);
+  if(li){ $('busqueda').setAttribute('aria-activedescendant', li.id); li.scrollIntoView({ block: 'nearest' }); }
+}
+function teclasBusqueda(e){
+  const n = resultadosBusq.length, abierta = !$('resultadosBusqueda').hidden;
+  if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    if(!abierta){ pintarBusqueda(); return; }
+    if(!n) return;
+    activoBusq = (activoBusq + (e.key === 'ArrowDown' ? 1 : n - 1)) % n;
+    marcarActivoBusqueda();
+  } else if(e.key === 'Enter'){
+    if(abierta && activoBusq >= 0){ e.preventDefault(); abrirResultado(activoBusq); }
+  } else if(e.key === 'Escape'){
+    if(abierta) e.preventDefault();
+    cerrarBusqueda();
+  }
+}
+function abrirResultado(i){
+  const r = resultadosBusq[i]; if(!r || !contacto(r.cid)) return;
+  cerrarBusqueda(); $('busqueda').value = '';
+  abrirFicha(r.cid, r.op || null);
+}
+
+// ---------- hoy en todos los negocios (solo con conexión a GitHub) ----------
+// Lee en crudo el archivo de datos de cada negocio y enseña, de solo lectura, lo atrasado y lo de hoy. Un toque en una línea abre ese negocio y esa ficha.
+// Si un archivo falla, se dice en su bloque y se sigue con los demás.
+function pasosDeHoy(d, n, hoy){
+  const C = new Map((d.contactos || []).map(c => [c.id, c])), res = [];
+  (d.oportunidades || []).forEach(o => {
+    const c = C.get(o.contactoId), P = n.mapa[o.producto];
+    if(!c || !P || c.excluido || !o.fechaProximo || o.fechaProximo > hoy || P.fases.indexOf(o.fase) === I_PERDIDO) return;
+    res.push({ cid: c.id, op: o.id, fecha: o.fechaProximo, paso: o.proximoPaso || '', contacto: nombre(c), producto: P.corto, prio: prioIdx(o.prioridad) });
+  });
+  return res.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.prio - b.prio);
+}
+async function leerPasosDe(n, hoy){
+  try {
+    const clave = [conexion.repo, conexion.rama, n.archivo].join('|');
+    let h = lectoresHoy.get(clave); if(!h){ h = archivoGitHub(conexion, n.archivo); lectoresHoy.set(clave, h); }   // el mismo lector: la segunda vez es una lectura condicional (304)
+    const d = comprobar(JSON.parse(await (await h.getFile()).text()), n);
+    return { pasos: pasosDeHoy(d, n, hoy) };
+  } catch(e){ return { error: (e && e.message) || String(e) }; }
+}
+function plural(n, uno, varios){ return n + ' ' + (n === 1 ? uno : varios); }
+function bloqueHoy(n, r, hoy){
+  const claro = (n.colores.claro && n.colores.claro.acento) || 'var(--accent)', oscuro = (n.colores.oscuro && n.colores.oscuro.acento) || claro;
+  let resumen = '', cuerpo;
+  if(r.error) cuerpo = '<p class="error">No se ha podido leer ' + esc(n.archivo) + ': ' + esc(r.error) + '</p>';
+  else if(r.sinArchivo) cuerpo = '<p class="sub">Todavía no tiene archivo en GitHub: crea el negocio con su tarjeta.</p>';
+  else if(!r.pasos.length) cuerpo = '<p class="sub">Nada atrasado ni para hoy.</p>';
+  else {
+    const atras = r.pasos.filter(p => p.fecha < hoy).length;
+    resumen = '<span class="sub">' + plural(atras, 'atrasado', 'atrasados') + ' · ' + plural(r.pasos.length - atras, 'de hoy', 'de hoy') + '</span>';
+    cuerpo = r.pasos.slice(0, 12).map(p => '<button type="button" class="linea-hoy" data-codigo="' + esc(n.codigo) + '" data-id="' + esc(p.cid) + '" data-op="' + esc(p.op) + '"><div class="t1">' + esc(p.contacto) + '</div><div class="t2">' +
+      (p.fecha < hoy ? 'Atrasado, ' : 'Hoy, ') + esc(fechaES(p.fecha)) + ' · ' + esc(p.producto) + ' · ' + esc(p.paso || 'Sin próximo paso') + '</div></button>').join('') +
+      (r.pasos.length > 12 ? '<p class="sub">Y ' + (r.pasos.length - 12) + ' más: abre el negocio y mira su Agenda.</p>' : '');
+  }
+  return '<div class="hoy-negocio" data-codigo="' + esc(n.codigo) + '" style="--c:' + esc(claro) + ';--c-oscuro:' + esc(oscuro) + '"><h4>' + esc(n.nombre) + resumen + '</h4>' + cuerpo + '</div>';
+}
+// enRepo: nombres de los archivos del repositorio, si se sabe (un negocio cuyo archivo no está no se lee).
+async function pintarHoyTodos(enRepo = enRepoActual){
+  const vez = ++vecesHoy, negocios = NEGOCIOS.slice(), cx = conexion, hay = !!cx && negocios.length > 0;
+  $('hoyTodos').classList.toggle('oculto', !hay);
+  if(!hay){ $('hoyTodosCuerpo').innerHTML = ''; return; }
+  $('hoyTodosCuerpo').innerHTML = '<p class="sub">Leyendo los archivos de todos los negocios...</p>';
+  const hoy = hoyISO();
+  const lista = await Promise.all(negocios.map(n => enRepo && !enRepo.has(n.archivo) ? Promise.resolve({ sinArchivo: true }) : leerPasosDe(n, hoy)));
+  if(vez !== vecesHoy || cx !== conexion) return;   // mientras tanto se ha vuelto a pintar o se ha cambiado la conexión: no vale lo leído
+  $('hoyTodosCuerpo').innerHTML = negocios.map((n, i) => bloqueHoy(n, lista[i], hoy)).join('');
+}
+// Un toque en una línea: abre ese negocio desde GitHub, se pone en su Agenda y abre la ficha de ese contacto con su oportunidad marcada.
+async function abrirDesdeHoy(codigo, cid, opId){
+  await abrirDeGitHub(codigo);
+  if(!NEG || NEG.codigo !== codigo || !datos) return;
+  ponerVista('agenda');
+  if(contacto(cid)) abrirFicha(cid, opId);
+}
+async function verConexion(){
+  if(datos && !await cambiarNegocio()) return;
+  $('conexion').open = true;
+  $('conexion').scrollIntoView({ block: 'center' });
+  $('ghRepo').focus({ preventScroll: true });
+}
+async function verHoyTodos(){
+  if(datos && !await cambiarNegocio()) return;
+  $('hoyTodos').scrollIntoView({ block: 'start' });
+}
+
+// ---------- deshacer ----------
+// Lo último que se ha quitado (un contacto o una oportunidad) se puede volver a poner durante unos segundos. Se deshace en memoria y se vuelve a
+// guardar: si el borrado aún no había llegado al archivo, no queda rastro; si ya había llegado, el archivo vuelve a tenerlo.
+function ofrecerDeshacer(etiqueta, restaurar){
+  quitarDeshacer();
+  const b = $('bDeshacerLocal');
+  b.textContent = 'Deshacer: ' + etiqueta; b.title = 'Vuelve a poner lo que acabas de quitar';
+  b.classList.remove('oculto');
+  pendienteDeshacer = { restaurar, reloj: setTimeout(quitarDeshacer, 10000) };
+}
+function quitarDeshacer(){
+  if(pendienteDeshacer) clearTimeout(pendienteDeshacer.reloj);
+  pendienteDeshacer = null;
+  $('bDeshacerLocal').classList.add('oculto'); $('bDeshacerLocal').textContent = '';
+}
+function deshacerLocal(){ const p = pendienteDeshacer; if(!p) return; quitarDeshacer(); if(datos) p.restaurar(); }
+// Saca de una lista lo que cumple la condición y lo devuelve con su posición, para poder volver a ponerlo donde estaba.
+function sacar(lista, cumple){
+  const fuera = [], quedan = [];
+  lista.forEach((x, i) => { if(cumple(x)) fuera.push({ x, i }); else quedan.push(x); });
+  return { fuera, quedan };
+}
+function devolver(lista, fuera){ fuera.forEach(({ x, i }) => lista.splice(Math.min(i, lista.length), 0, x)); }
+
+// «Deshacer el último cambio» (solo con GitHub): vuelve el archivo a la versión anterior distinta de la actual, como hace «crm_io.py deshacer».
+// Lee el historial del archivo (los últimos 10 guardados) y el contenido de cada versión en crudo, y escribe la anterior como un guardado más.
+async function versionAnterior(cfg, archivo, textoActual){
+  const base = cfg.apiBase + '/repos/' + cfg.repo;
+  const r = await pedirGH(cfg, 'GET', base + '/commits?path=' + encodeURIComponent(archivo) + '&sha=' + encodeURIComponent(cfg.rama) + '&per_page=10', { Accept: 'application/vnd.github+json' });
+  if(!r.ok) throw await falloGH(r, 'el historial de ' + archivo);
+  const lista = await r.json();
+  const datosDe = c => { const cm = c.commit || {}, a = cm.author || {}, k = cm.committer || {}; return { sha: c.sha, cuando: a.date || k.date || '', autor: a.name || k.name || '', mensaje: String(cm.message || '').split('\n')[0] }; };
+  for(const c of lista){
+    const v = await pedirGH(cfg, 'GET', base + '/contents/' + rutaGH(archivo) + '?ref=' + encodeURIComponent(c.sha), { Accept: 'application/vnd.github.raw+json' });
+    if(v.status === 404) return null;   // en ese guardado el archivo todavía no existía
+    if(!v.ok) throw await falloGH(v, 'una versión anterior de ' + archivo);
+    const texto = await v.text();
+    if(texto !== textoActual) return { version: datosDe(c), texto, ultimo: lista.length ? datosDe(lista[0]) : null };
+  }
+  return null;
+}
+async function deshacerUltimo(){
+  if(!manejador || !manejador.github || !conexion || !datos) return;
+  const h = manejador, antes = [$('estado').textContent, $('estado').className];
+  try {
+    estado('Mirando las versiones anteriores en GitHub...');
+    if(sucio || guardando){ clearTimeout(temporizador); await escribir(); }
+    if(sucio){ estado('Hay cambios sin guardar: espera unos segundos y vuelve a probar', 'sucio'); return; }
+    const actual = await h.getFile(), previa = await versionAnterior(conexion, h.name, await actual.text());
+    if(!previa){ estado('No hay nada que deshacer: en los últimos 10 guardados no hay ninguna versión distinta de la actual', 'error'); return; }
+    const v = previa.version, u = previa.ultimo;
+    const r = await cuadro({
+      titulo: 'Deshacer el último cambio',
+      texto: 'El archivo de ' + NEG.nombre + ' volverá a como estaba tras el guardado del ' + (fechaHoraCorta(v.cuando) || 'día de la versión') + ', de ' + (v.autor || 'alguien') + '.' +
+        (u && u.sha !== v.sha ? ' Se deja de ver lo guardado después (el último: ' + (fechaHoraCorta(u.cuando) || '?') + ', ' + (u.autor || 'alguien') + '), aunque sigue en el historial de GitHub.' : '') +
+        ' Queda como un guardado más: si lo repites, lo rehaces.',
+      botones: [{ t: 'No', v: 'no' }, { t: 'Sí, volver a esa versión', v: 'si', primario: true }], foco: 'no'
+    });
+    if(r.boton !== 'si'){ estado(antes[0], antes[1]); return; }
+    const w = await h.createWritable({ mensaje: AUTOR + ': deshacer, vuelve a ' + v.sha.slice(0, 7), sha: actual.sha });
+    await w.write(previa.texto); await w.close();
+    const f = await h.getFile(), texto = await f.text();
+    datos = cargarMismo(texto); base = clonar(datos); ultimaModif = huella(f); sucio = false; cargaPendiente = false;
+    try { localStorage.setItem(NEG.bd + '-copia', texto); } catch(e){}   // la copia de este navegador (para cuando no haya red) es lo último guardado
+    refrescarVista();
+    estado('Deshecho a las ' + ahora() + ': el archivo vuelve a la versión del ' + (fechaHoraCorta(v.cuando) || '?') + ' de ' + (v.autor || 'alguien'));
+  } catch(e){
+    estado(e && e.name === 'ConflictoGitHub' ? 'No se ha deshecho nada: alguien ha guardado mientras tanto. Mira cómo ha quedado y vuelve a probar si hace falta' : 'No se pudo deshacer: ' + ((e && e.message) || e), 'error');
+  }
+}
+
+// Negocio pedido en la dirección (CRM.html#CODIGO). Vacío si no es uno conocido.
+function negocioDelEnlace(){
+  let c = ''; try { c = decodeURIComponent(location.hash.slice(1)).trim().toUpperCase(); } catch(e){}
+  const n = c && NEGOCIOS.find(x => x.codigo.toUpperCase() === c);
+  return n ? n.codigo : '';
+}
+// Pantalla de inicio: una tarjeta por negocio, en el orden de NEGOCIOS. En local, con «Seguir con…» si el navegador recuerda su archivo.
+// Con conexión a GitHub, con «Abrir <archivo>» (o «Crear en GitHub» si el archivo aún no está en el repositorio) y el archivo local aparte.
+// Destaca la del negocio de la dirección o, si no hay, la del último usado, y pone el foco en su primer botón para abrirla con Enter.
+async function pintarTarjetas(){
+  const vez = ++vecesTarjetas, lista = [], gh = !!conexion;
+  let enRepo = null;   // nombres de los archivos del repositorio; null si no se ha podido saber (entonces todas dicen «Abrir»)
+  if(gh){ try { enRepo = new Set((await listaGH(conexion, '', 8000)).filter(x => x.type === 'file').map(x => x.name)); } catch(e){} }
+  for(const n of NEGOCIOS) lista.push({ n, h: hayApi && !gh ? await idbGet(n.bd, 'archivo') : undefined });
+  if(vez !== vecesTarjetas) return;
+  let ultimo = ''; try { ultimo = localStorage.getItem('crm-global-ultimo') || ''; } catch(e){}
+  const destacado = negocioDelEnlace() || (negocioPorCodigo(ultimo) ? ultimo : '');
+  recordados = {};
+  lista.forEach(({ n, h }) => { if(h) recordados[n.codigo] = h; });
+  $('negocios').innerHTML = lista.length ? lista.map(({ n, h }) => {
+    let uso = ''; try { uso = fechaHoraCorta(localStorage.getItem(n.bd + '-ultimo')); } catch(e){}
+    const claro = (n.colores.claro && n.colores.claro.acento) || 'var(--accent)', oscuro = (n.colores.oscuro && n.colores.oscuro.acento) || claro;
+    return '<div class="tarjeta-negocio' + (n.codigo === destacado ? ' destacada' : '') + '" data-codigo="' + esc(n.codigo) + '" style="--c:' + esc(claro) + ';--c-oscuro:' + esc(oscuro) + '">' +
+      '<h3>' + esc(n.nombre) + '</h3><div class="sub">' + esc(n.archivo) + (uso ? ' · Último uso: ' + esc(uso) : '') + '</div><div class="fila">' +
+      (gh ? botonesGitHub(n, enRepo) : botonesLocal(n, h)) + '</div></div>';
+  }).join('') : '<p class="sub">' + (gh ? 'No se ha podido leer ningún negocio del repositorio. Mira el aviso de arriba y la conexión de más abajo.' : 'Todavía no hay ningún negocio. Conecta con el repositorio de datos en «Conexión con GitHub», más abajo.') + '</p>';
+  const b = $('negocios').querySelector('.destacada button');
+  if(b && !$('pantallaInicio').classList.contains('oculto')) b.focus();
+  enRepoActual = enRepo;
+  pintarHoyTodos(enRepo);   // sin esperar: las tarjetas ya están, y lo de hoy tarda lo que tarde GitHub
+}
+function botonesLocal(n, h){
+  return (h ? '<button type="button" class="primario" data-accion="seguir">Seguir con ' + esc(h.name || n.archivo) + '</button>' : '') +
+    '<button type="button" data-accion="abrir">Abrir el archivo de datos…</button>' +
+    '<button type="button" class="mini" data-accion="crear">Crear un archivo vacío</button>';
+}
+function botonesGitHub(n, enRepo){
+  return (enRepo && !enRepo.has(n.archivo)
+      ? '<button type="button" class="primario" data-accion="crear-gh">Crear en GitHub</button>'
+      : '<button type="button" class="primario" data-accion="abrir-gh">Abrir ' + esc(n.archivo) + '</button>') +
+    (sinRed.has(n.codigo) && copiaLocal(n) ? '<button type="button" data-accion="copia">Abrir la última copia de este navegador (solo lectura)</button>' : '') +
+    '<button type="button" class="mini" data-accion="abrir">Archivo local…</button>' +
+    '<button type="button" class="mini" data-accion="crear">Crear un archivo local vacío</button>';
+}
+function rellenarSelNegocio(){ $('selNegocio').innerHTML = NEGOCIOS.map(n => '<option value="' + esc(n.codigo) + '">' + esc(n.nombre) + '</option>').join(''); }
+// ---------- conexión con GitHub en la pantalla de inicio ----------
+// La parte de la pantalla de inicio que depende de si hay conexión: el resumen, los campos, el texto de arriba y el aviso de «sin API».
+function pintarConexion(){
+  const c = conexion, porServidor = !!(c && c.servidor);
+  $('resumenConexion').textContent = c ? (porServidor ? 'Conexión con GitHub por el servidor local de este ordenador: ' : 'Conexión con GitHub: ') + c.repo + ' (rama ' + c.rama + ')' : 'Conexión con GitHub: sin conectar';
+  if(c){ $('ghRepo').value = c.repo; $('ghRama').value = c.rama; }
+  $('ghClave').placeholder = porServidor ? 'No hace falta clave en este ordenador' : (c ? 'Guardada en este navegador' : '');
+  ['ghRepo', 'ghRama', 'ghClave', 'bConectar'].forEach(id => { $(id).disabled = porServidor; });
+  $('bDesconectar').disabled = !c || porServidor;
+  $('textoInicio').textContent = c ? 'Estás conectado al repositorio ' + c.repo + (porServidor ? ' a través del servidor local de este ordenador' : '') + '. Elige el negocio y ábrelo: los cambios se guardan solos en GitHub y no hace falta tener ningún archivo en este ordenador.' : textoInicioLocal;
+  $('sinApi').classList.toggle('oculto', hayApi || !!c);
+}
+function ghEstado(txt, mal){ const e = $('ghEstado'); e.textContent = txt; e.className = 'sub' + (mal ? ' error' : ''); }
+// Al arrancar con una conexión guardada: lee los negocios del repositorio. Si algo falla, lo dice y sigue con lo que haya.
+async function cargarDeGitHub(){
+  estado('Leyendo los negocios desde GitHub...');
+  try {
+    const avisos = await cargarConfiguracion(conexion);
+    estado(avisos.length ? avisos.join('. ') : 'Sin datos abiertos', avisos.length ? 'error' : '');
+  } catch(e){ estado('No se pudo leer la configuración de GitHub: ' + e.message, 'error'); }
+}
+// «Conectar»: comprueba que se pueden leer los negocios del repositorio con esa clave y, solo si se puede, guarda la conexión.
+async function conectar(){
+  const repo = $('ghRepo').value.trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/i, '').replace(/\/+$/, '');
+  const rama = $('ghRama').value.trim() || 'principal', previa = leerConexion();
+  const token = $('ghClave').value.trim() || (previa && previa.repo === repo ? previa.token : '');
+  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){ ghEstado('Escribe el repositorio así: propietario/nombre', true); return; }
+  if(!token){ ghEstado('Falta la clave de acceso', true); return; }
+  const cfg = { repo, rama, token, apiBase: previa ? previa.apiBase : API_GH };
+  $('bConectar').disabled = true; ghEstado('Comprobando la conexión...');
+  try {
+    const avisos = await cargarConfiguracion(cfg, false);
+    if(!guardarConexion(cfg)) throw new Error('este navegador no deja guardar la conexión');
+    conexion = cfg; $('ghClave').value = ''; sinRed.clear(); lectoresHoy.clear();
+    rellenarSelNegocio(); pintarConexion(); await pintarTarjetas();
+    estado('Sin datos abiertos');
+    if(!NEGOCIOS.length) ghEstado('Conectado, pero la carpeta negocios del repositorio no tiene ningún negocio', true);
+    else ghEstado(avisos.length ? 'Conectado, pero: ' + avisos.join('. ') : 'Conectado.', !!avisos.length);
+  } catch(e){ ghEstado('No se pudo conectar: ' + e.message, true); }
+  finally { $('bConectar').disabled = false; }
+}
+// «Desconectar»: borra la conexión de este navegador y vuelve al modo local, con los negocios de la propia página.
+async function desconectar(){
+  olvidarConexion(); conexion = null; olvidarRemotos(); sinRed.clear(); lectoresHoy.clear(); $('ghClave').value = '';
+  rellenarSelNegocio(); pintarConexion(); await pintarTarjetas();
+  estado('Sin datos abiertos');
+  ghEstado('Desconectado: la clave se ha borrado de este navegador.');
+}
+function copiaLocal(n){ try { return localStorage.getItem(n.bd + '-copia') || ''; } catch(e){ return ''; } }
+function horaDe(iso){ const d = new Date(iso || ''); return isNaN(d) ? '' : d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }); }
+// «Abrir <archivo>» de una tarjeta con conexión: lee el archivo del repositorio. Si falla por falta de red y el navegador guarda una
+// copia de lo último guardado de ese negocio, la tarjeta ofrece abrirla (solo para mirar).
+async function abrirDeGitHub(codigo){
+  const n = negocioPorCodigo(codigo); if(!n || !conexion) return;
+  estado('Abriendo ' + n.archivo + ' desde GitHub...');
+  try { await leerManejador(archivoGitHub(conexion, n.archivo), codigo); }
+  catch(e){ const msg = fallaAbrirGH(n, e); await pintarTarjetas(); estado(msg, 'error'); }
+}
+function fallaAbrirGH(n, e){
+  const hayCopia = !!(e && e.name === 'SinRedGitHub' && copiaLocal(n));
+  if(hayCopia) sinRed.add(n.codigo); else sinRed.delete(n.codigo);
+  return 'No se pudo abrir: ' + (e && e.message || e) + (hayCopia ? '. Puedes abrir la última copia de este navegador, solo para mirar' : '');
+}
+// La última copia que este navegador guardó de un negocio (la que deja cada guardado), para mirarla sin conexión. No se guarda nada.
+function abrirCopia(codigo){
+  const n = negocioPorCodigo(codigo), texto = n ? copiaLocal(n) : '';
+  if(!texto){ estado('Este navegador no tiene ninguna copia' + (n ? ' de ' + n.nombre : ''), 'error'); return; }
+  try {
+    const d = cargarNuevo(texto, n.archivo, codigo);
+    manejador = null; ultimaModif = 0; datos = d; base = clonar(d); sucio = false; modoCopia = true;
+    recordarUso();
+    arrancar('Sin conexión: enseñando la copia de las ' + (horaDe(d.actualizado) || '?') + '; no se guarda');
+  } catch(e){ estado('No se pudo abrir la copia: ' + e.message, 'error'); }
+}
+// «Seguir con…» de una tarjeta: abre el archivo que el navegador recuerda para ese negocio. Puede volver a pedir permiso.
+async function seguirCon(codigo){
+  const h = recordados[codigo]; if(!h) return;
+  try { const p = await h.requestPermission({ mode: 'readwrite' }); if(p === 'granted') await leerManejador(h, codigo); else estado('Sin permiso para el archivo', 'error'); } catch(e){ estado('No se pudo abrir: ' + e.message, 'error'); }
+}
+// Antes de dejar el negocio abierto: cierra la ficha y guarda lo pendiente. Si algo no se ha podido guardar, lo avisa y devuelve false.
+async function guardarAntesDeCambiar(){
+  cargaPendiente = false;
+  if(!$('ficha').hidden) cerrarFicha();
+  if(modoCopia){ clearTimeout(temporizador); sucio = false; return true; }   // la copia sin conexión no se guarda: lo que se haya tocado se descarta
+  if(sucio || guardando){ clearTimeout(temporizador); await escribir(); }
+  if(sucio){ estado('Hay cambios sin guardar: espera unos segundos o usa «Descargar copia» antes de cambiar de negocio', 'sucio'); return false; }
+  return true;
+}
+// Olvida el negocio abierto (datos, archivo y vistas), para que no quede nada de él al abrir otro.
+function soltarNegocio(){
+  datos = null; manejador = null; base = null; ultimaModif = 0; cargaPendiente = false; fichaId = null; opMarcada = null; modoCopia = false;
+  quitarDeshacer(); cerrarMenus(); cerrarBusqueda(); $('busqueda').value = ''; plegadas = {}; historialCompleto = false;
+  limpiarVistas();
+}
+// Los controles que solo tienen sentido con un negocio abierto.
+const CONTROLES_DE_NEGOCIO = ['bNuevo', 'bCsv', 'bCopia', 'bCambiar', 'bNegocio', 'selNegocio', 'cajaBusqueda'];
+// Vuelve a la pantalla de inicio para abrir el archivo de otro negocio. Antes guarda lo pendiente. Devuelve false si no ha podido.
+async function cambiarNegocio(){
+  if(!await guardarAntesDeCambiar()) return false;
+  soltarNegocio();
+  $('app').classList.add('oculto'); $('pantallaInicio').classList.remove('oculto');
+  CONTROLES_DE_NEGOCIO.concat(['bHoyTodos', 'bHoyTodosMenu', 'bDeshacer']).forEach(id => $(id).classList.add('oculto'));
+  document.body.classList.remove('con-negocio');
+  document.title = 'CRM'; $('tituloNegocio').textContent = 'CRM'; $('marca').innerHTML = ''; ponerIconoBase();
+  const st = $('estiloNegocio'); if(st) st.textContent = '';   // la cabecera vuelve al color neutro; cada tarjeta lleva el suyo
+  estado('Sin datos abiertos');
+  try { history.replaceState(null, '', location.href.split('#')[0]); } catch(e){}
+  await pintarTarjetas();
+  return true;
+}
+// La lista de negocios de la cabecera: cambia de negocio en un clic. Antes guarda lo pendiente. Con conexión a GitHub abre
+// directamente el archivo de ese negocio del repositorio. Si no, y el navegador recuerda el archivo de ese negocio y da permiso,
+// lo abre; si no, vuelve al inicio con la tarjeta de ese negocio destacada.
+async function irANegocio(codigo){
+  const sel = $('selNegocio'), n = negocioPorCodigo(codigo);
+  if(!n || !NEG || n.codigo === NEG.codigo) return;
+  const anterior = NEG.codigo;
+  sel.disabled = true;
+  try {
+    if(!await guardarAntesDeCambiar()){ sel.value = anterior; return; }
+    if(conexion){
+      soltarNegocio();
+      try { await leerManejador(archivoGitHub(conexion, n.archivo), n.codigo); return; }
+      catch(e){ const msg = fallaAbrirGH(n, e); if(await cambiarNegocio()) await destacarTarjeta(n.codigo); estado(msg, 'error'); return; }
+    }
+    const h = hayApi ? await idbGet(n.bd, 'archivo') : undefined;
+    let permiso = '';
+    if(h){ try { permiso = await h.requestPermission({ mode: 'readwrite' }); } catch(e){} }
+    if(permiso === 'granted'){
+      soltarNegocio();
+      try { await leerManejador(h, n.codigo); return; }
+      catch(e){ if(await cambiarNegocio()) await destacarTarjeta(n.codigo); estado('No se pudo abrir: ' + e.message, 'error'); return; }
+    }
+    if(!await cambiarNegocio()){ sel.value = anterior; return; }
+    await destacarTarjeta(n.codigo);
+    if(h) estado('Sin permiso para el archivo de ' + n.nombre + ': pulsa «Seguir con…» en su tarjeta', 'error');
+    else estado('El navegador aún no recuerda el archivo de ' + n.nombre + ': ábrelo desde su tarjeta');
+  } finally { sel.disabled = false; }
+}
+// Destaca la tarjeta de un negocio poniendo su código en la dirección, igual que un enlace CRM.html#CODIGO.
+async function destacarTarjeta(codigo){
+  try { history.replaceState(null, '', location.href.split('#')[0] + '#' + codigo); } catch(e){}
+  await pintarTarjetas();
+}
+// Vacía las vistas y vuelve al panel, para que no quede nada de un negocio cuando se abre otro.
+function limpiarVistas(){
+  ['kpis','tarjetas','lHoy','lSemana','lUltimas','tablero','cuerpoOps','cuerpoContactos','agenda','lRegistro'].forEach(id => { $(id).innerHTML = ''; });
+  ['cuentaOps','cuentaContactos'].forEach(id => { $(id).textContent = ''; });
+  ['oTexto','cTexto','eTexto','rTexto','cRapido'].forEach(id => { $(id).value = ''; });
+  formAgenda = null;
+  vista = 'panel';
+  marcarVista('panel');
+}
+// Pone en la página todo lo que depende del negocio activo: título, icono, colores, productos, tipos, textos y ayuda.
+function aplicarNegocio(){
+  const n = NEG;
+  limpiarVistas();
+  document.title = n.titulo; $('tituloNegocio').textContent = n.titulo;
+  // El icono de un negocio es un archivo de la carpeta iconos\ del repositorio de la página. Un negocio leído del repositorio de datos
+  // (remotos) viene de un cascarón público que no lo trae: se queda el icono base de la página, en vez de pedir una ruta que no existe.
+  if(n.icono && !remotos.has(n.codigo)) $('icono').href = n.icono; else ponerIconoBase();
+  $('marca').innerHTML = n.productos.map(p => '<i class="p-' + p.c + '"></i>').join('');
+  let st = $('estiloNegocio'); if(!st){ st = document.createElement('style'); st.id = 'estiloNegocio'; document.head.appendChild(st); }
+  st.textContent = cssNegocio(n);
+  try { prod = localStorage.getItem(n.bd + '-producto') || ''; } catch(e){ prod = ''; }
+  if(prod && !PRODUCTOS[prod]) prod = '';
+  $('selProducto').innerHTML = [['', 'Todos', 'todos']].concat(CODIGOS.map(k => [k, PRODUCTOS[k].n, PRODUCTOS[k].c]))
+    .map(([k, nom, c]) => '<button type="button" data-prod="' + k + '" aria-pressed="' + (prod === k) + '"><i class="punto p-' + c + '"></i>' + esc(nom) + '</button>').join('');
+  $('selProducto').querySelectorAll('button').forEach(b => b.onclick = () => ponerProducto(b.dataset.prod));
+  $('nuevoProd').innerHTML = CODIGOS.map(k => '<option value="' + k + '">' + esc(PRODUCTOS[k].n) + '</option>').join('');
+  opciones($('aTipo'), TIPOS);
+  $('etEntidad').textContent = n.textos.entidad || 'Empresa';
+  $('cRapido').placeholder = 'Añadir rápido: ' + (n.textos.entidad || 'Empresa') + ', persona, correo';
+  $('cTexto').placeholder = n.textos.buscarContactos || 'Buscar';
+  $('aTexto').placeholder = n.textos.ejemploAnotacion || '';
+  document.querySelector('#ficha [data-c="permisoDetalle"]').placeholder = n.textos.ejemploPermiso || '';
+  $('listaHilos').innerHTML = n.hilos.map(h => '<option value="' + esc(h) + '">').join('');
+  $('atajoRecordatorio').classList.toggle('oculto', !n.recordatorio);
+  if(n.recordatorio){ $('bRecordatorio').textContent = n.recordatorio.boton || 'Recordatorio'; $('bRecordatorio').title = n.recordatorio.ayuda || ''; }
+  const reg = String(n.registro || '').split(/[\\/]/).pop() || n.archivo.replace(/\.json$/i, '') + '_registro.jsonl';
+  $('textoRegistro').textContent = 'Quién ha tocado el CRM y cuándo: tú desde aquí y los hilos de Claude con sus herramientas. Aquí salen los últimos cambios; el historial completo está en ' + reg + ', junto al archivo de datos.';
+  pintarAyuda();
+}
+// El icono de la página cuando no hay negocio abierto (o el negocio no trae el suyo): el que traiga la propia página, si lo trae.
+function ponerIconoBase(){ if(ICONO_BASE) $('icono').setAttribute('href', ICONO_BASE); else $('icono').removeAttribute('href'); }
+// Con un negocio abierto, la ayuda es la de ese negocio más tres frases comunes. En el inicio (sin negocio abierto), una ayuda general.
+function pintarAyuda(){
+  const abierto = !!(NEG && datos);
+  $('listaAyuda').innerHTML = (abierto ? NEG.ayuda.concat(ayudaComun()) : ayudaGeneral()).map(t => '<li>' + t + '</li>').join('');
+}
+function ayudaGeneral(){
+  return [
+    '<b>Qué es esto.</b> Un CRM sencillo: cada negocio tiene su propio archivo de datos y nunca se mezclan. Elige un negocio en su tarjeta para abrirlo.',
+    '<b>Dónde se guardan los datos.</b> Con la conexión a GitHub (más abajo), en el repositorio de datos: se guardan solos, se pueden abrir desde cualquier equipo o desde el móvil, y lo que cambien otros se recoge y se junta con lo tuyo. Sin conexión, en un archivo de tu ordenador (mejor con Chrome o Edge para que se guarde solo).',
+    '<b>Hoy en todos los negocios.</b> Con la conexión a GitHub, debajo de las tarjetas sale lo atrasado y lo de hoy de todos los negocios juntos. Un toque en una línea abre ese negocio y ese contacto.',
+    '<b>Una vez dentro.</b> Arriba están el buscador (también con la tecla «/»), «Nuevo contacto» y el menú de los tres puntos, con exportar, copia, tu nombre, deshacer y esta ayuda. En el móvil, la barra de abajo lleva a Hoy, Embudo, Contactos y Más.',
+    '<b>Tu nombre.</b> En el menú de los tres puntos pones el nombre con el que se firma lo que cambias, por ejemplo «Jorge · móvil». Se queda guardado en este navegador.'
+  ];
+}
+function cssNegocio(n){
+  const acento = a => a && a.acento ? '--accent:' + a.acento + ';--accent-soft:' + (a.acentoSuave || a.acento) + ';--accent-ink:' + (a.acentoTinta || '#ffffff') + ';' : '';
+  const prods = modo => n.productos.map(p => '--' + p.c + ':' + p.colores[modo][0] + ';--' + p.c + '-soft:' + p.colores[modo][1] + ';').join('');
+  const total = n.productos.length;
+  const segmentos = n.productos.map((p, i) => 'var(--' + p.c + ') 0' + (i < total - 1 ? ' ' + Math.round(100 * (i + 1) / total) + '%' : '')).join(',');
+  return ':root{' + acento(n.colores.claro) + prods('claro') + '}\n' +
+    '@media (prefers-color-scheme: dark){:root{' + acento(n.colores.oscuro) + prods('oscuro') + '}}\n' +
+    n.productos.map(p => '.p-' + p.c + '{background:var(--' + p.c + ')}').join(' ') + ' .p-todos{background:conic-gradient(' + segmentos + ')}\n' +
+    n.productos.map(p => '.chip.' + p.c + '{background:var(--' + p.c + '-soft);color:var(--' + p.c + ');border-color:transparent}').join('\n');
+}
+// La primera frase dice dónde se guarda, según se haya abierto el archivo: del repositorio de GitHub, la copia sin conexión o un archivo local.
+function ayudaComun(){
+  const n = NEG;
+  const donde = modoCopia ? 'Ahora ves la copia de ' + esc(n.archivo) + ' que este navegador guardó la última vez, porque no había conexión con GitHub. No se guarda nada hasta que lo abras de nuevo desde su tarjeta.'
+    : manejador && manejador.github && conexion ? 'Todo se guarda solo en ' + esc(n.archivo) + ', en el repositorio de GitHub ' + esc(conexion.repo) + ' (rama ' + esc(conexion.rama) + '). No hace falta tener el archivo en este ordenador. La clave de acceso se queda solo en este navegador.'
+    : 'Todo se guarda solo en ' + esc(n.archivo) + ', en tu ordenador.';
+  return [
+    donde + ' Cada negocio tiene su archivo de datos y la página sabe de cuál es por el propio archivo: nunca se mezclan. Para pasar a otro negocio, elígelo en la lista de arriba. «Cambiar de negocio», en el menú de los tres puntos, vuelve a la pantalla de inicio.',
+    '<b>Varios a la vez.</b> En este CRM escribes tú desde aquí y los hilos de Claude con sus herramientas. La página mira el archivo cada 15 segundos y al volver a la ventana, y recoge sola lo que hayan escrito otros. Si alguien escribe mientras tú cambias algo, se juntan los cambios; si los dos habéis tocado el mismo campo, se queda lo tuyo y lo anterior queda en «Registro».',
+    '<b>Registro</b> dice quién ha tocado qué y cuándo. Cada contacto enseña su último cambio y, si lo lleva un hilo concreto, cuál. Desde otro hilo ese contacto solo se puede anotar.' + (n.fabricantes.length ? ' En cada oportunidad puedes marcar con qué fabricante va, para ver de un vistazo si un contacto está ligado a dos.' : '') +
+      ' <b>Buscar.</b> El campo de arriba (o la tecla «/») busca en contactos, oportunidades y anotaciones sin fijarse en tildes ni mayúsculas. <b>Deshacer.</b> Al eliminar un contacto o quitar una oportunidad sale «Deshacer» unos segundos; con GitHub, «Deshacer el último cambio», en el menú de los tres puntos, devuelve el archivo a la versión anterior.'
+  ];
+}
+function arrancar(msg){
+  $('pantallaInicio').classList.add('oculto'); $('app').classList.remove('oculto');
+  CONTROLES_DE_NEGOCIO.forEach(id => $(id).classList.remove('oculto'));
+  document.body.classList.add('con-negocio');   // en el móvil, la lista de negocios hace de título
+  ['bHoyTodos', 'bHoyTodosMenu'].forEach(id => $(id).classList.toggle('oculto', !conexion));
+  $('bDeshacer').classList.toggle('oculto', !(manejador && manejador.github));
+  $('selNegocio').value = NEG.codigo;
+  if(esMovil()){ vista = 'agenda'; marcarVista('agenda'); }   // en el móvil se empieza por lo que toca hoy
+  pintarAyuda();   // ya se sabe de dónde viene el archivo, y la primera frase de la ayuda lo dice
+  estado(msg); pintarTodo();
+}
+function ponerProducto(k){
+  prod = k; try { localStorage.setItem(NEG.bd + '-producto', k); } catch(e){}
+  $('selProducto').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.prod === k));
+  pintarTodo();
+}
+// Enseña una sola vista y marca la pestaña de arriba (y el botón de la barra de abajo, en el móvil) que le corresponde.
+function marcarVista(v){
+  VISTAS.forEach(x => $('v-' + x).classList.toggle('oculto', x !== v));
+  document.querySelectorAll('nav[role=tablist] [role=tab]').forEach(b => { const s = b.dataset.vista === v; b.setAttribute('aria-selected', s); b.tabIndex = s ? 0 : -1; });
+  document.querySelectorAll('#barraInferior [data-vista], #menuVistas [data-vista]').forEach(b => { if(b.dataset.vista === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  if(MAS_VISTAS.includes(v)) $('bMasVistas').setAttribute('aria-current', 'page'); else $('bMasVistas').removeAttribute('aria-current');
+}
+function ponerVista(v){
+  vista = v; formAgenda = null;
+  marcarVista(v);
+  pintarTodo();
+  if(esMovil()) window.scrollTo(0, 0);
+}
+function pintarTodo(){
+  if(!datos) return;
+  prepararFiltros();
+  ({ panel: pintarPanel, embudo: pintarEmbudo, ops: pintarOps, contactos: pintarContactos, agenda: pintarAgenda, registro: pintarRegistro })[vista]();
+}
+function prepararFiltros(){
+  const mantener = (sel, html) => { const v = sel.value; sel.innerHTML = html; if([...sel.options].some(o => o.value === v)) sel.value = v; };
+  const servs = prod ? PRODUCTOS[prod].servicios.map(s => s.n) : [...new Set(CODIGOS.flatMap(k => PRODUCTOS[k].servicios.map(s => s.n)))];
+  mantener($('oServicio'), '<option value="">Todos los servicios</option><option value="-">Sin concretar</option>' + servs.map(s => '<option>' + esc(s) + '</option>').join(''));
+  const fases = prod ? PRODUCTOS[prod].fases : GENERICAS;
+  mantener($('oFase'), '<option value="">Todas las fases</option><option value="vivas">Abiertas (sin cliente, aplazado ni perdido)</option>' + fases.map((f, i) => '<option value="' + i + '">' + esc(f) + '</option>').join(''));
+  const segs = [...new Set(datos.contactos.map(c => c.segmento).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'es'));
+  const locs = [...new Set(datos.contactos.map(c => c.localidad).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'es'));
+  mantener($('cSegF'), '<option value="">Todos los segmentos</option>' + segs.map(s => '<option>' + esc(s) + '</option>').join(''));
+  mantener($('cLocF'), '<option value="">Todas las localidades</option>' + locs.map(s => '<option>' + esc(s) + '</option>').join(''));
+  $('listaSeg').innerHTML = segs.map(s => '<option value="' + esc(s) + '">').join('');
+  $('listaLoc').innerHTML = locs.map(s => '<option value="' + esc(s) + '">').join('');
+}
+
+// ---------- panel ----------
+function pintarPanel(){
+  const ops = opsVisibles(), hoy = hoyISO(), en7 = sumarDias(hoy, 7);
+  const cids = new Set(ops.map(o => o.contactoId));
+  const cs = datos.contactos.filter(c => !prod || cids.has(c.id));
+  const vivas = ops.filter(o => vivaIdx(idxFase(o)) && !contacto(o.contactoId).excluido);
+  const enJuego = ops.filter(o => [3,4].includes(idxFase(o)));
+  const valor = enJuego.reduce((s, o) => s + (o.alta || 0) + 12 * (o.cuota || 0), 0);
+  const clientes = ops.filter(o => idxFase(o) === I_CLIENTE);
+  const cuotas = clientes.filter(o => o.estadoServicio !== 'Baja').reduce((s, o) => s + (o.cuota || 0), 0);
+  const agenda = ops.filter(conAgenda);
+  const atras = agenda.filter(o => o.fechaProximo < hoy).length;
+  const escr = cs.filter(c => escritosA(c.id) > 0), resp = escr.filter(c => haRespondido(c.id)).length;
+  // Los indicadores que llevan a algún sitio son botones: contactos a Contactos, abiertas y en juego al Embudo, atrasados a la Agenda.
+  const k = (n, t, clase, ir) => (ir ? '<button type="button" class="kpi ' : '<div class="kpi ') + (clase || '') + '"' + (ir ? ' data-ir="' + ir + '" title="Ir a ' + { contactos: 'Contactos', embudo: 'el Embudo', agenda: 'la Agenda' }[ir] + '"' : '') + '><b>' + n + '</b><span>' + t + '</span>' + (ir ? '</button>' : '</div>');
+  $('kpis').innerHTML = k(cs.length, 'contactos, ' + cs.filter(c => c.rol === 'Prescriptor' || c.rol === 'Ambos').length + ' pueden recomendarte', '', 'contactos') +
+    k(vivas.length, 'oportunidades abiertas', '', 'embudo') +
+    k(enJuego.length, (NEG.textos.enJuego || 'en juego') + (valor ? ' · ' + euros(valor) + ' a un año' : ''), '', 'embudo') +
+    k(clientes.length, 'clientes' + (cuotas ? ' · ' + euros(cuotas) + '/mes en cuotas' : '')) +
+    (conToques() ? k(escr.length, 'contactos a los que se ha escrito' + (escr.length ? ' · ' + resp + ' han contestado (' + Math.round(100 * resp / escr.length) + ' %)' : '')) : '') +
+    k(atras, 'próximos pasos atrasados', atras ? 'atras' : '', 'agenda');
+  const lista = prod ? [prod] : CODIGOS;
+  $('tarjetas').innerHTML = lista.map(p => {
+    const P = PRODUCTOS[p], os = datos.oportunidades.filter(o => o.producto === p && contacto(o.contactoId));
+    const cuenta = P.fases.map((f, i) => os.filter(o => idxFase(o) === i).length);
+    const max = Math.max(1, ...cuenta);
+    const cl = os.filter(o => idxFase(o) === I_CLIENTE), cu = cl.filter(o => o.estadoServicio !== 'Baja').reduce((s, o) => s + (o.cuota || 0), 0);
+    const prox = os.filter(conAgenda).sort((a, b) => a.fechaProximo.localeCompare(b.fechaProximo))[0];
+    return '<div class="tprod" data-p="' + p + '" tabindex="0" style="--c:var(--' + P.c + ')"><h3>' + esc(P.n) + '</h3><div class="barras">' +
+      P.fases.map((f, i) => '<div><span>' + esc(f) + '</span><span class="b"><i style="width:' + Math.round(100 * cuenta[i] / max) + '%"></i></span><span class="n">' + cuenta[i] + '</span></div>').join('') +
+      '</div><div class="pie">' + os.length + ' oportunidades · ' + cl.length + ' clientes' + (cu ? ' · ' + euros(cu) + '/mes' : '') +
+      (prox ? '<br>Lo próximo: ' + esc(fechaES(prox.fechaProximo)) + ', ' + esc(nombre(contacto(prox.contactoId))) : '') + '</div></div>';
+  }).join('');
+  $('tarjetas').querySelectorAll('.tprod').forEach(t => { const ir = () => { ponerProducto(t.dataset.p); ponerVista('embudo'); }; t.onclick = ir; t.onkeydown = e => { if(e.key === 'Enter') ir(); }; });
+  const itemOp = (o, clase) => { const c = contacto(o.contactoId); return '<li class="' + (clase || '') + '" data-id="' + esc(c.id) + '" data-op="' + esc(o.id) + '" tabindex="0"><div class="t1">' + (prod ? '' : chip(o)) + esc(nombre(c)) + '</div><div class="t2">' + esc(fechaES(o.fechaProximo)) + ' · ' + esc(o.proximoPaso || 'Sin próximo paso') + '</div></li>'; };
+  const orden = (a, b) => a.fechaProximo.localeCompare(b.fechaProximo) || prioIdx(a.prioridad) - prioIdx(b.prioridad);
+  const hoyL = agenda.filter(o => o.fechaProximo <= hoy).sort(orden), semL = agenda.filter(o => o.fechaProximo > hoy && o.fechaProximo <= en7).sort(orden);
+  const vacio = t => '<li class="vacio" style="border:none;cursor:default">' + t + '</li>';
+  $('lHoy').innerHTML = hoyL.length ? hoyL.map(o => itemOp(o, o.fechaProximo < hoy ? 'atrasado' : '')).join('') : vacio('Nada pendiente para hoy.');
+  $('lSemana').innerHTML = semL.length ? semL.map(o => itemOp(o)).join('') : vacio('Nada en los próximos 7 días.');
+  const ult = datos.actividades.map((a, i) => [a, i]).filter(([a]) => { if(!prod) return true; const o = datos.oportunidades.find(x => x.id === a.oportunidadId); return o && o.producto === prod; })
+    .sort((x, y) => (y[0].fecha || '').localeCompare(x[0].fecha || '') || y[1] - x[1]).map(([a]) => a).slice(0, 8);
+  $('lUltimas').innerHTML = ult.length ? ult.map(a => { const c = contacto(a.contactoId), o = datos.oportunidades.find(x => x.id === a.oportunidadId);
+    return '<li data-id="' + esc(a.contactoId) + '" tabindex="0"><div class="t1">' + (o && !prod ? chip(o) : '') + esc(c ? nombre(c) : 'Contacto borrado') + '</div><div class="t2">' + esc(fechaES(a.fecha)) + ' · ' + esc(a.tipo) + ': ' + esc((a.texto || '').slice(0, 110)) + '</div></li>'; }).join('') : vacio('Todavía no hay anotaciones.');
+  enlazarListas('#v-panel');
+}
+function enlazarListas(ambito){
+  document.querySelectorAll(ambito + ' [data-id]').forEach(li => {
+    const ir = () => { if(contacto(li.dataset.id)) abrirFicha(li.dataset.id, li.dataset.op); };
+    li.onclick = e => { if(!e.target.closest('button, a, input, select, textarea, label, .en-linea')) ir(); };   // lo que tiene dentro (botones, formularios) hace lo suyo
+    li.onkeydown = e => { if(e.key === 'Enter' && e.target === li) ir(); };
+  });
+}
+
+// ---------- embudo ----------
+// En el ordenador son columnas, y se puede arrastrar una tarjeta a otra columna. En el móvil es una lista: cada fase es un bloque que se
+// pliega y se despliega. En los dos sitios, el botón «Mover a…» de cada tarjeta abre un menú con las fases.
+function pintarEmbudo(){
+  const t = normalizar($('eTexto').value.trim()), pr = $('ePrioridad').value, hoy = hoyISO(), movil = esMovil();
+  const fases = prod ? PRODUCTOS[prod].fases : GENERICAS, todas = opsVisibles();
+  const ops = todas.filter(o => { const c = contacto(o.contactoId); if(c.excluido) return false; if(pr && o.prioridad !== pr) return false;
+    if(t && !normalizar([c.entidad, c.persona, c.localidad, c.segmento, o.servicio, o.proximoPaso].join(' ')).includes(t)) return false; return true; });
+  const LIM = 60;
+  const vacioFase = i => i === 0 ? 'Nada aquí. Los contactos nuevos empiezan en esta fase.' : 'Nada aquí. ' + (movil ? 'Usa «Mover a…» en una tarjeta.' : 'Arrastra una tarjeta a esta columna.');
+  $('embudoAyuda').textContent = movil ? 'Pulsa «Mover a…» en una tarjeta para cambiar su fase. Toca el nombre de una fase para plegarla o abrirla.' : 'Arrastra una tarjeta a otra columna, o pulsa «Mover a…», para cambiar la fase.';
+  $('embudoGuia').classList.toggle('oculto', ops.length > 0);
+  $('embudoGuia').textContent = ops.length ? '' : todas.length ? 'Ninguna oportunidad coincide con lo que buscas. Quita la búsqueda o el filtro.' : 'Aún no hay oportunidades. Pulsa «Nuevo contacto» o pide a un hilo que cargue un lote.';
+  $('tablero').innerHTML = fases.map((f, i) => {
+    const col = ops.filter(o => idxFase(o) === i).sort((a, b) => prioIdx(a.prioridad) - prioIdx(b.prioridad) || (a.fechaProximo || '9').localeCompare(b.fechaProximo || '9'));
+    const plegada = movil && (i in plegadas ? plegadas[i] : (!col.length || i > 4));   // sin tocar nada: abiertas las fases vivas que tienen tarjetas
+    return '<div class="col' + (plegada ? ' plegada' : '') + '" data-i="' + i + '"><h4' + (movil ? ' role="button" tabindex="0" aria-expanded="' + !plegada + '"' : '') + '>' + esc(f) + '<span>' + col.length + '</span></h4><div class="cartas">' +
+      (col.length ? '' : '<div class="vacio-col">' + vacioFase(i) + '</div>') +
+      col.slice(0, LIM).map(o => { const c = contacto(o.contactoId), P = PRODUCTOS[o.producto], atr = o.fechaProximo && o.fechaProximo < hoy && vivaIdx(i);
+        return '<div class="carta" draggable="true" data-op="' + esc(o.id) + '" data-id="' + esc(c.id) + '" tabindex="0" style="--c:var(--' + P.c + ')"><div class="t1">' + esc(c.entidad || c.persona) + '</div>' +
+          '<div class="t2">' + esc(o.servicio || (prod ? 'Servicio sin concretar' : P.corto)) + (o.prioridad ? ' · ' + esc(o.prioridad) : '') + '</div>' +
+          (o.fechaProximo ? '<div class="t2' + (atr ? ' fecha-atrasada' : '') + '">' + esc(fechaES(o.fechaProximo)) + ' · ' + esc((o.proximoPaso || '').slice(0, 60)) + '</div>' : '') +
+          '<button type="button" class="mini mover" data-mover="' + esc(o.id) + '" aria-label="Mover ' + esc(c.entidad || c.persona) + ' a otra fase">Mover a…</button></div>'; }).join('') +
+      (col.length > LIM ? '<div class="mas">y ' + (col.length - LIM) + ' más: usa la búsqueda o la lista de oportunidades</div>' : '') + '</div></div>';
+  }).join('');
+  const tab = $('tablero');
+  tab.querySelectorAll('.carta').forEach(el => {
+    el.onclick = e => { if(!e.target.closest('[data-mover]')) abrirFicha(el.dataset.id, el.dataset.op); };
+    el.onkeydown = e => { if(e.key === 'Enter' && e.target === el) abrirFicha(el.dataset.id, el.dataset.op); };
+    el.ondragstart = e => { e.dataTransfer.setData('text/plain', el.dataset.op); e.dataTransfer.effectAllowed = 'move'; el.classList.add('arr'); };
+    el.ondragend = () => el.classList.remove('arr');
+  });
+  tab.querySelectorAll('[data-mover]').forEach(b => b.onclick = e => { e.stopPropagation(); abrirMover(b.dataset.mover); });
+  tab.querySelectorAll('.col').forEach(col => {
+    col.ondragover = e => { e.preventDefault(); col.classList.add('sobre'); };
+    col.ondragleave = () => col.classList.remove('sobre');
+    col.ondrop = e => { e.preventDefault(); col.classList.remove('sobre'); const o = opPorId(e.dataTransfer.getData('text/plain')); if(o) moverDesdeEmbudo(o, Number(col.dataset.i), 'Cambio de fase desde el embudo'); };
+    const cab = col.querySelector('h4[role=button]');
+    if(cab){
+      const alternar = () => { const p = !col.classList.contains('plegada'); col.classList.toggle('plegada', p); cab.setAttribute('aria-expanded', String(!p)); plegadas[col.dataset.i] = p; };
+      cab.onclick = alternar;
+      cab.onkeydown = e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); alternar(); } };
+    }
+  });
+}
+async function moverDesdeEmbudo(o, i, origen){
+  if(await moverFase(o, i, origen)) programarGuardado();
+  if(datos && vista === 'embudo') pintarEmbudo();
+}
+// El menú «Mover a…» de una tarjeta: las fases de su producto, con la actual marcada.
+async function abrirMover(opId){
+  const o = opPorId(opId); if(!o) return;
+  const P = PRODUCTOS[o.producto], c = contacto(o.contactoId), actual = idxFase(o);
+  const r = await cuadro({
+    titulo: 'Mover a…', texto: nombre(c) + (prod ? '' : ' (' + P.corto + ')') + ' está en «' + o.fase + '». ¿A qué fase la pasas?',
+    html: '<div class="lista-fases">' + P.fases.map((f, i) => '<button type="button" data-v="f' + i + '"' + (i === actual ? ' aria-current="true"' : '') + '>' + esc(f) + (i === actual ? '<span>ahora</span>' : '') + '</button>').join('') + '</div>',
+    botones: [{ t: 'Cancelar', v: '' }]
+  });
+  const m = /^f(\d)$/.exec(r.boton), o2 = opPorId(opId);
+  if(m && o2) await moverDesdeEmbudo(o2, Number(m[1]), 'Cambio de fase desde el embudo');
+}
+// Cambia la fase de una oportunidad (y lo apunta en su historial). Pasar a Perdido pide antes el motivo, en un cuadro propio.
+// Devuelve true si la fase ha cambiado y false si ya estaba en ella o se ha cancelado.
+async function moverFase(o, i, origen){
+  const id = o.id, P = PRODUCTOS[o.producto];
+  if(!P.fases[i] || P.fases[i] === o.fase) return false;
+  let motivo = '';
+  if(i === I_PERDIDO){
+    motivo = await pedirMotivoPerdida(o);
+    if(motivo === null) return false;
+    o = opPorId(id); if(!o) return false;   // mientras se contestaba pudo llegar un archivo nuevo de fuera
+  }
+  cambiarFase(o, i, origen, motivo);
+  return true;
+}
+// El cuadro del motivo. Devuelve el motivo (puede ir en blanco) o null si se cancela.
+async function pedirMotivoPerdida(o){
+  const c = contacto(o.contactoId);
+  const r = await cuadro({
+    titulo: '¿Por qué se pierde?', texto: (c ? nombre(c) + ': ' : '') + PRODUCTOS[o.producto].n + (o.servicio ? ', ' + o.servicio : '') + '. Apúntalo para aprender de ello; puedes dejarlo en blanco.',
+    entrada: { etiqueta: 'Motivo', valor: o.motivoPerdida || '', ejemplo: 'Por ejemplo: precio, no era el momento, eligió a otro' },
+    botones: [{ t: 'Cancelar', v: 'no' }, { t: 'Marcar como perdida', v: 'si', primario: true }]
+  });
+  return r.boton === 'si' ? r.valor : null;
+}
+function cambiarFase(o, i, origen, motivo){
+  const P = PRODUCTOS[o.producto], nueva = P.fases[i];
+  if(!nueva || nueva === o.fase) return;
+  const vieja = o.fase; o.fase = nueva; o.actualizado = hoyISO();
+  if(i === I_CLIENTE){ if(!o.fechaCierre) o.fechaCierre = hoyISO(); if(!o.estadoServicio) o.estadoServicio = 'Puesta en marcha'; }
+  if(i === I_PERDIDO){ if(!o.fechaCierre) o.fechaCierre = hoyISO(); if(motivo) o.motivoPerdida = motivo; }
+  datos.actividades.push({ id: nuevoId('A'), contactoId: o.contactoId, oportunidadId: o.id, fecha: hoyISO(), tipo: 'Nota', texto: (origen || 'Cambio de fase') + ': de ' + vieja + ' a ' + nueva + '.' + (i === I_PERDIDO && motivo ? ' Motivo: ' + motivo + '.' : '') });
+}
+
+// ---------- oportunidades ----------
+function filtrarOps(){
+  const t = normalizar($('oTexto').value.trim()), sv = $('oServicio').value, fa = $('oFase').value, pr = $('oPrioridad').value, se = $('oSemana').value;
+  const res = opsVisibles().filter(o => {
+    const c = contacto(o.contactoId), i = idxFase(o);
+    if(sv === '-' ? o.servicio : (sv && o.servicio !== sv)) return false;
+    if(fa === 'vivas' ? !vivaIdx(i) || c.excluido : (fa !== '' && i !== Number(fa))) return false;
+    if(pr && o.prioridad !== pr) return false;
+    if(se && o.semana !== se) return false;
+    if(t && !normalizar([c.entidad, c.persona, c.localidad, c.segmento, c.notas, c.email, c.telefono, o.servicio, o.proximoPaso, o.notas].join(' ')).includes(t)) return false;
+    return true;
+  });
+  const ord = $('oOrden').value;
+  const f = {
+    fecha: (a, b) => (a.fechaProximo || '9').localeCompare(b.fechaProximo || '9') || prioIdx(a.prioridad) - prioIdx(b.prioridad),
+    prioridad: (a, b) => prioIdx(a.prioridad) - prioIdx(b.prioridad) || (a.fechaProximo || '9').localeCompare(b.fechaProximo || '9'),
+    fase: (a, b) => idxFase(b) - idxFase(a) || (a.fechaProximo || '9').localeCompare(b.fechaProximo || '9'),
+    nombre: (a, b) => nombre(contacto(a.contactoId)).localeCompare(nombre(contacto(b.contactoId)), 'es'),
+    importe: (a, b) => ((b.alta || 0) + 12 * (b.cuota || 0)) - ((a.alta || 0) + 12 * (a.cuota || 0)),
+  }[ord];
+  return res.sort(f);
+}
+function pintarOps(){
+  const hoy = hoyISO(), ops = filtrarOps();
+  $('cuerpoOps').innerHTML = !ops.length ? '<tr class="fila-vacia"><td colspan="7" class="guia-vacia">' + (opsVisibles().length ? 'Ninguna oportunidad coincide con los filtros. Quita alguno o cambia la búsqueda.' : 'Aún no hay oportunidades. Pulsa «Nuevo contacto» o pide a un hilo que cargue un lote.') + '</td></tr>' : ops.map(o => {
+    const c = contacto(o.contactoId), i = idxFase(o), atr = o.fechaProximo && o.fechaProximo < hoy && vivaIdx(i);
+    return '<tr data-id="' + esc(c.id) + '" data-op="' + esc(o.id) + '" tabindex="0"><td><b>' + esc(c.entidad || c.persona) + '</b>' + (c.persona && c.entidad ? '<div class="sub">' + esc(c.persona) + '</div>' : '') +
+      '<div class="sub">' + esc(c.segmento || '') + (c.localidad ? ' · ' + esc(c.localidad) : '') + '</div></td>' +
+      '<td>' + chip(o) + '<div class="sub">' + esc(o.servicio || 'Sin concretar') + '</div></td>' +
+      '<td>' + (c.excluido ? '<span class="pill excl">Excluido</span>' : pillFase(o)) + '</td>' +
+      '<td>' + esc(o.proximoPaso || '') + '</td>' +
+      '<td class="num' + (atr ? ' fecha-atrasada' : '') + '">' + esc(fechaES(o.fechaProximo)) + '</td>' +
+      '<td class="opc num">' + esc(importe(o)) + '</td><td class="opc">' + esc(o.prioridad || '') + (o.semana ? ' · ' + esc(o.semana) : '') + '</td></tr>';
+  }).join('');
+  enlazarListas('#cuerpoOps');
+  const total = ops.reduce((s, o) => s + (o.alta || 0) + 12 * (o.cuota || 0), 0);
+  $('cuentaOps').textContent = ops.length + ' de ' + opsVisibles().length + ' oportunidades' + (total ? ' · valor a un año de las que tienen importe: ' + euros(total) : '');
+}
+
+// ---------- contactos ----------
+function filtrarContactos(){
+  const t = normalizar($('cTexto').value.trim()), rol = $('cRolF').value, seg = $('cSegF').value, loc = $('cLocF').value, conCorreo = $('cConCorreo').checked, sinExcl = $('cSinExcl').checked;
+  return datos.contactos.filter(c => {
+    const os = opsDe(c.id);
+    if(prod && !os.some(o => o.producto === prod)) return false;
+    if(rol && c.rol !== rol) return false;
+    if(seg && c.segmento !== seg) return false;
+    if(loc && c.localidad !== loc) return false;
+    if(conCorreo && !c.email) return false;
+    if(sinExcl && c.excluido) return false;
+    if(t && !normalizar([c.entidad, c.persona, c.localidad, c.segmento, c.notas, c.motivo, c.email, c.telefono].join(' ')).includes(t)) return false;
+    return true;
+  }).sort((a, b) => (a.entidad || a.persona || '').localeCompare(b.entidad || b.persona || '', 'es'));
+}
+function pintarContactos(){
+  const cs = filtrarContactos();
+  $('cuerpoContactos').innerHTML = !cs.length ? '<tr class="fila-vacia"><td colspan="5" class="guia-vacia">' + (datos.contactos.length ? 'Ningún contacto coincide con los filtros. Quita alguno o cambia la búsqueda.' : 'Aún no hay contactos. Pulsa «Nuevo contacto», escribe uno arriba, o pide a un hilo que cargue un lote.') + '</td></tr>' :
+    cs.map(c => '<tr data-id="' + esc(c.id) + '" tabindex="0"><td><b>' + esc(c.entidad || c.persona) + '</b>' + (c.persona && c.entidad ? '<div class="sub">' + esc(c.persona) + '</div>' : '') +
+    '<div class="sub">' + esc(c.segmento || '') + (c.localidad ? ' · ' + esc(c.localidad) : '') + '</div></td>' +
+    '<td>' + (c.excluido ? '<span class="pill excl">Excluido</span>' : esc(c.rol || '')) + '</td>' +
+    '<td>' + opsDe(c.id).map(o => chip(o, true)).join('') + '</td>' +
+    '<td class="opc num">' + esc(c.telefono || '') + '</td><td class="opc">' + esc(c.email || '') + '</td></tr>').join('');
+  enlazarListas('#cuerpoContactos');
+  $('cuentaContactos').textContent = cs.length + ' de ' + datos.contactos.length + ' contactos';
+}
+
+// ---------- agenda ----------
+// Cada elemento se trabaja desde aquí: «Hecho» (anota lo que se hizo y pone el siguiente paso), «Aplazar» (mañana, una semana o una fecha)
+// y «Anotar» (abre la ficha con el cursor en «Qué ha pasado»). Los avisos de toques salen también en el elemento de esa oportunidad.
+function itemAgenda(o, hoy, conFecha){
+  const c = contacto(o.contactoId);
+  return '<li class="tarea ' + (o.fechaProximo && o.fechaProximo < hoy ? 'atrasado' : '') + '" data-id="' + esc(c.id) + '" data-op="' + esc(o.id) + '" tabindex="0"><div class="t1">' + chip(o) + esc(nombre(c)) + '</div><div class="t2">' +
+    (o.fechaProximo ? esc(fechaES(o.fechaProximo)) + ' · ' : '') + esc(o.proximoPaso || 'Sin próximo paso') + (c.telefono ? ' · ' + esc(c.telefono) : '') + (c.localidad ? ' · ' + esc(c.localidad) : '') + '</div>' +
+    avisoDe(c) +
+    '<div class="acciones-tarea">' + (conFecha ? '<button type="button" class="mini primario" data-acc="hecho">Hecho</button>' : '') +
+    '<button type="button" class="mini" data-acc="aplazar">' + (conFecha ? 'Aplazar' : 'Poner fecha') + '</button><button type="button" class="mini" data-acc="anotar">Anotar</button></div>' +
+    '<div class="en-linea" hidden></div></li>';
+}
+function pintarAgenda(){
+  const hoy = hoyISO(), man = sumarDias(hoy, 1), en7 = sumarDias(hoy, 7), en30 = sumarDias(hoy, 30);
+  const guardado = capturarFormAgenda();   // si había un formulario abierto, que no se pierda al volver a pintar
+  const ops = opsVisibles().filter(conAgenda).sort((a, b) => a.fechaProximo.localeCompare(b.fechaProximo) || prioIdx(a.prioridad) - prioIdx(b.prioridad));
+  const sinFecha = opsVisibles().filter(o => { const c = contacto(o.contactoId); return !c.excluido && vivaIdx(idxFase(o)) && !o.fechaProximo; });
+  // [título, lista, si tiene fecha, qué decir si está vacío]. Un grupo vacío solo sale si dice algo (lo atrasado y lo de hoy).
+  const grupos = [
+    ['Atrasados', ops.filter(o => o.fechaProximo < hoy), true, 'Nada atrasado.'],
+    ['Hoy, ' + fechaLarga(hoy), ops.filter(o => o.fechaProximo === hoy), true, 'Nada para hoy.'],
+    ['Mañana, ' + fechaLarga(man), ops.filter(o => o.fechaProximo === man), true, ''],
+    ['Resto de la semana', ops.filter(o => o.fechaProximo > man && o.fechaProximo <= en7), true, ''],
+    ['Próximos 30 días', ops.filter(o => o.fechaProximo > en7 && o.fechaProximo <= en30), true, ''],
+    ['Más adelante', ops.filter(o => o.fechaProximo > en30), true, ''],
+    ['Abiertas sin próximo paso', sinFecha, false, ''],
+  ];
+  const guia = !ops.length && !sinFecha.length ? '<p class="guia-vacia">No hay próximos pasos. Anota qué ha pasado en un contacto y pon la fecha del siguiente paso: saldrá aquí.</p>' : '';
+  $('agenda').innerHTML = guia + grupos.filter(([, l, , vacio]) => l.length || vacio).map(([t, l, conFecha, vacio]) => '<div class="grupo"><h3>' + esc(t) + ' <span>' + l.length + '</span></h3>' +
+    (l.length ? '<ul class="lista-tareas">' + l.map(o => itemAgenda(o, hoy, conFecha)).join('') + '</ul>' : '<p class="vacio">' + vacio + '</p>') + '</div>').join('');
+  restaurarFormAgenda(guardado);
+  enlazarListas('#agenda');
+}
+function htmlFormHecho(o){
+  const por = NEG.tipoPorDefecto || TIPOS[0];
+  return '<form data-form="hecho"><div class="campos">' +
+    '<label>Tipo de anotación<select data-f="tipo">' + TIPOS.map(t => '<option' + (t === por ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select></label>' +
+    '<label class="ancho">Qué ha pasado (puedes dejarlo en blanco)<input data-f="texto" type="text" autocomplete="off" placeholder="' + esc(NEG.textos.ejemploAnotacion || '') + '"></label>' +
+    '<label class="ancho">Siguiente paso<input data-f="proximo" type="text" autocomplete="off"></label>' +
+    '<label>Fecha del siguiente paso<input data-f="fecha" type="date"></label>' +
+    (NEG.recordatorio ? '<label>Atajo<button type="button" class="mini" data-acc="atajo" title="' + esc(NEG.recordatorio.ayuda || '') + '">' + esc(NEG.recordatorio.boton || 'Recordatorio') + '</button></label>' : '') +
+    '</div><div class="sub" data-f="fase"></div><div class="fila"><button type="submit" class="mini primario">Anotar como hecho</button><button type="button" class="mini" data-acc="cancelar">Cancelar</button></div></form>';
+}
+function htmlFormAplazar(){
+  return '<div class="fila-aplazar"><button type="button" class="mini" data-acc="aplazar-dias" data-dias="1">Mañana</button><button type="button" class="mini" data-acc="aplazar-dias" data-dias="7">En una semana</button>' +
+    '<label>O elige una fecha<input data-f="fecha" type="date" min="' + hoyISO() + '"></label><button type="button" class="mini primario" data-acc="aplazar-fecha">Poner esa fecha</button><button type="button" class="mini" data-acc="cancelar">Cancelar</button></div>';
+}
+function abrirFormAgenda(li, modo){
+  const o = opPorId(li.dataset.op); if(!o) return;
+  const igual = !!formAgenda && formAgenda.op === o.id && formAgenda.modo === modo;
+  cerrarFormAgenda();
+  if(igual) return;   // pulsar otra vez el mismo botón lo cierra
+  formAgenda = { op: o.id, modo };
+  const zona = li.querySelector('.en-linea');
+  zona.innerHTML = modo === 'hecho' ? htmlFormHecho(o) : htmlFormAplazar();
+  zona.hidden = false;
+  if(modo === 'hecho') avisoFaseHecho(zona.querySelector('form'));
+  const primero = zona.querySelector(modo === 'hecho' ? '[data-f="texto"]' : 'button');
+  if(primero) primero.focus();
+}
+function cerrarFormAgenda(){
+  formAgenda = null;
+  document.querySelectorAll('#agenda .en-linea').forEach(z => { z.hidden = true; z.innerHTML = ''; });
+}
+// Antes de volver a pintar la Agenda, apunta qué formulario hay abierto, lo que lleva escrito y dónde está el cursor.
+function capturarFormAgenda(){
+  if(!formAgenda) return null;
+  const li = $('agenda').querySelector('li[data-op="' + CSS.escape(formAgenda.op) + '"]'), valores = {};
+  if(li) li.querySelectorAll('.en-linea [data-f]').forEach(n => { if('value' in n) valores[n.dataset.f] = n.value; });
+  const a = document.activeElement;
+  return Object.assign({}, formAgenda, { valores, foco: li && a && li.contains(a) && a.dataset ? a.dataset.f || '' : null });
+}
+function restaurarFormAgenda(g){
+  if(!g) return;
+  const li = $('agenda').querySelector('li[data-op="' + CSS.escape(g.op) + '"]'), o = opPorId(g.op);
+  if(!li || !o){ formAgenda = null; return; }
+  const zona = li.querySelector('.en-linea');
+  zona.innerHTML = g.modo === 'hecho' ? htmlFormHecho(o) : htmlFormAplazar();
+  zona.hidden = false;
+  Object.keys(g.valores).forEach(k => { const n = zona.querySelector('[data-f="' + k + '"]'); if(n && 'value' in n) n.value = g.valores[k]; });
+  if(g.modo === 'hecho') avisoFaseHecho(zona.querySelector('form'));
+  if(g.foco){ const n = zona.querySelector('[data-f="' + g.foco + '"]'); if(n) n.focus(); }
+}
+function avisoFaseHecho(form){
+  const li = form && form.closest('li[data-op]'), o = li && opPorId(li.dataset.op); if(!o) return;
+  const f = faseSugerida(o, form.querySelector('[data-f="tipo"]').value);
+  form.querySelector('[data-f="fase"]').textContent = f && f !== o.fase ? 'Pasará a la fase «' + f + '».' : '';
+}
+function accionAgenda(e){
+  const b = e.target.closest('button[data-acc]'), li = b && b.closest('li[data-op]'); if(!li) return;
+  const acc = b.dataset.acc, opId = li.dataset.op;
+  if(acc === 'hecho' || acc === 'aplazar') abrirFormAgenda(li, acc);
+  else if(acc === 'anotar') abrirFicha(li.dataset.id, opId, { foco: 'anotar' });
+  else if(acc === 'cancelar') cerrarFormAgenda();
+  else if(acc === 'aplazar-dias') aplazarOp(opId, Number(b.dataset.dias));
+  else if(acc === 'aplazar-fecha'){ const campo = li.querySelector('[data-f="fecha"]'); if(campo.value) aplazarOp(opId, campo.value); else campo.focus(); }
+  else if(acc === 'atajo' && NEG.recordatorio){ const f = b.closest('form'); f.querySelector('[data-f="proximo"]').value = NEG.recordatorio.texto; f.querySelector('[data-f="fecha"]').value = sumarDias(hoyISO(), NEG.recordatorio.dias || 9); }
+}
+// «Hecho»: anota lo que se hizo como lo hace «Anotar» de la ficha (con la misma fase sugerida) y pone el siguiente paso con su fecha.
+// Sin texto, la anotación dice «Hecho: <el paso que había>».
+function hechoAgenda(form){
+  const li = form.closest('li[data-op]'), o = li && opPorId(li.dataset.op), c = o && contacto(o.contactoId); if(!o || !c) return;
+  const v = n => form.querySelector('[data-f="' + n + '"]').value.trim(), tipo = v('tipo');
+  registrarAnotacion(c, o, { fecha: hoyISO(), tipo, texto: v('texto') || (o.proximoPaso ? 'Hecho: ' + o.proximoPaso + '.' : 'Hecho.'), fase: faseSugerida(o, tipo), proximo: v('proximo'), proximoFecha: v('fecha') });
+  formAgenda = null; opMarcada = o.id;
+  programarGuardado(); pintarTodo();
+}
+// «Aplazar»: pone otra fecha al próximo paso. destino es un número de días contados desde hoy, o una fecha (aaaa-mm-dd).
+function aplazarOp(opId, destino){
+  const o = opPorId(opId), fecha = typeof destino === 'number' ? sumarDias(hoyISO(), destino) : destino;
+  if(!o || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return;
+  o.fechaProximo = fecha; o.actualizado = hoyISO();
+  formAgenda = null; programarGuardado(); pintarTodo();
+}
+
+// ---------- exportar ----------
+function exportarCsv(){
+  const q = v => { const s = String(v ?? ''); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  let filas, nombreArchivo;
+  if(vista === 'contactos'){
+    filas = [[NEG.textos.entidad || 'Empresa','Persona','Rol','Segmento','Localidad','Teléfono','Correo','Web','Productos','Permiso','Excluido','Notas']].concat(
+      filtrarContactos().map(c => [c.entidad, c.persona, c.rol, c.segmento, c.localidad, c.telefono, c.email, c.web, opsDe(c.id).map(o => PRODUCTOS[o.producto].corto + ' (' + o.fase + ')').join(', '), c.permiso, c.excluido ? 'Sí' : 'No', c.notas]));
+    nombreArchivo = 'CRM_contactos_' + hoyISO() + '.csv';
+  } else {
+    const ops = vista === 'ops' ? filtrarOps() : opsVisibles();
+    filas = [['Producto','Servicio','Fase','Prioridad','Semana',NEG.textos.entidad || 'Empresa','Persona','Rol','Segmento','Localidad','Teléfono','Correo','Próximo paso','Fecha','Alta (€)','Cuota (€/mes)','Estado del servicio']].concat(
+      ops.map(o => { const c = contacto(o.contactoId); return [PRODUCTOS[o.producto].n, o.servicio, c.excluido ? 'Excluido' : o.fase, o.prioridad, o.semana, c.entidad, c.persona, c.rol, c.segmento, c.localidad, c.telefono, c.email, o.proximoPaso, fechaES(o.fechaProximo), o.alta ?? '', o.cuota ?? '', o.estadoServicio]; }));
+    nombreArchivo = 'CRM_oportunidades' + (prod ? '_' + PRODUCTOS[prod].corto.replace(/\s/g, '_') : '') + '_' + hoyISO() + '.csv';
+  }
+  descargar(nombreArchivo, '﻿' + filas.map(f => f.map(q).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+}
+
+// ---------- registro de cambios ----------
+function fechaHora(iso){ if(!iso) return ''; const d = new Date(iso); return isNaN(d) ? String(iso) : d.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+// El nombre de la ficha de un cambio del registro (el contacto, o el contacto y su producto), o vacío si ya no está. Su identificador queda en el «title».
+function nombreParaRegistro(col, id, c){
+  if(col === 'contactos'){ const x = contacto(id); return x ? nombre(x) : ''; }
+  if(col === 'oportunidades'){ const o = datos.oportunidades.find(y => y.id === id), x = o && contacto(o.contactoId); return x && PRODUCTOS[o.producto] ? nombre(x) + ' (' + PRODUCTOS[o.producto].corto + ')' : ''; }
+  if(col === 'actividades'){ const x = c && c.contacto && contacto(c.contacto); return x ? nombre(x) : ''; }
+  return '';
+}
+function pintarRegistro(){
+  const filtro = normalizar($('rTexto').value.trim());
+  const nombreDe = id => { const c = id && contacto(id); return c ? nombre(c) : ''; };
+  const lista = (datos.registro || []).slice().reverse().filter(e => !filtro || normalizar(JSON.stringify([e.quien, e.hilo, e.con, (e.cambios || []).map(c => [c.ficha, c.contacto, nombreDe(c.contacto)])])).includes(filtro)).slice(0, 150);
+  $('lRegistro').innerHTML = lista.length ? lista.map(e => {
+    const cs = e.cambios || [], ids = [...new Set(cs.map(c => c.contacto).filter(Boolean))];
+    const marca = c => c.forzado ? ' <b>(contacto del hilo ' + esc(c.forzado) + ', con permiso)</b>' : (c.fueraDeHilo ? ' (contacto del hilo ' + esc(c.fueraDeHilo) + ')' : '');
+    const linea = c => '<span title="' + esc([...new Set([c.ficha, c.contacto].filter(Boolean))].join(' · ')) + '">' + esc(textoCambio(c, nombreParaRegistro)) + '</span>' + marca(c);
+    return '<li><div class="h1">' + esc(fechaHora(e.cuando)) + ' · ' + esc(e.quien || 'Sin identificar') + (e.hilo && e.hilo !== 'Jorge' ? ' · hilo ' + esc(e.hilo) : '') + '</div>' +
+      (e.fusion ? '<div class="sub">Se juntó con lo que había escrito ' + esc(e.fusion.conQuien || 'otra fuente') + '.</div>' : '') +
+      (e.choques && e.choques.length ? '<div class="aviso aten">' + e.choques.map(c => esc((nombreParaRegistro(c.col, c.ficha, c) || c.ficha || '') + (c.campo ? ', ' + (NOMBRE_CAMPO[c.campo] || c.campo) : '') + ': ' + c.motivo + (c.suyo != null ? ' (antes ponía «' + String(c.suyo).slice(0, 80) + '»)' : ''))).join('<br>') + '</div>' : '') +
+      '<div>' + cs.slice(0, 8).map(linea).join('<br>') + (cs.length > 8 ? '<br><span class="sub">y ' + (cs.length - 8) + ' cambios más</span>' : '') + '</div>' +
+      (ids.length ? '<div class="sub">' + ids.slice(0, 12).map(id => contacto(id) ? '<a href="#" data-ficha="' + esc(id) + '">' + esc(nombreDe(id)) + '</a>' : esc(id)).join(' · ') + '</div>' : '') + '</li>';
+  }).join('') : '<li class="guia-vacia">' + (filtro ? 'Nada del registro coincide con lo que buscas.' : 'Sin cambios apuntados todavía. Aquí saldrá quién cambia qué, tú o un hilo de Claude, en cuanto alguien toque algo.') + '</li>';
+}
+// ---------- ficha ----------
+// Abre la ficha de un contacto, con su oportunidad marcada si se dice cuál. Con opciones.foco = 'anotar' el cursor va a «Qué ha pasado»,
+// también en el móvil (donde, si no, no se pone en un campo para que no salte el teclado nada más abrir).
+function abrirFicha(id, opId, opciones){
+  const c = contacto(id); if(!c) return;
+  const cambiaContacto = fichaId !== id;
+  if(cambiaContacto) historialCompleto = false;
+  fichaId = id; opMarcada = opId || (cambiaContacto ? null : opMarcada);
+  $('fichaTitulo').textContent = nombre(c);
+  const fabs = [...new Set(opsDe(c.id).map(o => o.fabricante).filter(Boolean))];
+  $('fichaChips').innerHTML = '<span class="sub">' + esc(c.rol || '') + (c.segmento ? ' · ' + esc(c.segmento) : '') + (c.localidad ? ' · ' + esc(c.localidad) : '') + '</span>' +
+    (c.hilo ? ' <span class="chip">Lo lleva el hilo ' + esc(c.hilo) + '</span>' : '') + (fabs.length ? ' <span class="chip">Con ' + esc(fabs.join(' y ')) + '</span>' : '') +
+    (c.tocadoPor ? '<div class="sub">Último cambio: ' + esc(fechaHora(c.tocadoEn)) + ', ' + esc(c.tocadoPor) + '</div>' : '') +
+    (fabs.length > 1 ? '<div class="aviso aten">Ojo: este contacto está ligado a ' + esc(fabs.join(' y a ')) + ' a la vez.</div>' : '');
+  $('fichaAviso').innerHTML = avisoDe(c);
+  document.querySelectorAll('#ficha [data-c]').forEach(n => {
+    const k = n.dataset.c; let v = k === 'excluido' ? (c.excluido ? 'si' : 'no') : (c[k] ?? '');
+    if(n.tagName === 'SELECT' && v && ![...n.options].some(o => o.value === v)) n.insertAdjacentHTML('beforeend', '<option>' + esc(v) + '</option>');
+    n.value = v;
+  });
+  const enl = [];
+  if(c.telefono) enl.push('<a href="tel:' + esc(c.telefono.replace(/[^\d+]/g, '')) + '">Llamar al ' + esc(c.telefono) + '</a>');
+  if(c.email) enl.push('<a href="mailto:' + esc(c.email.trim()) + '">Escribir a ' + esc(c.email) + '</a>');
+  if(c.web) enl.push('<a href="' + esc(/^https?:/.test(c.web) ? c.web : 'https://' + c.web) + '" target="_blank" rel="noopener">Abrir la web</a>');
+  if(c.fuente && /^https?:/.test(c.fuente)) enl.push('<a href="' + esc(c.fuente) + '" target="_blank" rel="noopener">Ver la fuente</a>');
+  $('enlaces').innerHTML = enl.join('');
+  $('enlaces').classList.toggle('oculto', !enl.length);
+  $('bloqueGuion').classList.toggle('oculto', !c.guion);
+  $('cGuion').textContent = c.guion || '';
+  pintarPistaMasDatos(c);
+  pintarOpsFicha(c);
+  prepararAnotarSelect(c);
+  $('aFecha').value = hoyISO(); $('aTipo').value = NEG.tipoPorDefecto || TIPOS[0]; $('aTexto').value = ''; sugerirFase();
+  pintarHistorial(c);
+  $('fichaEstado').textContent = '';
+  if($('ficha').hidden){
+    origenFoco = recordarOrigenFoco();
+    $('ficha').hidden = false; bloquearFondo(true);
+    $('ficha').querySelector('.ficha-caja').scrollTop = 0;
+    if(!esMovil() || (opciones && opciones.foco === 'anotar')) $('aTexto').focus(); else $('fichaTitulo').focus({ preventScroll: true });
+  } else if(opciones && opciones.foco === 'anotar') $('aTexto').focus();
+  if(opId){ const el = $('opsFicha').querySelector('[data-opcaja="' + CSS.escape(opId) + '"]'); if(el) el.scrollIntoView({ block: 'nearest' }); }
+}
+// «Más datos» va plegado: si el contacto tiene notas, lo dice en su título para que no queden escondidas.
+function pintarPistaMasDatos(c){ $('pistaMasDatos').textContent = c && c.notas ? '· con notas' : ''; }
+// Cierra la ficha sin más: la esconde, deja de bloquear el fondo y se olvida de ella.
+function ocultarFicha(){ $('ficha').hidden = true; bloquearFondo(false); fichaId = null; opMarcada = null; historialCompleto = false; }
+function pintarOpsFicha(c){
+  const ops = opsDe(c.id);
+  $('opsFicha').innerHTML = ops.length ? ops.map(o => {
+    const P = PRODUCTOS[o.producto], i = idxFase(o), serv = P.servicios.find(s => s.n === o.servicio);
+    const sel = (k, lista, v, vacio) => '<select data-op="' + esc(o.id) + '" data-k="' + k + '">' + (vacio !== undefined ? '<option value="">' + esc(vacio) + '</option>' : '') + lista.map(x => '<option' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>').join('') + (v && !lista.includes(v) ? '<option selected>' + esc(v) + '</option>' : '') + '</select>';
+    const inp = (k, v, tipo, extra) => '<input data-op="' + esc(o.id) + '" data-k="' + k + '" type="' + (tipo || 'text') + '" value="' + esc(v ?? '') + '"' + (extra || '') + '>';
+    return '<div class="op' + (o.id === opMarcada ? ' marcada' : '') + '" data-opcaja="' + esc(o.id) + '" style="--c:var(--' + P.c + ')"><div class="op-cab"><b>' + esc(P.n) + '</b>' + pillFase(o) +
+      '<button class="mini" type="button" data-quitar="' + esc(o.id) + '" title="Quita solo esta oportunidad. El contacto y sus anotaciones se quedan.">Quitar</button></div><div class="campos">' +
+      '<label class="ancho">Servicio' + sel('servicio', P.servicios.map(s => s.n), o.servicio, 'Sin concretar') + (serv && serv.nota ? '<span class="pista">' + esc(serv.nota) + '</span>' : '') + '</label>' +
+      '<label>Fase' + sel('fase', P.fases, o.fase) + '</label>' +
+      '<label>Prioridad' + sel('prioridad', PRIOS, o.prioridad, 'Sin prioridad') + '</label>' +
+      '<label>Semana del plan' + sel('semana', SEMANAS, o.semana, 'Sin semana') + '</label>' +
+      (NEG.fabricantes.length ? '<label>Va con el fabricante' + sel('fabricante', NEG.fabricantes, o.fabricante, 'Ninguno') + '</label>' : '') +
+      '<label class="ancho">Próximo paso' + inp('proximoPaso', o.proximoPaso) + '</label>' +
+      '<label>Fecha del próximo paso' + inp('fechaProximo', o.fechaProximo, 'date') + '</label>' +
+      '<label>Alta (€ sin IVA)' + inp('alta', o.alta, 'number', ' step="1" min="0"') + '</label>' +
+      '<label>Cuota (€/mes)' + inp('cuota', o.cuota, 'number', ' step="1" min="0"') + '</label>' +
+      (i === I_CLIENTE ? '<label>Estado del servicio' + sel('estadoServicio', ['Puesta en marcha','Activo','Baja'], o.estadoServicio, 'Sin estado') + '</label><label>Fecha de firma' + inp('fechaCierre', o.fechaCierre, 'date') + '</label>' : '') +
+      (i === I_PERDIDO ? '<label class="ancho">Por qué se perdió' + inp('motivoPerdida', o.motivoPerdida) + '</label>' : '') +
+      '<label class="ancho">Notas de esta oportunidad<textarea data-op="' + esc(o.id) + '" data-k="notas">' + esc(o.notas || '') + '</textarea></label>' +
+      '</div></div>';
+  }).join('') : '<p class="vacio">Sin oportunidades. Añade una con el producto que le encaje.</p>';
+  $('nuevoProd').value = prod || (CODIGOS.find(k => !ops.some(o => o.producto === k)) || CODIGOS[0]);
+}
+// Un cambio en un campo de una oportunidad. Pasar a Perdido pide el motivo, y elegir un servicio pregunta antes de pisar los importes ya puestos.
+// Tras cada pregunta se vuelve a buscar la oportunidad por su identificador: mientras se contestaba pudo llegar un archivo nuevo.
+async function cambioOp(e){
+  const n = e.target, id = n.dataset.op, k = n.dataset.k, v = n.value;
+  let o = id && opPorId(id); if(!o) return;
+  if(k === 'fase'){
+    const cambio = await moverFase(o, PRODUCTOS[o.producto].fases.indexOf(v), 'Cambio de fase en la ficha');
+    o = opPorId(id); if(!o) return;
+    if(!cambio){ const c0 = contacto(o.contactoId); if(c0) pintarOpsFicha(c0); return; }   // cancelado: el desplegable vuelve a la fase de antes
+  }
+  else if(k === 'alta' || k === 'cuota'){ o[k] = v === '' ? null : Number(v); }
+  else if(k === 'servicio'){ o.servicio = v; await importesDelServicio(id, v); o = opPorId(id); if(!o) return; }
+  else o[k] = typeof v === 'string' ? v.trim() : v;
+  o.actualizado = hoyISO();
+  const c = contacto(o.contactoId);
+  opMarcada = o.id;
+  if(k === 'fase' || k === 'servicio'){ pintarOpsFicha(c); prepararAnotarSelect(c, true); pintarHistorial(c); }
+  else if((k === 'proximoPaso' || k === 'fechaProximo') && $('aOp').value === o.id){ $('aProx').value = o.proximoPaso || ''; $('aProxFecha').value = o.fechaProximo || ''; }
+  programarGuardado();
+}
+// Al elegir un servicio se ponen los importes que trae. Si la oportunidad ya tenía otros, antes se pregunta.
+async function importesDelServicio(id, nombreServicio){
+  let o = opPorId(id); if(!o) return;
+  const s = PRODUCTOS[o.producto].servicios.find(x => x.n === nombreServicio); if(!s) return;
+  const alta = s.alta ?? null, cuota = s.cuota ?? null;
+  if((o.alta != null || o.cuota != null) && (o.alta !== alta || o.cuota !== cuota)){
+    const dicen = (a, c) => 'alta ' + (a != null ? euros(a) : 'sin poner') + ', cuota ' + (c != null ? euros(c) + '/mes' : 'sin poner');
+    const r = await cuadro({
+      titulo: '¿Poner los importes del servicio?',
+      texto: 'Esta oportunidad ya tiene ' + dicen(o.alta, o.cuota) + '. El servicio «' + s.n + '» trae ' + dicen(alta, cuota) + '.',
+      botones: [{ t: 'Dejar los que hay', v: 'dejar' }, { t: 'Sí, poner los del servicio', v: 'poner', primario: true }], foco: 'dejar'
+    });
+    if(r.boton !== 'poner') return;
+    o = opPorId(id); if(!o) return;
+  }
+  o.alta = alta; o.cuota = cuota;
+}
+function cambioContacto(n){
+  const c = contacto(fichaId); if(!c) return;
+  const k = n.dataset.c;
+  if(k === 'excluido'){ c.excluido = n.value === 'si'; if(c.excluido && !c.motivoExclusion){ $('fichaEstado').textContent = 'Indica el motivo de la exclusión.'; } }
+  else c[k] = n.value.trim();
+  c.actualizado = hoyISO();
+  $('fichaTitulo').textContent = nombre(c);
+  $('fichaAviso').innerHTML = avisoDe(c);
+  pintarPistaMasDatos(c);
+  programarGuardado();
+}
+function prepararAnotarSelect(c, mantener){
+  const ops = opsDe(c.id), actual = $('aOp').value;
+  $('aOp').innerHTML = ops.map(o => '<option value="' + esc(o.id) + '">' + esc(PRODUCTOS[o.producto].n) + (o.servicio ? ': ' + esc(o.servicio) : '') + '</option>').join('') + '<option value="">General, sin oportunidad</option>';
+  $('aOp').value = mantener && [...$('aOp').options].some(x => x.value === actual) ? actual : (opMarcada && ops.some(o => o.id === opMarcada) ? opMarcada : (ops[0] ? ops[0].id : ''));
+  prepararAnotar();
+}
+function prepararAnotar(){
+  const o = datos.oportunidades.find(x => x.id === $('aOp').value);
+  $('aFase').innerHTML = '<option value="">Sin cambios</option>' + (o ? PRODUCTOS[o.producto].fases.map(f => '<option>' + esc(f) + '</option>').join('') : '');
+  $('aFase').disabled = !o; $('aProx').disabled = !o; $('aProxFecha').disabled = !o;
+  $('aProx').value = o ? (o.proximoPaso || '') : ''; $('aProxFecha').value = o ? (o.fechaProximo || '') : '';
+  sugerirFase();
+}
+// La fase a la que suele pasar una oportunidad según lo que se anota: escribirle estando en la primera la pasa a la segunda, una respuesta
+// a «Conversación» y una reunión a la primera fase «en juego». Vacío si no toca cambiar nada.
+function faseSugerida(o, tipo){
+  const i = idxFase(o), F = PRODUCTOS[o.producto].fases;
+  if(NEG.escritos.includes(tipo) && i === 0) return F[1];
+  if(NEG.respuesta && tipo === NEG.respuesta && i <= 1) return F[2];
+  if(NEG.reunion && tipo === NEG.reunion && i <= 2) return F[3];
+  return '';
+}
+function sugerirFase(){
+  const o = datos && opPorId($('aOp').value); if(!o) return;
+  $('aFase').value = faseSugerida(o, $('aTipo').value);
+}
+// Las últimas 8 anotaciones del contacto, o todas si se pulsa «Ver todas».
+function pintarHistorial(c){
+  const acts = datos.actividades.map((a, i) => [a, i]).filter(([a]) => a.contactoId === c.id).sort((x, y) => (y[0].fecha || '').localeCompare(x[0].fecha || '') || y[1] - x[1]).map(([a]) => a);
+  const ver = historialCompleto ? acts : acts.slice(0, 8);
+  $('historial').innerHTML = ver.length ? ver.map(a => { const o = datos.oportunidades.find(x => x.id === a.oportunidadId);
+    return '<li><div class="h1">' + esc(fechaES(a.fecha)) + ' · ' + esc(a.tipo) + (o ? chip(o) : '') + '</div><div>' + esc(a.texto) + '</div></li>'; }).join('') : '<li class="vacio">Sin anotaciones todavía. Escribe arriba qué ha pasado y pulsa «Anotar».</li>';
+  $('bVerTodas').classList.toggle('oculto', acts.length <= 8);
+  $('bVerTodas').textContent = historialCompleto ? 'Ver solo las últimas 8' : 'Ver todas (' + acts.length + ')';
+}
+function cerrarFicha(){
+  if(document.activeElement && $('ficha').contains(document.activeElement)) document.activeElement.blur();
+  const c = contacto(fichaId);
+  if(c && !c.entidad && !c.persona && !c.email && !c.telefono && !datos.actividades.some(a => a.contactoId === c.id)){   // un contacto nuevo que se ha quedado vacío no se guarda
+    datos.contactos = datos.contactos.filter(x => x.id !== c.id);
+    datos.oportunidades = datos.oportunidades.filter(o => o.contactoId !== c.id);
+    programarGuardado();
+  }
+  ocultarFicha(); pintarTodo(); devolverFoco();
+  if(cargaPendiente) mirarArchivo();
+}
+// Apunta una anotación y, si hay oportunidad, cambia su fase y su próximo paso. La usan «Anotar» de la ficha y «Hecho» de la Agenda.
+// a: fecha, tipo, texto, fase (nombre; vacío si no cambia), proximo, proximoFecha y motivo (si la fase nueva es Perdido).
+function registrarAnotacion(c, o, a){
+  const act = { id: nuevoId('A'), contactoId: c.id, oportunidadId: o ? o.id : null, fecha: a.fecha || hoyISO(), tipo: a.tipo, texto: a.texto };
+  datos.actividades.push(act);
+  if(o){
+    const i = a.fase ? PRODUCTOS[o.producto].fases.indexOf(a.fase) : -1;
+    if(i >= 0 && i !== idxFase(o)){
+      const vieja = o.fase; o.fase = a.fase;
+      if(i === I_CLIENTE){ if(!o.fechaCierre) o.fechaCierre = hoyISO(); if(!o.estadoServicio) o.estadoServicio = 'Puesta en marcha'; }
+      if(i === I_PERDIDO){ if(!o.fechaCierre) o.fechaCierre = hoyISO(); if(a.motivo) o.motivoPerdida = a.motivo; }
+      act.texto += ' (Fase: de ' + vieja + ' a ' + o.fase + ').';
+    }
+    o.proximoPaso = String(a.proximo || '').trim(); o.fechaProximo = a.proximoFecha || ''; o.actualizado = hoyISO();
+  }
+  c.actualizado = hoyISO();
+  return act;
+}
+async function anotar(){
+  let c = contacto(fichaId); if(!c) return;
+  const texto = $('aTexto').value.trim();
+  if(!texto){ $('fichaEstado').textContent = 'Escribe qué ha pasado antes de anotarlo.'; $('aTexto').focus(); return; }
+  let o = opPorId($('aOp').value) || null;
+  const a = { fecha: $('aFecha').value, tipo: $('aTipo').value, texto, fase: $('aFase').value, proximo: $('aProx').value, proximoFecha: $('aProxFecha').value };
+  if(o && a.fase && PRODUCTOS[o.producto].fases.indexOf(a.fase) === I_PERDIDO && idxFase(o) !== I_PERDIDO){   // pasar a Perdido pide el motivo
+    const id = o.id, motivo = await pedirMotivoPerdida(o);
+    if(motivo === null) return;
+    a.motivo = motivo; o = opPorId(id); c = contacto(fichaId); if(!o || !c) return;   // mientras se contestaba pudo llegar un archivo nuevo
+  }
+  registrarAnotacion(c, o, a);
+  if(o) opMarcada = o.id;
+  abrirFicha(c.id, o ? o.id : null);
+  $('fichaEstado').textContent = 'Anotado.';
+  programarGuardado();
+}
+function anadirOp(){
+  const c = contacto(fichaId); if(!c) return;
+  const p = $('nuevoProd').value;
+  const o = { id: nuevoId('O'), contactoId: c.id, producto: p, servicio: '', fase: 'Pendiente', prioridad: 'B', semana: '', proximoPaso: '', fechaProximo: '', alta: null, cuota: null, estadoServicio: '', fechaCierre: '', motivoPerdida: '', notas: '', fabricante: '', creado: hoyISO(), actualizado: hoyISO() };
+  datos.oportunidades.push(o);
+  opMarcada = o.id;
+  abrirFicha(c.id, o.id);
+  $('fichaEstado').textContent = 'Oportunidad de ' + PRODUCTOS[p].n + ' añadida.';
+  programarGuardado();
+}
+// «Quitar» saca solo la oportunidad (el contacto y sus anotaciones se quedan). Pide confirmación en un cuadro propio y deja «Deshacer» unos segundos.
+async function quitarOp(id){
+  const o = opPorId(id); if(!o) return;
+  const r = await cuadro({
+    titulo: '¿Quitar esta oportunidad?',
+    texto: 'Se quita la oportunidad de ' + PRODUCTOS[o.producto].n + (o.servicio ? ' (' + o.servicio + ')' : '') + '. El contacto y sus anotaciones se quedan. Tendrás unos segundos para deshacerlo.',
+    botones: [{ t: 'Cancelar', v: 'no' }, { t: 'Quitar oportunidad', v: 'si', peligro: true }], foco: 'no'
+  });
+  if(r.boton !== 'si') return;
+  const x = opPorId(id); if(!x) return;
+  const cid = x.contactoId, quitada = sacar(datos.oportunidades, y => y.id === id), enlazadas = datos.actividades.filter(a => a.oportunidadId === id).map(a => a.id);
+  datos.oportunidades = quitada.quedan;
+  datos.actividades.forEach(a => { if(a.oportunidadId === id) a.oportunidadId = null; });
+  if(fichaId === cid) abrirFicha(cid); else pintarTodo();
+  programarGuardado();
+  ofrecerDeshacer('oportunidad quitada', () => {
+    if(opPorId(id) || !contacto(cid)) return;
+    devolver(datos.oportunidades, quitada.fuera);
+    datos.actividades.forEach(a => { if(enlazadas.includes(a.id) && a.oportunidadId == null) a.oportunidadId = id; });
+    if(fichaId === cid) abrirFicha(cid); else pintarTodo();
+    programarGuardado();
+  });
+}
+// Un contacto nuevo con su primera oportunidad. Con «inicial» (lo que se escribió en «Añadir rápido») ya lleva esos datos y se guarda.
+function nuevoContacto(inicial){
+  const c = { id: nuevoId('N'), entidad: '', persona: '', rol: 'Cliente potencial', segmento: '', localidad: '', telefono: '', email: '', web: '', motivo: '', fuente: '', marca: '', canal: '', guion: '', permiso: 'No', permisoFecha: '', permisoDetalle: '', robinson: NEG.robinsonPorDefecto || 'Pendiente', excluido: false, motivoExclusion: '', notas: '', hilo: '', creado: hoyISO(), actualizado: hoyISO() };
+  if(inicial) Object.assign(c, inicial);
+  datos.contactos.push(c);
+  const p = prod || CODIGOS[0];
+  const o = { id: nuevoId('O'), contactoId: c.id, producto: p, servicio: '', fase: 'Pendiente', prioridad: 'B', semana: '', proximoPaso: 'Primer contacto', fechaProximo: '', alta: null, cuota: null, estadoServicio: '', fechaCierre: '', motivoPerdida: '', notas: '', fabricante: '', creado: hoyISO(), actualizado: hoyISO() };
+  datos.oportunidades.push(o);
+  abrirFicha(c.id, o.id);
+  if(inicial){ programarGuardado(); $('fichaEstado').textContent = 'Contacto añadido. Completa lo que quieras: se guarda solo.'; }
+  else { $('ficha').querySelector('[data-c="entidad"]').focus(); $('fichaEstado').textContent = 'Rellena los datos; se guardan solos.'; }
+}
+// «Añadir rápido»: una línea «Empresa, persona, correo» (en cualquier orden: lo que lleva @ es el correo y lo que parece un número, el teléfono).
+function anadirRapido(texto){
+  const v = { entidad: '', persona: '', email: '', telefono: '' }, sueltas = [];
+  texto.split(',').map(s => s.trim()).filter(Boolean).forEach(p => {
+    if(p.includes('@') && !v.email) v.email = p;
+    else if(/^\+?[\d\s().-]{7,}$/.test(p) && !v.telefono) v.telefono = p;
+    else sueltas.push(p);
+  });
+  v.entidad = sueltas[0] || ''; v.persona = sueltas[1] || '';
+  if(sueltas.length > 2) v.notas = sueltas.slice(2).join(', ');
+  nuevoContacto(v);
+}
+const recorte = (t, n) => { t = String(t || ''); return t.length > n ? t.slice(0, n - 1) + '…' : t; };
+// «Eliminar contacto» borra también sus oportunidades y anotaciones. Pide confirmación en un cuadro propio y deja «Deshacer» unos segundos.
+async function borrarContacto(){
+  const c = contacto(fichaId); if(!c) return;
+  const id = c.id, nom = nombre(c), nOps = opsDe(id).length, nActs = datos.actividades.filter(a => a.contactoId === id).length;
+  const r = await cuadro({
+    titulo: '¿Eliminar este contacto?',
+    texto: nom + ' se borra con ' + plural(nOps, 'oportunidad', 'oportunidades') + ' y ' + plural(nActs, 'anotación', 'anotaciones') + '. Para quitar solo una oportunidad, usa «Quitar» en ella. Tendrás unos segundos para deshacerlo.',
+    botones: [{ t: 'Cancelar', v: 'no' }, { t: 'Eliminar contacto', v: 'si', peligro: true }], foco: 'no'
+  });
+  if(r.boton !== 'si' || !contacto(id)) return;
+  const cs = sacar(datos.contactos, y => y.id === id), ops = sacar(datos.oportunidades, o => o.contactoId === id), acts = sacar(datos.actividades, a => a.contactoId === id);
+  datos.contactos = cs.quedan; datos.oportunidades = ops.quedan; datos.actividades = acts.quedan;
+  ocultarFicha(); pintarTodo(); devolverFoco();
+  programarGuardado();
+  ofrecerDeshacer('«' + recorte(nom, 22) + '» eliminado', () => {
+    if(contacto(id)) return;
+    devolver(datos.contactos, cs.fuera); devolver(datos.oportunidades, ops.fuera); devolver(datos.actividades, acts.fuera);
+    pintarTodo(); programarGuardado();
+  });
+}
+inicio();
+})();
+</script>
+</body>
+</html>
