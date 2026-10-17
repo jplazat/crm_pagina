@@ -9,7 +9,7 @@
 // service worker: lo distingue el prefijo).
 'use strict';
 
-const VERSION = '20261017-145618';
+const VERSION = '20261017-183114';
 const PREFIJO = 'crm-pagina-';
 const CACHE = PREFIJO + VERSION;
 const ARCHIVOS = ['./', './index.html', './manifest.webmanifest', './CRM.ico', './CRM-192.png', './CRM-512.png', './CRM-180.png'];
