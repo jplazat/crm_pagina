@@ -82,6 +82,7 @@ button.kpi::after{content:"›";position:absolute;right:10px;top:6px;font-size:2
 .kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;line-height:1.2}
 .kpi span{font-size:12.5px;color:var(--muted)}
 .kpi.atras b{color:var(--bad)}
+.kpi.parada b{color:var(--warn)}
 .tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:18px}
 .tprod{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:8px;padding:10px 12px;cursor:pointer}
 .tprod h3{margin:0 0 8px;font-size:15px;color:var(--c)}
@@ -91,9 +92,23 @@ button.kpi::after{content:"›";position:absolute;right:10px;top:6px;font-size:2
 .barras .b i{display:block;height:100%;background:var(--c)}
 .barras .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
 .tprod .pie{margin-top:8px;font-size:12.5px;color:var(--muted)}
+/* panel: el bloque «Dinero». Su tabla es pequeña y de números: no se convierte en tarjetas en el móvil como las listas largas. */
+.dinero{border:1px solid var(--line);border-radius:8px;padding:10px 12px 6px;margin-bottom:18px}
+.dinero h2.sec{margin:0 0 4px}
+.dinero p{margin:5px 0}
+.din-caja{overflow-x:auto;margin:6px 0 8px}
+table.din-tabla{display:table;width:100%;max-width:520px}
+.din-tabla thead{display:table-header-group}
+.din-tabla tbody{display:table-row-group}
+.din-tabla tbody tr{display:table-row;padding:0;margin:0;border:none;border-radius:0;background:transparent;cursor:default}
+.din-tabla tbody tr:hover{background:transparent}
+.din-tabla th,.din-tabla td{display:table-cell;padding:5px 8px;border-bottom:1px solid var(--line)}
+.din-tabla th:not(:first-child),.din-tabla td:not(:first-child){text-align:right;white-space:nowrap}
 .lista-tareas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .lista-tareas li{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:7px 10px;cursor:pointer}
 .lista-tareas li.atrasado{border-left-color:var(--bad)}
+.lista-tareas li.parada{border-left-color:var(--warn)}
+.parada .hace{color:var(--warn);font-weight:600}
 .lista-tareas li .t1{font-weight:600;display:flex;gap:6px;align-items:center}
 .lista-tareas li .t2{font-size:12.5px;color:var(--muted)}
 .vacio{color:var(--muted);font-style:italic}
@@ -136,6 +151,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .grupo{margin-bottom:16px}
 .grupo h3{font-size:14px;margin:0 0 8px;display:flex;gap:8px;align-items:baseline}
 .grupo h3 span{color:var(--muted);font-weight:400;font-size:12.5px}
+.grupo[data-seccion]{scroll-margin-top:70px}   /* al llevar a una sección desde el Panel, que la cabecera fija no la tape */
 /* ficha */
 #ficha{position:fixed;inset:0;background:rgba(10,20,24,.45);display:flex;justify-content:flex-end;z-index:20}
 #ficha[hidden]{display:none}
@@ -206,8 +222,11 @@ dialog li{margin-bottom:6px}
 /* ficha */
 .datos-principales{margin:12px 0 0}
 .enlaces{gap:8px;margin:10px 0 0}
-.enlaces a{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;text-decoration:none;font-weight:600}
-.enlaces a:hover{border-color:var(--accent);background:var(--accent-soft)}
+.enlaces a,.enlaces button{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;text-decoration:none;font-weight:600}
+.enlaces button{background:transparent;color:var(--accent)}
+.enlaces a:hover,.enlaces button:hover{border-color:var(--accent);background:var(--accent-soft)}
+#enlaceEstado:not(:empty){margin:6px 0 0}
+#enlaceEstado.error{color:var(--bad)}
 details.plegable{border:1px solid var(--line);border-radius:8px;margin:14px 0 0}
 details.plegable>summary{cursor:pointer;font-weight:700;color:var(--accent);padding:10px 12px}
 details.plegable[open]>summary{border-bottom:1px solid var(--line)}
@@ -229,6 +248,20 @@ details.plegable>.cuerpo{padding:12px}
 .linea-hoy .t1{font-weight:600}
 .linea-hoy .t2{font-size:12.5px;color:var(--muted)}
 @media (prefers-color-scheme: dark){ .hoy-negocio{--c:var(--c-oscuro)!important} }
+/* inicio: buscar en todos los negocios (los resultados usan los bloques de «hoy en todos») */
+.buscar-todos{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+.buscar-todos h3{margin:0 0 8px;font-size:16px;color:var(--accent)}
+.buscar-todos .res-tipo{margin-right:4px}
+.resultados-busqueda li.res-todos{margin-top:4px;border-top:1px solid var(--line);border-radius:0 0 6px 6px;color:var(--accent)}
+/* fichas repetidas: el aviso al dar de alta y el que sale debajo del correo o del teléfono de una ficha */
+.aviso .linea-parecida{margin:3px 0}
+.aviso .fila{margin-top:8px;font-weight:400}
+.repetida{font-weight:400;color:var(--warn)}
+.repetida a{color:inherit;text-decoration:underline}
+/* cuadro de «Nuevo contacto» */
+#alta{max-width:560px}
+#alta h2{font-size:17px;margin-bottom:10px}
+#altaBotones{justify-content:flex-end;margin-top:14px}
 /* contactos: añadir rápido, y estados vacíos con guía */
 .rapido{display:flex;gap:8px;margin-bottom:12px}
 .rapido input{flex:1 1 auto}
@@ -244,7 +277,7 @@ tr.fila-vacia:hover{background:transparent}
 @media (max-width:720px), (pointer:coarse){
   input,select,textarea{font-size:16px}
   input:not([type=checkbox]):not([type=radio]),select{min-height:44px}
-  button,.boton,.enlaces a{min-height:44px}
+  button,.boton,.enlaces a,.enlaces button{min-height:44px}
   button.mini{padding:6px 12px;font-size:14px}
   .filtros label.chk{min-height:44px}
   .filtros label.chk input{width:22px;height:22px}
@@ -278,6 +311,10 @@ tr.fila-vacia:hover{background:transparent}
   .barra-inferior button{min-height:58px}
   .kpis{grid-template-columns:1fr 1fr}
   .barras div{grid-template-columns:96px 1fr 30px}
+  .dinero{padding:8px 10px 4px}
+  .din-tabla{font-size:12.5px}
+  .din-tabla th,.din-tabla td{padding:5px 4px}
+  .din-tabla th{font-size:11px;letter-spacing:0;text-transform:none}
   .filtros select,.filtros input[type=search]{flex:1 1 100%;max-width:none;width:100%}
   .tabla-caja{overflow:visible}
   table,tbody{display:block}
@@ -321,9 +358,17 @@ tr.fila-vacia:hover{background:transparent}
   body.con-negocio #tituloNegocio{display:none}
   #cuadro{margin:auto 0 0;width:100%;max-width:none;border-radius:14px 14px 0 0;border-bottom:none;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
   #cuadroBotones{flex-direction:column-reverse;align-items:stretch}
+  #alta{margin:auto 0 0;width:100%;max-width:none;max-height:94%;border-radius:14px 14px 0 0;border-bottom:none;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+  #alta .campos{grid-template-columns:1fr}
+  #altaBotones{flex-direction:column-reverse;align-items:stretch}
 }
 @media (prefers-reduced-motion:no-preference){ .tprod,.lista-tareas li,.carta{transition:border-color .15s,box-shadow .15s} }
 </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./CRM-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CRM">
 </head>
 <body>
 <header>
@@ -361,6 +406,11 @@ tr.fila-vacia:hover{background:transparent}
   <h2>Abrir los datos</h2>
   <p id="textoInicio">Cada negocio guarda sus datos en su propio archivo y nunca se mezclan. Elige el negocio y abre su archivo. Usa Chrome o Edge para que los cambios se guarden solos.</p>
   <div id="negocios" class="tarjetas-negocio"></div>
+  <section id="buscarTodos" class="buscar-todos oculto" aria-labelledby="buscarTodosTitulo">
+    <h3 id="buscarTodosTitulo">Buscar en todos los negocios</h3>
+    <input id="busquedaTodos" type="search" placeholder="Nombre, correo, teléfono, localidad o nota (pulsa /)" aria-label="Buscar en todos los negocios" autocomplete="off" spellcheck="false">
+    <div id="busquedaTodosCuerpo" aria-live="polite"></div>
+  </section>
   <section id="hoyTodos" class="hoy-todos oculto" aria-labelledby="hoyTodosTitulo">
     <div class="fila"><h3 id="hoyTodosTitulo">Hoy en todos los negocios</h3><button id="bHoyActualizar" class="mini" type="button">Actualizar</button></div>
     <div id="hoyTodosCuerpo" aria-live="polite"></div>
@@ -394,6 +444,10 @@ tr.fila-vacia:hover{background:transparent}
   <main>
     <section id="v-panel" class="hoja" role="tabpanel" aria-labelledby="t-panel">
       <div id="kpis" class="kpis"></div>
+      <section id="panelDinero" class="dinero" aria-labelledby="dineroTitulo">
+        <h2 id="dineroTitulo" class="sec">Dinero</h2>
+        <div id="dineroCuerpo"></div>
+      </section>
       <div id="tarjetas" class="tarjetas"></div>
       <div class="cuadricula">
         <div><h2 class="sec">Para hoy y atrasados</h2><ul id="lHoy" class="lista-tareas"></ul></div>
@@ -435,6 +489,7 @@ tr.fila-vacia:hover{background:transparent}
         <input id="cRapido" type="text" placeholder="Añadir rápido: Empresa, persona, correo" aria-label="Añadir un contacto de golpe: empresa, persona, correo">
         <button type="submit" class="primario">Añadir</button>
       </form>
+      <div id="rapidoAviso" aria-live="polite"></div>
       <div class="filtros">
         <input id="cTexto" type="search" placeholder="Buscar" aria-label="Buscar contactos">
         <select id="cRolF" aria-label="Rol"><option value="">Todos los roles</option><option>Cliente potencial</option><option>Prescriptor</option><option>Ambos</option></select>
@@ -486,12 +541,13 @@ tr.fila-vacia:hover{background:transparent}
     <div id="fichaChips"></div>
     <div id="fichaAviso"></div>
     <div id="enlaces" class="enlaces"></div>
+    <div id="enlaceEstado" class="sub" role="status" aria-live="polite"></div>
 
     <div id="datosFicha" class="campos datos-principales">
       <label><span id="etEntidad">Empresa</span><input data-c="entidad" type="text" autocomplete="off"></label>
       <label>Persona<input data-c="persona" type="text" autocomplete="off"></label>
-      <label>Teléfono<input data-c="telefono" type="text" inputmode="tel" autocomplete="off"></label>
-      <label>Correo<input data-c="email" type="text" inputmode="email" autocomplete="off" autocapitalize="none"></label>
+      <label>Teléfono<input data-c="telefono" type="text" inputmode="tel" autocomplete="off"><span class="repetida" data-aviso="telefono" aria-live="polite" hidden></span></label>
+      <label>Correo<input data-c="email" type="text" inputmode="email" autocomplete="off" autocapitalize="none"><span class="repetida" data-aviso="email" aria-live="polite" hidden></span></label>
       <label>Hilo que la lleva<input data-c="hilo" type="text" list="listaHilos" placeholder="General" autocomplete="off"></label>
       <label>Rol<select data-c="rol"><option>Cliente potencial</option><option>Prescriptor</option><option>Ambos</option></select></label>
     </div>
@@ -534,6 +590,7 @@ tr.fila-vacia:hover{background:transparent}
           <label>Marca del dato<select data-c="marca"><option value="">Sin marca</option><option>V</option><option>S</option><option>E</option></select></label>
           <label class="ancho">Motivo del contacto<textarea data-c="motivo"></textarea></label>
           <label class="ancho">Fuente<input data-c="fuente" type="text" autocomplete="off"></label>
+          <label class="ancho">Carpeta o documento<input data-c="enlace" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"><span class="pista">Dirección web o carpeta del PC</span></label>
           <label class="ancho">Notas<textarea data-c="notas"></textarea></label>
         </div>
         <div id="bloqueGuion">
@@ -576,6 +633,24 @@ tr.fila-vacia:hover{background:transparent}
   <h2 id="cuadroTitulo"></h2>
   <div id="cuadroCuerpo"></div>
   <div id="cuadroBotones" class="fila"></div>
+</dialog>
+
+<dialog id="alta" aria-labelledby="altaTitulo">
+  <form id="formAlta" autocomplete="off">
+    <h2 id="altaTitulo">Nuevo contacto</h2>
+    <div class="campos">
+      <label class="ancho"><span id="altaEtEntidad">Empresa</span><input data-alta="entidad" type="text" autocomplete="off"></label>
+      <label>Persona<input data-alta="persona" type="text" autocomplete="off"></label>
+      <label>Teléfono<input data-alta="telefono" type="text" inputmode="tel" autocomplete="off"></label>
+      <label>Correo<input data-alta="email" type="text" inputmode="email" autocomplete="off" autocapitalize="none"></label>
+      <label>Web<input data-alta="web" type="text" inputmode="url" autocomplete="off" autocapitalize="none"></label>
+      <label>Localidad<input data-alta="localidad" type="text" list="listaLoc" autocomplete="off"></label>
+      <label>Segmento<input data-alta="segmento" type="text" list="listaSeg" autocomplete="off"></label>
+      <label>Producto<select id="altaProducto" data-alta="producto"></select></label>
+    </div>
+    <div id="altaAviso" aria-live="polite"></div>
+    <div id="altaBotones" class="fila"><button id="bAltaCancelar" type="button">Cancelar</button><button id="bAltaCrear" type="submit" class="primario">Crear contacto</button></div>
+  </form>
 </dialog>
 
 <script id="motor">
@@ -735,7 +810,7 @@ function sellar(d, cambios, autor, cuando){
   });
 }
 function registrar(d, entrada){ if(!Array.isArray(d.registro)) d.registro = []; d.registro.push(entrada); if(d.registro.length > MAX_REGISTRO_PAGINA) d.registro.splice(0, d.registro.length - MAX_REGISTRO_PAGINA); }
-const NOMBRE_CAMPO = { proximoPaso: 'próximo paso', fechaProximo: 'fecha del próximo paso', fechaCierre: 'fecha de firma', motivoPerdida: 'motivo de pérdida', estadoServicio: 'estado del servicio', entidad: 'empresa', email: 'correo', telefono: 'teléfono', motivoExclusion: 'motivo de exclusión', permisoDetalle: 'detalle del permiso', permisoFecha: 'fecha del permiso', excluido: 'no contactar' };
+const NOMBRE_CAMPO = { proximoPaso: 'próximo paso', fechaProximo: 'fecha del próximo paso', fechaCierre: 'fecha de firma', motivoPerdida: 'motivo de pérdida', estadoServicio: 'estado del servicio', entidad: 'empresa', email: 'correo', telefono: 'teléfono', motivoExclusion: 'motivo de exclusión', permisoDetalle: 'detalle del permiso', permisoFecha: 'fecha del permiso', excluido: 'no contactar', enlace: 'carpeta o documento' };
 // El cambio en palabras. Con «nombrar» (una función (col, id, cambio) que da el nombre legible de una ficha, o vacío si no lo sabe)
 // sale el nombre del contacto en vez de su identificador; sin ella, el texto es el de siempre (el que va a los mensajes de GitHub).
 function textoCambio(c, nombrar){
@@ -750,7 +825,198 @@ function textoCambio(c, nombrar){
   }
   return (n(c.col, c.ficha) || c.ficha || 'General') + ', ' + (NOMBRE_CAMPO[c.campo] || c.campo) + ': de «' + v(c.antes) + '» a «' + v(c.despues) + '»';
 }
-if(typeof module !== 'undefined') module.exports = { NEGOCIOS, CRM_NEGOCIO, negocioPorCodigo, activarNegocio, elegirNegocio, comprobar, idxFase, normalizar, rolPorSegmento, diferencias, fusionar, sellar, registrar, textoCambio, clonar, PRIOS, SEMANAS, I_CLIENTE, I_APLAZADO, I_PERDIDO, actual: () => ({ NEG, PRODUCTOS, CODIGOS, GENERICAS, FASES, TIPOS }) };
+// ---------- Nombres, fichas repetidas, búsqueda en varios negocios, WhatsApp y carpeta o documento (sin pantalla; se prueban aparte) ----------
+// El nombre de un contacto para enseñarlo («Ana · Empresa X») y una fecha aaaa-mm-dd como dd/mm/aaaa.
+function personaCorta(p){ return String(p || '').split(/[,(]/)[0].trim(); }
+function nombre(c){ const p = personaCorta(c.persona); return p && c.entidad ? p + ' · ' + c.entidad : (c.entidad || p || 'Sin nombre'); }
+function fechaES(iso){ if(!iso) return ''; const [a, m, d] = iso.split('-'); return d + '/' + m + '/' + a; }
+// ¿Es la misma ficha? Se mira el correo (igual sin mayúsculas ni espacios), el teléfono (las mismas cifras, sin el 34 de España ni el 00 de delante;
+// con menos de seis cifras no cuenta) y el nombre: la empresa «en plano» (sin tildes, mayúsculas, puntuación ni «S.L.», «S.L.U.», «S.A.», «SL», «SLU» o «SA» al final)
+// o, si no hay empresa, la persona.
+function claveCorreo(e){ return String(e ?? '').replace(/\s+/g, '').toLowerCase(); }
+function cifrasTelefono(t){
+  let c = String(t ?? '').replace(/\D/g, '');
+  if(c.startsWith('00')) c = c.slice(2);
+  if(c.length === 11 && c.startsWith('34')) c = c.slice(2);
+  return c.length >= 6 ? c : '';
+}
+function nombrePlano(t){
+  const s = normalizar(t).replace(/\./g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const m = /^(.*\S)\s+(slu|sl|sa|s l u|s l|s a)$/.exec(s);
+  return m ? m[1] : s;
+}
+function claveNombre(c){ return nombrePlano(c.entidad) || nombrePlano(personaCorta(c.persona)); }
+const MOTIVOS_PARECIDA = ['mismo correo', 'mismo teléfono', 'mismo nombre'];
+// Los contactos de «d» que se parecen a «datos» ({ entidad, persona, email, telefono }), sin contar el de «excluirId». Cada uno con su motivo (el más fuerte, en este orden:
+// correo, teléfono, nombre) y con todos los motivos en «motivos». Lo que no se ha escrito no cuenta: sin correo no se mira el correo. Los más seguros, primero.
+function fichasParecidas(d, datos, excluirId){
+  const x = datos || {}, correo = claveCorreo(x.email), tel = cifrasTelefono(x.telefono), nom = claveNombre(x), res = [];
+  if(!correo && !tel && !nom) return res;
+  ((d && d.contactos) || []).forEach(c => {
+    if(!c || (excluirId != null && c.id === excluirId)) return;
+    const motivos = [];
+    if(correo && claveCorreo(c.email) === correo) motivos.push(MOTIVOS_PARECIDA[0]);
+    if(tel && cifrasTelefono(c.telefono) === tel) motivos.push(MOTIVOS_PARECIDA[1]);
+    if(nom && claveNombre(c) === nom) motivos.push(MOTIVOS_PARECIDA[2]);
+    if(motivos.length) res.push({ contacto: c, motivo: motivos[0], motivos });
+  });
+  return res.sort((a, b) => MOTIVOS_PARECIDA.indexOf(a.motivo) - MOTIVOS_PARECIDA.indexOf(b.motivo));
+}
+// Busca un texto, sin tildes ni mayúsculas y con todas las palabras, en los contactos (nombre, correo, teléfono, localidad, segmento), las oportunidades (servicio,
+// próximo paso, notas) y las anotaciones (texto) del archivo de datos «d» del negocio «n». Devuelve hasta «tope» resultados: { tipo, cid, op, titulo, detalle, excluido }.
+function buscarEnDatos(d, n, texto, tope){
+  const palabras = normalizar(texto).split(/\s+/).filter(Boolean);
+  if(!d || !palabras.length) return [];
+  const max = tope > 0 ? tope : Infinity, P = (n && n.mapa) || {}, C = indiceDe(d.contactos), res = [], libre = () => res.length < max;
+  const coincide = campos => { const b = normalizar(campos.join(' ')); return palabras.every(p => b.includes(p)); };
+  (d.contactos || []).forEach(c => {
+    if(libre() && coincide([c.entidad, c.persona, c.email, c.telefono, c.localidad, c.segmento]))
+      res.push({ tipo: 'Contacto', cid: c.id, titulo: nombre(c), detalle: [c.email, c.telefono, c.localidad, c.segmento].filter(Boolean).join(' · '), excluido: !!c.excluido });
+  });
+  (d.oportunidades || []).forEach(o => {
+    const c = C.get(o.contactoId), p = P[o.producto];
+    if(libre() && c && p && coincide([o.servicio, o.proximoPaso, o.notas]))
+      res.push({ tipo: 'Oportunidad', cid: c.id, op: o.id, titulo: nombre(c), detalle: [p.corto + (o.servicio ? ': ' + o.servicio : ''), o.fase, o.proximoPaso].filter(Boolean).join(' · ') });
+  });
+  (d.actividades || []).forEach(a => {
+    const c = C.get(a.contactoId);
+    if(libre() && c && coincide([a.texto]))
+      res.push({ tipo: 'Anotación', cid: c.id, op: a.oportunidadId || '', titulo: nombre(c), detalle: fechaES(a.fecha) + ' · ' + a.tipo + ': ' + String(a.texto || '').slice(0, 110) });
+  });
+  return res;
+}
+// Lo mismo en varios negocios a la vez. docsPorNegocio es { CODIGO: archivo de datos ya leído }. Devuelve { CODIGO: { resultados, hayMas } } con hasta «tope» resultados
+// por negocio (8 si no se dice); hayMas dice si había más de los que se enseñan.
+function buscarEnTodos(docsPorNegocio, texto, tope){
+  const max = tope > 0 ? tope : 8, res = {};
+  Object.keys(docsPorNegocio || {}).forEach(codigo => {
+    const n = negocioPorCodigo(codigo), todos = n ? buscarEnDatos(docsPorNegocio[codigo], n, texto, max + 1) : [];
+    res[codigo] = { resultados: todos.slice(0, max), hayMas: todos.length > max };
+  });
+  return res;
+}
+// https://wa.me/<cifras> para un móvil, o '' si el teléfono no sirve para WhatsApp. Sin el 00 de delante, un móvil español de 9 cifras (6 o 7 al principio) lleva el 34;
+// uno de 11 cifras que ya empieza por 34 y 6 o 7 vale tal cual, y un número extranjero con su prefijo (de 10 a 15 cifras, sin empezar por 34 ni por 0) también. Un fijo, un número corto o uno raro, no.
+function enlaceWhatsApp(telefono){
+  let c = String(telefono ?? '').replace(/\D/g, '');
+  if(c.startsWith('00')) c = c.slice(2);
+  const espanol = c.length === 9 && /^[67]/.test(c), conPrefijo = c.length === 11 && /^34[67]/.test(c);
+  const extranjero = c.length > 9 && c.length <= 15 && !c.startsWith('34') && !c.startsWith('0');
+  if(!espanol && !conPrefijo && !extranjero) return '';
+  return 'https://wa.me/' + (espanol ? '34' + c : c);
+}
+// Qué hace el botón «Abrir carpeta o documento» con lo que hay en el campo «enlace» de un contacto: una dirección web se abre en otra pestaña (tipo «web»); una ruta del PC
+// la abre el servidor local si la conexión es la de ese servidor y trae su permiso «abrir» (tipo «servidor»); en cualquier otro caso solo se puede copiar (tipo «copiar»).
+// Vacío da null. Si la ruta viene entre comillas (como la da «Copiar como ruta de acceso» de Windows), se quitan.
+function destinoEnlace(enlace, conexion){
+  let e = String(enlace ?? '').trim();
+  if(/^"[^"]*"$/.test(e)) e = e.slice(1, -1).trim();
+  if(!e) return null;
+  if(/^https?:\/\//i.test(e)) return { tipo: 'web', url: e };
+  const rutaPC = /^[a-zA-Z]:([\\/]|$)/.test(e) || e.startsWith('\\\\');
+  if(rutaPC && conexion && conexion.servidor && typeof conexion.abrir === 'string' && conexion.abrir) return { tipo: 'servidor', ruta: e };
+  return { tipo: 'copiar', ruta: e };
+}
+if(typeof module !== 'undefined') module.exports = { NEGOCIOS, CRM_NEGOCIO, negocioPorCodigo, activarNegocio, elegirNegocio, comprobar, idxFase, normalizar, rolPorSegmento, diferencias, fusionar, sellar, registrar, textoCambio, clonar, personaCorta, nombre, fechaES, nombrePlano, cifrasTelefono, fichasParecidas, buscarEnDatos, buscarEnTodos, enlaceWhatsApp, destinoEnlace, PRIOS, SEMANAS, I_CLIENTE, I_APLAZADO, I_PERDIDO, actual: () => ({ NEG, PRODUCTOS, CODIGOS, GENERICAS, FASES, TIPOS }) };
+
+// ---------- Dinero y paradas (sin pantalla; se prueba aparte) ----------
+// Las mismas definiciones valen en la página, en el servidor del PC y en las herramientas de Python (contrato B):
+//  - La posición i (0 a 7) de una oportunidad es la de su fase entre las ocho de su producto: 0 Pendiente, 1 Contactado, 2 Conversación,
+//    3 y 4 «en juego», 5 Cliente, 6 Aplazado, 7 Perdido. Una fase que el producto no tiene cuenta como 0, igual que idxFase.
+//  - «En juego» son las de i de 1 a 4. Alta (euros, una vez) y cuota (euros al mes): null cuenta como 0.
+//  - «Previsto» pondera el alta y la cuota de las que están en juego con un tanto por ciento por fase (PESOS_FASE, o los ocho números de
+//    `pesosFase` del negocio, si los trae). Se suma sin redondear y se redondea una sola vez, a euros enteros, con la mitad hacia arriba.
+//  - «Ganado» y «perdido este mes» son las de i 5 y 7 cuya fecha de cierre (o, si está vacía, `actualizado`) cae en el mes de hoy.
+//  - «Parada» es una de i de 1 a 4, sin `fechaProximo`, cuyo último movimiento es de hace más de `diasParada` días (del negocio; 30 si no lo dice).
+//    Último movimiento: la fecha mayor entre sus anotaciones, las generales de su contacto (sin oportunidad), su `actualizado` y su `creado`.
+//    Sin ninguna fecha válida no se puede saber desde cuándo, y no cuenta como parada. A igual número de días se respeta el orden del archivo.
+const PESOS_FASE = [0, 10, 25, 50, 75, 100, 0, 0];
+const DIAS_PARADA = 30;
+// Euros enteros con punto de miles: euros(12500) da «12.500 €». Para una cuota, euros(840) + '/mes'. Vacío si no hay número.
+function euros(n){
+  if(n == null || n === '') return '';
+  const v = Math.round(Number(n));
+  if(!Number.isFinite(v)) return '';
+  return (v < 0 ? '-' : '') + String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' €';
+}
+// Los ocho tantos por ciento que usa el negocio: los suyos (`pesosFase`) si son ocho números de 0 a 100; si no, los de siempre.
+function pesosDe(negocio){
+  const p = negocio && negocio.pesosFase;
+  return Array.isArray(p) && p.length === 8 && p.every(x => typeof x === 'number' && x >= 0 && x <= 100) ? p.slice() : PESOS_FASE.slice();
+}
+// Cuántos días sin movimiento hacen falta para que una oportunidad cuente como parada: `diasParada` del negocio, o 30.
+function diasParadaDe(negocio){
+  const n = negocio && negocio.diasParada;
+  return typeof n === 'number' && Number.isFinite(n) && n > 0 ? n : DIAS_PARADA;
+}
+// Como idxFase, pero con el negocio que se le pasa en vez del activo: las fases de su producto, o las del negocio si el producto no se conoce.
+function idxFaseDe(negocio, o){
+  const cod = o && o.producto, mapa = (negocio && negocio.mapa) || {};
+  const p = Object.prototype.hasOwnProperty.call(mapa, cod) ? mapa[cod] : (negocio && Array.isArray(negocio.productos) ? negocio.productos.find(x => x && x.codigo === cod) : null);
+  const i = ((p && p.fases) || (negocio && negocio.fases) || []).indexOf(o && o.fase);
+  return i < 0 ? 0 : i;
+}
+// La fecha AAAA-MM-DD de un valor (vale también una con hora, como las de `actualizado`); vacío si no es una fecha.
+function fechaDia(v){ const s = String(v == null ? '' : v).slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : ''; }
+// Días de una fecha AAAA-MM-DD a otra, sin que el cambio de hora cuente.
+function diasEntre(desde, hasta){
+  const t = s => { const [a, m, d] = s.split('-').map(Number); return Date.UTC(a, m - 1, d); };
+  return Math.round((t(hasta) - t(desde)) / 86400000);
+}
+// El dinero de un negocio. d son los datos (contactos, oportunidades y anotaciones; basta con las oportunidades), negocio su configuración
+// y hoyISO el día de hoy (AAAA-MM-DD). Devuelve { enJuego: { porFase: [{ i, fase, n, alta, cuota }] (solo las fases con algo), n, alta, cuota },
+// previsto: { alta, cuota }, ganadoMes: { n, alta, cuota }, perdidoMes: { n, alta, cuota, motivos: { motivo: recuento } }, hayImportes }.
+// `fase` es el nombre de la fase en el negocio. hayImportes dice si alguna oportunidad, en cualquier fase, tiene alta o cuota.
+function dinero(d, negocio, hoyISO){
+  const pesos = pesosDe(negocio), mes = fechaDia(hoyISO).slice(0, 7);
+  const num = v => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+  const fases = new Map(), motivos = new Map();
+  const juego = { porFase: [], n: 0, alta: 0, cuota: 0 }, ganado = { n: 0, alta: 0, cuota: 0 }, perdido = { n: 0, alta: 0, cuota: 0, motivos: {} };
+  let previstoAlta = 0, previstoCuota = 0, hayImportes = false;
+  ((d && d.oportunidades) || []).forEach(o => {
+    if(!o) return;
+    const alta = num(o.alta), cuota = num(o.cuota), i = idxFaseDe(negocio, o);
+    if(alta !== 0 || cuota !== 0) hayImportes = true;
+    if(i >= 1 && i <= 4){
+      let f = fases.get(i);
+      if(!f){ f = { i, fase: (negocio && negocio.fases && negocio.fases[i]) || '', n: 0, alta: 0, cuota: 0 }; fases.set(i, f); }
+      f.n++; f.alta += alta; f.cuota += cuota;
+      juego.n++; juego.alta += alta; juego.cuota += cuota;
+      previstoAlta += alta * pesos[i]; previstoCuota += cuota * pesos[i];
+    } else if((i === I_CLIENTE || i === I_PERDIDO) && mes && fechaDia(o.fechaCierre || o.actualizado).slice(0, 7) === mes){
+      const x = i === I_CLIENTE ? ganado : perdido;
+      x.n++; x.alta += alta; x.cuota += cuota;
+      if(i === I_PERDIDO){ const m = String(o.motivoPerdida == null ? '' : o.motivoPerdida).trim() || 'Sin motivo'; motivos.set(m, (motivos.get(m) || 0) + 1); }
+    }
+  });
+  juego.porFase = [...fases.values()].sort((a, b) => a.i - b.i);
+  perdido.motivos = Object.fromEntries(motivos);
+  return { enJuego: juego, previsto: { alta: Math.round(previstoAlta / 100), cuota: Math.round(previstoCuota / 100) }, ganadoMes: ganado, perdidoMes: perdido, hayImportes };
+}
+// Las oportunidades paradas, de más días a menos: [{ id (de la oportunidad), contactoId, contacto (entidad, o persona), producto, fase, dias }].
+function paradas(d, negocio, hoyISO){
+  const hoy = fechaDia(hoyISO), limite = diasParadaDe(negocio);
+  if(!hoy) return [];
+  const contactos = new Map(), deOp = new Map(), generales = new Map();
+  ((d && d.contactos) || []).forEach(c => { if(c && c.id != null) contactos.set(c.id, c); });
+  ((d && d.actividades) || []).forEach(a => {
+    const f = fechaDia(a && a.fecha); if(!f) return;
+    const sinOp = a.oportunidadId == null || a.oportunidadId === '', mapa = sinOp ? generales : deOp, clave = sinOp ? a.contactoId : a.oportunidadId;
+    if(f > (mapa.get(clave) || '')) mapa.set(clave, f);
+  });
+  const lista = [];
+  ((d && d.oportunidades) || []).forEach(o => {
+    if(!o || o.fechaProximo) return;
+    const i = idxFaseDe(negocio, o); if(i < 1 || i > 4) return;
+    const ultimo = [deOp.get(o.id), generales.get(o.contactoId), fechaDia(o.actualizado), fechaDia(o.creado)].filter(Boolean).sort().pop();
+    if(!ultimo) return;
+    const dias = diasEntre(ultimo, hoy); if(!(dias > limite)) return;
+    const c = contactos.get(o.contactoId);
+    lista.push({ id: o.id, contactoId: o.contactoId, contacto: c ? (c.entidad || c.persona || c.id || '') : '', producto: o.producto, fase: o.fase, dias });
+  });
+  return lista.sort((a, b) => b.dias - a.dias);
+}
+if(typeof module !== 'undefined') Object.assign(module.exports, { euros, dinero, paradas, pesosDe, diasParadaDe, idxFaseDe, diasEntre, PESOS_FASE, DIAS_PARADA });
 </script>
 
 <script>
@@ -769,6 +1035,11 @@ let vista = 'panel', prod = '', opMarcada = null;
 let origenFoco = null, pendienteDeshacer = null, formAgenda = null, plegadas = {}, historialCompleto = false, resolverCuadro = null;
 const lectoresHoy = new Map();
 let vecesHoy = 0, enRepoActual = null;
+// Fichas repetidas: lo escrito en «Nuevo contacto» o en «Añadir rápido» mientras se decide qué hacer con las parecidas. Buscar en todos los negocios (solo con GitHub):
+// lo leído de cada negocio en esta sesión, la espera tras escribir, y cuántas búsquedas van (para que solo valga la última).
+let altaPendiente = null, rapidoPendiente = null, relojTodos = null, vecesTodos = 0;
+const lecturasTodos = new Map();
+const MAX_EDAD_TODOS = 60000, POR_NEGOCIO = 8;
 const VISTAS = ['panel', 'embudo', 'ops', 'contactos', 'agenda', 'registro'], MAS_VISTAS = ['panel', 'ops', 'registro'];
 // Pantalla de inicio: archivo que recuerda el navegador de cada negocio, negocio de la tarjeta cuyo «Abrir» se ha pulsado
 // (sin la API de archivos) y cuántas veces se han pintado las tarjetas, para que solo cuente el último pintado.
@@ -784,16 +1055,12 @@ const ICONO_BASE = $('icono').getAttribute('href') || '';   // el icono de la p�
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function hoyISO(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
 function sumarDias(iso, n){ const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
-function fechaES(iso){ if(!iso) return ''; const [a,m,d] = iso.split('-'); return d + '/' + m + '/' + a; }
-const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DIAS =['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 function fechaLarga(iso){ const d = new Date(iso + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + fechaES(iso); }
 // «dd/mm/aaaa hh:mm» en la hora de este ordenador; vacío si no es una fecha.
 function fechaHoraCorta(iso){ const d = new Date(iso || ''); if(!iso || isNaN(d)) return ''; const p = x => String(x).padStart(2, '0'); return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
 function ahora(){ return new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }
 function nuevoId(pref){ return pref + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
-function euros(n){ if(n == null || n === '') return ''; const v = Math.round(Number(n)); return (v < 0 ? '-' : '') + String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' €'; }
-function personaCorta(p){ return String(p || '').split(/[,(]/)[0].trim(); }
-function nombre(c){ const p = personaCorta(c.persona); return p && c.entidad ? p + ' · ' + c.entidad : (c.entidad || p || 'Sin nombre'); }
 function estado(txt, clase){ const e = $('estado'); e.textContent = txt; e.className = clase || ''; }
 function contacto(id){ return datos.contactos.find(x => x.id === id); }
 function opsDe(cid){ return datos.oportunidades.filter(o => o.contactoId === cid); }
@@ -803,6 +1070,8 @@ function importe(o){ const a = o.alta, c = o.cuota; if(a == null && c == null) r
 function vivaIdx(i){ return i <= 4; }
 function enProducto(o){ return !prod || o.producto === prod; }
 function opsVisibles(){ return datos.oportunidades.filter(o => { const c = contacto(o.contactoId); return c && enProducto(o); }); }
+// Los datos tal como los ve la pantalla (solo el producto elegido arriba, y sin oportunidades sin contacto), para dinero() y paradas().
+function datosVisibles(){ return { contactos: datos.contactos, oportunidades: opsVisibles(), actividades: datos.actividades }; }
 function conAgenda(o){ const c = contacto(o.contactoId); return c && !c.excluido && o.fechaProximo && idxFase(o) !== I_PERDIDO; }
 function conToques(){ return NEG.escritos.length > 0 && !!NEG.respuesta && !!NEG.maxToques; }
 function escritosA(cid){ const hoy = hoyISO(); return datos.actividades.filter(a => a.contactoId === cid && NEG.escritos.includes(a.tipo) && (a.fecha || '') <= hoy).length; }
@@ -877,7 +1146,8 @@ async function conexionDelServidor(){
     const r = await fetch(location.origin + '/gh/estado', { cache: 'no-store', signal: AbortSignal.timeout(2500) });
     if(!r.ok) return null;
     const e = await r.json();
-    if(e && e.modo === 'servidor' && /^[\w.-]+\/[\w.-]+$/.test(e.repo || '')) return { repo: e.repo, rama: e.rama || 'principal', token: 'servidor', apiBase: location.origin + '/gh', servidor: true };
+    // «abrir» es el permiso que da el servidor para pedirle que abra una carpeta o un documento del PC; si no lo trae, queda vacío y esos enlaces solo se copian.
+    if(e && e.modo === 'servidor' && /^[\w.-]+\/[\w.-]+$/.test(e.repo || '')) return { repo: e.repo, rama: e.rama || 'principal', token: 'servidor', apiBase: location.origin + '/gh', servidor: true, abrir: typeof e.abrir === 'string' ? e.abrir : '' };
   } catch(err){}
   return null;
 }
@@ -1044,7 +1314,7 @@ async function leerManejador(h, codigoEsperado){
 // Apunta qué negocio se ha abierto y cuándo, y pone su código en la dirección (CRM.html#CODIGO), para que al recargar salga su tarjeta.
 function recordarUso(){
   try { localStorage.setItem('crm-global-ultimo', NEG.codigo); localStorage.setItem(NEG.bd + '-ultimo', new Date().toISOString()); } catch(e){}
-  try { history.replaceState(null, '', location.href.split('#')[0] + '#' + NEG.codigo); } catch(e){}
+  ponerDireccion(location.href.split('#')[0] + '#' + NEG.codigo);
 }
 async function abrirConSelector(codigoEsperado){
   try {
@@ -1132,6 +1402,7 @@ async function escribir(intento){
     ultimaModif = huella(await manejador.getFile());
     base = JSON.parse(texto);
     sucio = edicion !== ed;
+    lecturasTodos.delete(NEG.codigo);   // lo que la búsqueda en todos los negocios tenía leído de este ya no vale
     try { localStorage.setItem(NEG.bd + '-copia', texto); } catch(e){}
     if(fusion) refrescarVista();
     if(choques.length) estado('Guardado a las ' + ahora() + ', junto con lo de ' + fusion.conQuien + '. Ojo: ' + (choques.length === 1 ? 'un campo lo habíais cambiado los dos' : choques.length + ' campos los habíais cambiado los dos') + '; se ha quedado lo tuyo y lo anterior está en «Registro»', 'sucio');
@@ -1215,7 +1486,7 @@ async function inicio(){
   // «Abrir otro archivo»: antes guarda lo pendiente del negocio abierto; si se cancela el selector, no cambia nada.
   $('bCambiar').onclick = async () => { if(datos && !await guardarAntesDeCambiar()) return; if(hayApi) abrirConSelector(); else { codigoEntrada = ''; $('entradaArchivo').click(); } };
   $('bNegocio').onclick = cambiarNegocio;
-  $('bNuevo').onclick = () => nuevoContacto();
+  $('bNuevo').onclick = abrirAlta;
   $('bAyuda').onclick = () => { pintarAyuda(); $('ayuda').showModal(); };   // se vuelve a pintar cada vez: siempre la del negocio abierto, o la general en el inicio
   $('bCerrarAyuda').onclick = () => $('ayuda').close();
   document.querySelectorAll('nav[role=tablist] [role=tab]').forEach(b => b.onclick = () => ponerVista(b.dataset.vista));
@@ -1241,6 +1512,11 @@ async function inicio(){
   $('opsFicha').addEventListener('change', cambioOp);
   $('opsFicha').addEventListener('click', e => { const b = e.target.closest('[data-quitar]'); if(b) quitarOp(b.dataset.quitar); });
   $('ficha').addEventListener('change', e => { if(e.target.dataset && e.target.dataset.c) cambioContacto(e.target); });
+  // Al escribir el correo o el teléfono, si otra ficha los tiene, un aviso debajo del campo con un enlace a esa ficha.
+  $('ficha').addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.c; if(k === 'email' || k === 'telefono') avisoRepetida(k); });
+  $('datosFicha').addEventListener('click', e => { const a = e.target.closest('a[data-abrir-ficha]'); if(a){ e.preventDefault(); abrirFicha(a.dataset.abrirFicha); } });
+  // Los dos botones nuevos de arriba de la ficha: WhatsApp (deja elegido ese tipo al anotar) y «Abrir carpeta o documento».
+  $('enlaces').addEventListener('click', e => { if(e.target.closest('a[data-whatsapp]')) elegirTipoWhatsApp(); else if(e.target.closest('button[data-abrir-enlace]')) abrirEnlace(); });
   enlazarPantalla();
   textoInicioLocal = $('textoInicio').textContent;
   if(!conexion) conexion = await conexionDelServidor();
@@ -1276,11 +1552,24 @@ function enlazarPantalla(){
   $('bDeshacerLocal').onclick = deshacerLocal;
   $('bHoyActualizar').onclick = () => pintarHoyTodos();
   $('hoyTodosCuerpo').addEventListener('click', e => { const b = e.target.closest('.linea-hoy'); if(b) abrirDesdeHoy(b.dataset.codigo, b.dataset.id, b.dataset.op); });
-  $('kpis').addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if(b) ponerVista(b.dataset.ir); });
+  $('kpis').addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if(b){ ponerVista(b.dataset.ir); if(b.dataset.seccion) irASeccionAgenda(b.dataset.seccion); } });
   $('agenda').addEventListener('click', accionAgenda);
   $('agenda').addEventListener('submit', e => { e.preventDefault(); hechoAgenda(e.target); });
   $('agenda').addEventListener('input', e => { if(e.target.dataset.f === 'tipo') avisoFaseHecho(e.target.closest('form')); });
-  $('formRapido').addEventListener('submit', e => { e.preventDefault(); const t = $('cRapido').value.trim(); if(!t){ $('cRapido').focus(); return; } $('cRapido').value = ''; anadirRapido(t); });
+  $('formRapido').addEventListener('submit', e => { e.preventDefault(); const t = $('cRapido').value.trim(); if(!t){ $('cRapido').focus(); return; } anadirRapido(t); });
+  $('cRapido').addEventListener('input', quitarAvisoRapido);
+  $('rapidoAviso').addEventListener('click', accionRapido);
+  // «Nuevo contacto»: un cuadro con los datos principales. Al crear, si hay fichas parecidas, el aviso sale dentro del cuadro y no se crea nada hasta decidir.
+  $('formAlta').addEventListener('submit', e => { e.preventDefault(); guardarAlta(); });
+  $('formAlta').addEventListener('input', quitarAvisoAlta);
+  $('bAltaCancelar').onclick = () => $('alta').close();
+  $('alta').addEventListener('close', () => { altaPendiente = null; });
+  $('altaAviso').addEventListener('click', accionAlta);
+  // Buscar en todos los negocios (inicio): espera 300 ms tras la última tecla, o Enter para buscar ya.
+  const cajaTodos = $('busquedaTodos');
+  cajaTodos.addEventListener('input', () => { clearTimeout(relojTodos); if(!cajaTodos.value.trim()){ vecesTodos++; $('busquedaTodosCuerpo').innerHTML = ''; return; } relojTodos = setTimeout(buscarTodos, 300); });
+  cajaTodos.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); clearTimeout(relojTodos); buscarTodos(); } });
+  $('busquedaTodosCuerpo').addEventListener('click', e => { const b = e.target.closest('.linea-hoy'); if(b) abrirDesdeBusqueda(b.dataset.codigo, b.dataset.id, b.dataset.op); });
   const caja = $('busqueda');
   caja.addEventListener('input', pintarBusqueda);
   caja.addEventListener('focus', () => { clearTimeout(relojBusqueda); if(caja.value.trim()) pintarBusqueda(); });
@@ -1292,16 +1581,20 @@ function enlazarPantalla(){
   // Al pasar de móvil a ordenador (o al revés) cambian el embudo y las listas, así que se vuelven a pintar.
   window.matchMedia('(max-width:720px)').addEventListener('change', () => { cerrarMenus(); if(datos) pintarTodo(); });
 }
-// Escape cierra el menú abierto o, si no, la ficha. «/» y Ctrl+K llevan a la búsqueda, salvo si ya se está escribiendo en un campo.
+// Escape cierra el menú abierto o, si no, la ficha. «/» y Ctrl+K llevan a la búsqueda, salvo si ya se está escribiendo en un campo: a la de la cabecera con un
+// negocio abierto y, en el inicio con conexión a GitHub, a la de todos los negocios.
 function teclasGlobales(e){
   if(e.key === 'Escape'){
     if(!$('menuMas').hidden || !$('menuVistas').hidden){ const boton = !$('menuMas').hidden ? $('bMas') : $('bMasVistas'); cerrarMenus(); boton.focus(); }   // y el foco vuelve al botón que lo abrió
     else if(!$('ficha').hidden && !$('ayuda').open && !$('cuadro').open) cerrarFicha();
     return;
   }
-  if(!datos || !$('ficha').hidden || $('ayuda').open || $('cuadro').open || enCampoDeTexto(e.target) || e.altKey) return;
+  if(!$('ficha').hidden || $('ayuda').open || $('cuadro').open || $('alta').open || enCampoDeTexto(e.target) || e.altKey) return;
   const barra = e.key === '/' && !e.ctrlKey && !e.metaKey, ctrlK = (e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'k';
-  if(barra || ctrlK){ e.preventDefault(); $('busqueda').focus(); $('busqueda').select(); }
+  if(!barra && !ctrlK) return;
+  const enInicio = !datos && !$('pantallaInicio').classList.contains('oculto') && !$('buscarTodos').classList.contains('oculto');
+  const caja = datos ? $('busqueda') : enInicio ? $('busquedaTodos') : null;
+  if(caja){ e.preventDefault(); caja.focus(); caja.select(); }
 }
 // Las flechas pasan de una pestaña a otra (y Inicio y Fin van a la primera y la última).
 function moverEntrePestanas(e){
@@ -1341,39 +1634,23 @@ function devolverFoco(){
 
 // ---------- búsqueda global ----------
 // Un campo en la cabecera que busca, sin tildes ni mayúsculas, en contactos (nombre, correo, teléfono, localidad, segmento),
-// oportunidades (servicio, próximo paso, notas) y anotaciones (texto). Todas las palabras escritas tienen que estar. Enseña hasta 20.
+// oportunidades (servicio, próximo paso, notas) y anotaciones (texto). Todas las palabras escritas tienen que estar. Enseña hasta 20 (la búsqueda es buscarEnDatos del motor).
+// Con conexión a GitHub, la última línea de la lista es «Buscar «texto» en todos los negocios», que lleva al inicio con esa búsqueda hecha.
 const MAX_RESULTADOS = 20;
 let resultadosBusq = [], activoBusq = -1, relojBusqueda = null;
-function buscarGlobal(texto){
-  const palabras = normalizar(texto).split(/\s+/).filter(Boolean);
-  if(!palabras.length) return [];
-  const coincide = campos => { const b = normalizar(campos.join(' ')); return palabras.every(p => b.includes(p)); };
-  const res = [], libre = () => res.length < MAX_RESULTADOS;
-  datos.contactos.forEach(c => {
-    if(libre() && coincide([c.entidad, c.persona, c.email, c.telefono, c.localidad, c.segmento]))
-      res.push({ tipo: 'Contacto', cid: c.id, titulo: nombre(c), detalle: [c.email, c.telefono, c.localidad, c.segmento].filter(Boolean).join(' · '), excluido: !!c.excluido });
-  });
-  datos.oportunidades.forEach(o => {
-    const c = contacto(o.contactoId), P = PRODUCTOS[o.producto];
-    if(libre() && c && P && coincide([o.servicio, o.proximoPaso, o.notas]))
-      res.push({ tipo: 'Oportunidad', cid: c.id, op: o.id, titulo: nombre(c), detalle: [P.corto + (o.servicio ? ': ' + o.servicio : ''), o.fase, o.proximoPaso].filter(Boolean).join(' · ') });
-  });
-  datos.actividades.forEach(a => {
-    const c = contacto(a.contactoId);
-    if(libre() && c && coincide([a.texto]))
-      res.push({ tipo: 'Anotación', cid: c.id, op: a.oportunidadId || '', titulo: nombre(c), detalle: fechaES(a.fecha) + ' · ' + a.tipo + ': ' + String(a.texto || '').slice(0, 110) });
-  });
-  return res;
-}
+function buscarGlobal(texto){ return datos ? buscarEnDatos(datos, NEG, texto, MAX_RESULTADOS) : []; }
 function pintarBusqueda(){
   clearTimeout(relojBusqueda);
   const t = $('busqueda').value;
   if(!datos || !t.trim()){ cerrarBusqueda(); return; }
   resultadosBusq = buscarGlobal(t);
+  const hallados = resultadosBusq.length;
+  if(conexion) resultadosBusq.push({ tipo: 'Todos', texto: t.trim() });
   activoBusq = resultadosBusq.length ? 0 : -1;
-  $('resultadosBusqueda').innerHTML = resultadosBusq.length
-    ? resultadosBusq.map((r, i) => '<li role="option" id="res-' + i + '" data-i="' + i + '" aria-selected="' + (i === 0) + '"><span class="res-tipo">' + esc(r.tipo) + (r.excluido ? ' · excluido' : '') + '</span><b>' + esc(r.titulo) + '</b><span class="sub">' + esc(r.detalle) + '</span></li>').join('')
-    : '<li class="sin-resultados" role="option" aria-disabled="true">Nada encontrado. Prueba con otra palabra o con menos.</li>';
+  $('resultadosBusqueda').innerHTML = (hallados ? '' : '<li class="sin-resultados" role="option" aria-disabled="true">Nada encontrado. Prueba con otra palabra o con menos.</li>') +
+    resultadosBusq.map((r, i) => r.tipo === 'Todos'
+      ? '<li role="option" id="res-' + i + '" data-i="' + i + '" class="res-todos" aria-selected="' + (i === 0) + '"><b>Buscar «' + esc(recorte(r.texto, 40)) + '» en todos los negocios</b></li>'
+      : '<li role="option" id="res-' + i + '" data-i="' + i + '" aria-selected="' + (i === 0) + '"><span class="res-tipo">' + esc(r.tipo) + (r.excluido ? ' · excluido' : '') + '</span><b>' + esc(r.titulo) + '</b><span class="sub">' + esc(r.detalle) + '</span></li>').join('');
   $('resultadosBusqueda').hidden = false;
   $('busqueda').setAttribute('aria-expanded', 'true');
   if(activoBusq >= 0) $('busqueda').setAttribute('aria-activedescendant', 'res-0'); else $('busqueda').removeAttribute('aria-activedescendant');
@@ -1404,7 +1681,9 @@ function teclasBusqueda(e){
   }
 }
 function abrirResultado(i){
-  const r = resultadosBusq[i]; if(!r || !contacto(r.cid)) return;
+  const r = resultadosBusq[i]; if(!r) return;
+  if(r.tipo === 'Todos'){ cerrarBusqueda(); $('busqueda').value = ''; buscarDesdeNegocio(r.texto); return; }
+  if(!contacto(r.cid)) return;
   cerrarBusqueda(); $('busqueda').value = '';
   abrirFicha(r.cid, r.op || null);
 }
@@ -1421,13 +1700,18 @@ function pasosDeHoy(d, n, hoy){
   });
   return res.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.prio - b.prio);
 }
-async function leerPasosDe(n, hoy){
+// El cargador de los archivos de datos de todos los negocios, el de «Hoy en todos» y el de buscar en todos: lee el archivo en crudo y lo comprueba. Devuelve { d } o { error }.
+async function leerDatosDe(n){
   try {
     const clave = [conexion.repo, conexion.rama, n.archivo].join('|');
     let h = lectoresHoy.get(clave); if(!h){ h = archivoGitHub(conexion, n.archivo); lectoresHoy.set(clave, h); }   // el mismo lector: la segunda vez es una lectura condicional (304)
-    const d = comprobar(JSON.parse(await (await h.getFile()).text()), n);
-    return { pasos: pasosDeHoy(d, n, hoy) };
+    return { d: comprobar(JSON.parse(await (await h.getFile()).text()), n) };
   } catch(e){ return { error: (e && e.message) || String(e) }; }
+}
+async function leerPasosDe(n, hoy){
+  const r = await leerDatosDe(n);
+  if(r.error) return { error: r.error };
+  try { return { pasos: pasosDeHoy(r.d, n, hoy) }; } catch(e){ return { error: (e && e.message) || String(e) }; }
 }
 function plural(n, uno, varios){ return n + ' ' + (n === 1 ? uno : varios); }
 function bloqueHoy(n, r, hoy){
@@ -1472,6 +1756,68 @@ async function verConexion(){
 async function verHoyTodos(){
   if(datos && !await cambiarNegocio()) return;
   $('hoyTodos').scrollIntoView({ block: 'start' });
+}
+
+// ---------- buscar en todos los negocios (inicio, solo con conexión a GitHub) ----------
+// Escribir en la caja del inicio (con una espera de 300 ms) lee el archivo de cada negocio con el cargador de «Hoy en todos» y busca en todos a la vez (buscarEnTodos, sin tildes
+// ni mayúsculas), con hasta 8 resultados por negocio, cada bloque con el nombre y el color de su negocio. Lo leído se guarda en memoria y se vuelve a leer si tiene más de 60 s o si
+// desde aquí se ha guardado ese negocio. Si un archivo no se puede leer, se dice en su bloque y se sigue con los demás. Un toque en un resultado abre ese negocio en esa ficha.
+function olvidarLecturas(){ lectoresHoy.clear(); lecturasTodos.clear(); }
+async function datosDeTodos(){
+  const t = Date.now();
+  const lista = await Promise.all(NEGOCIOS.slice().map(async n => {
+    const e = lecturasTodos.get(n.codigo);
+    if(e && t - e.cuando <= MAX_EDAD_TODOS) return [n.codigo, e.r];
+    const r = enRepoActual && !enRepoActual.has(n.archivo) ? { sinArchivo: true } : await leerDatosDe(n);
+    if(r.d) lecturasTodos.set(n.codigo, { cuando: Date.now(), r });
+    return [n.codigo, r];
+  }));
+  return new Map(lista);
+}
+function bloqueBusqueda(n, r, h){
+  const claro = (n.colores.claro && n.colores.claro.acento) || 'var(--accent)', oscuro = (n.colores.oscuro && n.colores.oscuro.acento) || claro;
+  let resumen = '', cuerpo;
+  if(r.error) cuerpo = '<p class="error">No se ha podido leer ' + esc(n.archivo) + ': ' + esc(r.error) + '</p>';
+  else if(r.sinArchivo) cuerpo = '<p class="sub">Todavía no tiene archivo en GitHub.</p>';
+  else if(!h || !h.resultados.length) cuerpo = '<p class="sub">Nada encontrado.</p>';
+  else {
+    resumen = '<span class="sub">' + (h.hayMas ? 'los ' + h.resultados.length + ' primeros' : plural(h.resultados.length, 'resultado', 'resultados')) + '</span>';
+    cuerpo = h.resultados.map(x => '<button type="button" class="linea-hoy" data-codigo="' + esc(n.codigo) + '" data-id="' + esc(x.cid) + '" data-op="' + esc(x.op || '') + '"><div class="t1"><span class="res-tipo">' +
+      esc(x.tipo) + (x.excluido ? ' · excluido' : '') + '</span> ' + esc(x.titulo) + '</div><div class="t2">' + esc(x.detalle) + '</div></button>').join('') +
+      (h.hayMas ? '<p class="sub">Hay más: escribe algo más para afinar la búsqueda.</p>' : '');
+  }
+  return '<div class="hoy-negocio" data-codigo="' + esc(n.codigo) + '" style="--c:' + esc(claro) + ';--c-oscuro:' + esc(oscuro) + '"><h4>' + esc(n.nombre) + resumen + '</h4>' + cuerpo + '</div>';
+}
+async function buscarTodos(){
+  const caja = $('busquedaTodos'), cuerpo = $('busquedaTodosCuerpo'), vez = ++vecesTodos, cx = conexion, texto = caja.value.trim();
+  if(!texto || !cx || !NEGOCIOS.length){ cuerpo.innerHTML = ''; return; }
+  const t = Date.now();
+  if(NEGOCIOS.some(n => { const e = lecturasTodos.get(n.codigo); return !e || t - e.cuando > MAX_EDAD_TODOS; })) cuerpo.innerHTML = '<p class="sub">Leyendo los archivos de todos los negocios...</p>';
+  const lecturas = await datosDeTodos();
+  if(vez !== vecesTodos || cx !== conexion || caja.value.trim() !== texto) return;   // mientras se leía se ha escrito otra cosa, se ha vuelto a buscar o se ha cambiado la conexión
+  const docs = {}; NEGOCIOS.forEach(n => { const r = lecturas.get(n.codigo); if(r && r.d) docs[n.codigo] = r.d; });
+  const halladas = buscarEnTodos(docs, texto, POR_NEGOCIO);
+  cuerpo.innerHTML = NEGOCIOS.map(n => bloqueBusqueda(n, lecturas.get(n.codigo) || {}, halladas[n.codigo])).join('');
+}
+// La caja solo sale con conexión a GitHub (como «Hoy en todos»). Al volver al inicio con algo escrito, se enseña otra vez esa búsqueda con lo último guardado.
+function pintarBuscarTodos(){
+  const hay = !!conexion && NEGOCIOS.length > 0;
+  $('buscarTodos').classList.toggle('oculto', !hay);
+  if(!hay){ clearTimeout(relojTodos); vecesTodos++; $('busquedaTodosCuerpo').innerHTML = ''; return; }
+  if($('busquedaTodos').value.trim()) buscarTodos();
+}
+async function abrirDesdeBusqueda(codigo, cid, opId){
+  await abrirDeGitHub(codigo);
+  if(!NEG || NEG.codigo !== codigo || !datos) return;
+  if(contacto(cid)) abrirFicha(cid, opId || null);
+}
+// La última línea de la lista de la cabecera: guarda lo pendiente, vuelve al inicio y deja hecha esa búsqueda en todos los negocios.
+async function buscarDesdeNegocio(texto){
+  if(!await cambiarNegocio()) return;
+  const caja = $('busquedaTodos'); caja.value = texto;
+  clearTimeout(relojTodos);
+  await buscarTodos();
+  caja.focus();
 }
 
 // ---------- deshacer ----------
@@ -1537,6 +1883,7 @@ async function deshacerUltimo(){
     await w.write(previa.texto); await w.close();
     const f = await h.getFile(), texto = await f.text();
     datos = cargarMismo(texto); base = clonar(datos); ultimaModif = huella(f); sucio = false; cargaPendiente = false;
+    lecturasTodos.delete(NEG.codigo);
     try { localStorage.setItem(NEG.bd + '-copia', texto); } catch(e){}   // la copia de este navegador (para cuando no haya red) es lo último guardado
     refrescarVista();
     estado('Deshecho a las ' + ahora() + ': el archivo vuelve a la versión del ' + (fechaHoraCorta(v.cuando) || '?') + ' de ' + (v.autor || 'alguien'));
@@ -1574,6 +1921,7 @@ async function pintarTarjetas(){
   const b = $('negocios').querySelector('.destacada button');
   if(b && !$('pantallaInicio').classList.contains('oculto')) b.focus();
   enRepoActual = enRepo;
+  pintarBuscarTodos();
   pintarHoyTodos(enRepo);   // sin esperar: las tarjetas ya están, y lo de hoy tarda lo que tarde GitHub
 }
 function botonesLocal(n, h){
@@ -1623,7 +1971,7 @@ async function conectar(){
   try {
     const avisos = await cargarConfiguracion(cfg, false);
     if(!guardarConexion(cfg)) throw new Error('este navegador no deja guardar la conexión');
-    conexion = cfg; $('ghClave').value = ''; sinRed.clear(); lectoresHoy.clear();
+    conexion = cfg; $('ghClave').value = ''; sinRed.clear(); olvidarLecturas();
     rellenarSelNegocio(); pintarConexion(); await pintarTarjetas();
     estado('Sin datos abiertos');
     if(!NEGOCIOS.length) ghEstado('Conectado, pero la carpeta negocios del repositorio no tiene ningún negocio', true);
@@ -1633,7 +1981,7 @@ async function conectar(){
 }
 // «Desconectar»: borra la conexión de este navegador y vuelve al modo local, con los negocios de la propia página.
 async function desconectar(){
-  olvidarConexion(); conexion = null; olvidarRemotos(); sinRed.clear(); lectoresHoy.clear(); $('ghClave').value = '';
+  olvidarConexion(); conexion = null; olvidarRemotos(); sinRed.clear(); olvidarLecturas(); $('ghClave').value = '';
   rellenarSelNegocio(); pintarConexion(); await pintarTarjetas();
   estado('Sin datos abiertos');
   ghEstado('Desconectado: la clave se ha borrado de este navegador.');
@@ -1674,8 +2022,9 @@ async function guardarAntesDeCambiar(){
   cargaPendiente = false;
   if(!$('ficha').hidden) cerrarFicha();
   if(modoCopia){ clearTimeout(temporizador); sucio = false; return true; }   // la copia sin conexión no se guarda: lo que se haya tocado se descarta
-  if(sucio || guardando){ clearTimeout(temporizador); await escribir(); }
-  if(sucio){ estado('Hay cambios sin guardar: espera unos segundos o usa «Descargar copia» antes de cambiar de negocio', 'sucio'); return false; }
+  for(let i = 0; guardando && i < 100; i++) await new Promise(r => setTimeout(r, 100));   // si ya se está guardando, se espera a que acabe (hasta 10 s)
+  if(sucio && !guardando){ clearTimeout(temporizador); await escribir(); }
+  if(sucio || guardando){ estado('Hay cambios sin guardar: espera unos segundos o usa «Descargar copia» antes de cambiar de negocio', 'sucio'); return false; }
   return true;
 }
 // Olvida el negocio abierto (datos, archivo y vistas), para que no quede nada de él al abrir otro.
@@ -1696,7 +2045,7 @@ async function cambiarNegocio(){
   document.title = 'CRM'; $('tituloNegocio').textContent = 'CRM'; $('marca').innerHTML = ''; ponerIconoBase();
   const st = $('estiloNegocio'); if(st) st.textContent = '';   // la cabecera vuelve al color neutro; cada tarjeta lleva el suyo
   estado('Sin datos abiertos');
-  try { history.replaceState(null, '', location.href.split('#')[0]); } catch(e){}
+  ponerDireccion(location.href.split('#')[0]);
   await pintarTarjetas();
   return true;
 }
@@ -1731,14 +2080,15 @@ async function irANegocio(codigo){
 }
 // Destaca la tarjeta de un negocio poniendo su código en la dirección, igual que un enlace CRM.html#CODIGO.
 async function destacarTarjeta(codigo){
-  try { history.replaceState(null, '', location.href.split('#')[0] + '#' + codigo); } catch(e){}
+  ponerDireccion(location.href.split('#')[0] + '#' + codigo);
   await pintarTarjetas();
 }
 // Vacía las vistas y vuelve al panel, para que no quede nada de un negocio cuando se abre otro.
 function limpiarVistas(){
-  ['kpis','tarjetas','lHoy','lSemana','lUltimas','tablero','cuerpoOps','cuerpoContactos','agenda','lRegistro'].forEach(id => { $(id).innerHTML = ''; });
+  ['kpis','dineroCuerpo','tarjetas','lHoy','lSemana','lUltimas','tablero','cuerpoOps','cuerpoContactos','agenda','lRegistro'].forEach(id => { $(id).innerHTML = ''; });
   ['cuentaOps','cuentaContactos'].forEach(id => { $(id).textContent = ''; });
   ['oTexto','cTexto','eTexto','rTexto','cRapido'].forEach(id => { $(id).value = ''; });
+  quitarAvisoRapido();
   formAgenda = null;
   vista = 'panel';
   marcarVista('panel');
@@ -1785,6 +2135,7 @@ function ayudaGeneral(){
     '<b>Qué es esto.</b> Un CRM sencillo: cada negocio tiene su propio archivo de datos y nunca se mezclan. Elige un negocio en su tarjeta para abrirlo.',
     '<b>Dónde se guardan los datos.</b> Con la conexión a GitHub (más abajo), en el repositorio de datos: se guardan solos, se pueden abrir desde cualquier equipo o desde el móvil, y lo que cambien otros se recoge y se junta con lo tuyo. Sin conexión, en un archivo de tu ordenador (mejor con Chrome o Edge para que se guarde solo).',
     '<b>Hoy en todos los negocios.</b> Con la conexión a GitHub, debajo de las tarjetas sale lo atrasado y lo de hoy de todos los negocios juntos. Un toque en una línea abre ese negocio y ese contacto.',
+    '<b>Buscar en todos los negocios.</b> También con la conexión a GitHub, encima de «Hoy en todos» hay una caja (la tecla «/» te lleva a ella) que busca un nombre, un correo, un teléfono o una nota en todos los negocios a la vez, sin fijarse en tildes ni mayúsculas. Cada negocio sale con su nombre y su color; un toque en un resultado abre esa ficha.',
     '<b>Una vez dentro.</b> Arriba están el buscador (también con la tecla «/»), «Nuevo contacto» y el menú de los tres puntos, con exportar, copia, tu nombre, deshacer y esta ayuda. En el móvil, la barra de abajo lleva a Hoy, Embudo, Contactos y Más.',
     '<b>Tu nombre.</b> En el menú de los tres puntos pones el nombre con el que se firma lo que cambias, por ejemplo «Jorge · móvil». Se queda guardado en este navegador.'
   ];
@@ -1809,7 +2160,10 @@ function ayudaComun(){
     donde + ' Cada negocio tiene su archivo de datos y la página sabe de cuál es por el propio archivo: nunca se mezclan. Para pasar a otro negocio, elígelo en la lista de arriba. «Cambiar de negocio», en el menú de los tres puntos, vuelve a la pantalla de inicio.',
     '<b>Varios a la vez.</b> En este CRM escribes tú desde aquí y los hilos de Claude con sus herramientas. La página mira el archivo cada 15 segundos y al volver a la ventana, y recoge sola lo que hayan escrito otros. Si alguien escribe mientras tú cambias algo, se juntan los cambios; si los dos habéis tocado el mismo campo, se queda lo tuyo y lo anterior queda en «Registro».',
     '<b>Registro</b> dice quién ha tocado qué y cuándo. Cada contacto enseña su último cambio y, si lo lleva un hilo concreto, cuál. Desde otro hilo ese contacto solo se puede anotar.' + (n.fabricantes.length ? ' En cada oportunidad puedes marcar con qué fabricante va, para ver de un vistazo si un contacto está ligado a dos.' : '') +
-      ' <b>Buscar.</b> El campo de arriba (o la tecla «/») busca en contactos, oportunidades y anotaciones sin fijarse en tildes ni mayúsculas. <b>Deshacer.</b> Al eliminar un contacto o quitar una oportunidad sale «Deshacer» unos segundos; con GitHub, «Deshacer el último cambio», en el menú de los tres puntos, devuelve el archivo a la versión anterior.'
+      ' <b>Buscar.</b> El campo de arriba (o la tecla «/») busca en contactos, oportunidades y anotaciones sin fijarse en tildes ni mayúsculas' + (conexion ? '; la última línea de la lista busca lo mismo en todos los negocios' : '') + '.' +
+      ' <b>Fichas repetidas.</b> Al crear un contacto, si ya hay una ficha con ese correo, ese teléfono o ese nombre, la página avisa y deja elegir entre usar esa ficha o crear la nueva igualmente; al escribir el correo o el teléfono de una ficha, avisa debajo si lo tiene otra.' +
+      ' <b>En la ficha</b>, con un móvil en el teléfono sale el botón «WhatsApp», y con algo en «Carpeta o documento» (dentro de «Más datos»), el botón para abrirlo.' +
+      ' <b>Deshacer.</b> Al eliminar un contacto o quitar una oportunidad sale «Deshacer» unos segundos; con GitHub, «Deshacer el último cambio», en el menú de los tres puntos, devuelve el archivo a la versión anterior.'
   ];
 }
 function arrancar(msg){
@@ -1873,14 +2227,18 @@ function pintarPanel(){
   const agenda = ops.filter(conAgenda);
   const atras = agenda.filter(o => o.fechaProximo < hoy).length;
   const escr = cs.filter(c => escritosA(c.id) > 0), resp = escr.filter(c => haRespondido(c.id)).length;
-  // Los indicadores que llevan a algún sitio son botones: contactos a Contactos, abiertas y en juego al Embudo, atrasados a la Agenda.
-  const k = (n, t, clase, ir) => (ir ? '<button type="button" class="kpi ' : '<div class="kpi ') + (clase || '') + '"' + (ir ? ' data-ir="' + ir + '" title="Ir a ' + { contactos: 'Contactos', embudo: 'el Embudo', agenda: 'la Agenda' }[ir] + '"' : '') + '><b>' + n + '</b><span>' + t + '</span>' + (ir ? '</button>' : '</div>');
+  const paradasAhora = paradas(datosVisibles(), NEG, hoy);
+  // Los indicadores que llevan a algún sitio son botones: contactos a Contactos, abiertas y en juego al Embudo, atrasados a la Agenda y paradas
+  // a su sección de la Agenda (data-seccion).
+  const k = (n, t, clase, ir, seccion) => (ir ? '<button type="button" class="kpi ' : '<div class="kpi ') + (clase || '') + '"' + (ir ? ' data-ir="' + ir + '"' + (seccion ? ' data-seccion="' + seccion + '"' : '') + ' title="Ir a ' + { contactos: 'Contactos', embudo: 'el Embudo', agenda: 'la Agenda', paradas: 'las paradas de la Agenda' }[seccion || ir] + '"' : '') + '><b>' + n + '</b><span>' + t + '</span>' + (ir ? '</button>' : '</div>');
   $('kpis').innerHTML = k(cs.length, 'contactos, ' + cs.filter(c => c.rol === 'Prescriptor' || c.rol === 'Ambos').length + ' pueden recomendarte', '', 'contactos') +
     k(vivas.length, 'oportunidades abiertas', '', 'embudo') +
     k(enJuego.length, (NEG.textos.enJuego || 'en juego') + (valor ? ' · ' + euros(valor) + ' a un año' : ''), '', 'embudo') +
     k(clientes.length, 'clientes' + (cuotas ? ' · ' + euros(cuotas) + '/mes en cuotas' : '')) +
     (conToques() ? k(escr.length, 'contactos a los que se ha escrito' + (escr.length ? ' · ' + resp + ' han contestado (' + Math.round(100 * resp / escr.length) + ' %)' : '')) : '') +
-    k(atras, 'próximos pasos atrasados', atras ? 'atras' : '', 'agenda');
+    k(atras, 'próximos pasos atrasados', atras ? 'atras' : '', 'agenda') +
+    k(paradasAhora.length, 'paradas · más de ' + diasParadaDe(NEG) + ' días sin movimiento', paradasAhora.length ? 'parada' : '', 'agenda', 'paradas');
+  pintarDinero(hoy);
   const lista = prod ? [prod] : CODIGOS;
   $('tarjetas').innerHTML = lista.map(p => {
     const P = PRODUCTOS[p], os = datos.oportunidades.filter(o => o.producto === p && contacto(o.contactoId));
@@ -1905,6 +2263,33 @@ function pintarPanel(){
   $('lUltimas').innerHTML = ult.length ? ult.map(a => { const c = contacto(a.contactoId), o = datos.oportunidades.find(x => x.id === a.oportunidadId);
     return '<li data-id="' + esc(a.contactoId) + '" tabindex="0"><div class="t1">' + (o && !prod ? chip(o) : '') + esc(c ? nombre(c) : 'Contacto borrado') + '</div><div class="t2">' + esc(fechaES(a.fecha)) + ' · ' + esc(a.tipo) + ': ' + esc((a.texto || '').slice(0, 110)) + '</div></li>'; }).join('') : vacio('Todavía no hay anotaciones.');
   enlazarListas('#v-panel');
+}
+// «12.500 € de alta y 840 €/mes de cuota»: solo la parte que no es cero (vacío si no hay nada).
+function textoImportes(alta, cuota){
+  const p = [];
+  if(alta) p.push(euros(alta) + ' de alta');
+  if(cuota) p.push(euros(cuota) + '/mes de cuota');
+  return p.join(' y ');
+}
+// El bloque «Dinero» del Panel: lo que hay en juego (con una tabla por fase), lo previsto, y lo ganado y perdido este mes. Sigue el producto elegido
+// arriba. Si ninguna oportunidad tiene alta ni cuota, es una sola línea que lo dice. Los cálculos son los de dinero(), en el motor.
+function pintarDinero(hoy){
+  const r = dinero(datosVisibles(), NEG, hoy), cuerpo = $('dineroCuerpo');
+  if(!r.hayImportes){ cuerpo.innerHTML = '<p class="vacio">Sin importes todavía: ponlos en cada oportunidad (alta y cuota)</p>'; return; }
+  const faseDe = i => (prod ? PRODUCTOS[prod].fases[i] : NEG.fases[i]) || '';
+  const oportunidades = n => plural(n, 'oportunidad', 'oportunidades');
+  const juego = r.enJuego, imp = textoImportes(juego.alta, juego.cuota);
+  const pesos = pesosDe(NEG), partes = [1, 2, 3, 4].map(i => String(pesos[i]).replace('.', ',') + ' % ' + faseDe(i));
+  const explicacion = 'Cada oportunidad cuenta según su fase: ' + partes.slice(0, -1).join(', ') + ' y ' + partes[partes.length - 1] + '.';
+  const delMes = x => x.n ? oportunidades(x.n) + ' (' + (textoImportes(x.alta, x.cuota) || 'sin importe') + ')' : 'nada';
+  const motivos = Object.entries(r.perdidoMes.motivos).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es')).map(([m, n]) => esc(m) + ' (' + n + ')').join(', ');
+  const filas = juego.porFase.map(f => '<tr><td>' + esc(faseDe(f.i) || f.fase) + '</td><td class="num">' + f.n + '</td><td class="num">' + euros(f.alta) + '</td><td class="num">' + euros(f.cuota) + '/mes</td></tr>').join('');
+  cuerpo.innerHTML =
+    '<p><b>En juego:</b> ' + (juego.n ? (imp ? imp + ' en ' + oportunidades(juego.n) : oportunidades(juego.n) + ', todavía sin importe') + ' <span class="sub">(de ' + esc(faseDe(1)) + ' a ' + esc(faseDe(4)) + ')</span>' : 'ninguna oportunidad') + '</p>' +
+    (juego.n ? '<div class="din-caja"><table class="din-tabla" aria-label="Lo que hay en juego, por fase"><thead><tr><th>Fase</th><th><span class="txt-largo">Oportunidades</span><span class="txt-corto">Cuántas</span></th><th>Alta</th><th>Cuota</th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '') +
+    '<p title="' + esc(explicacion) + '"><b>Previsto:</b> ' + (textoImportes(r.previsto.alta, r.previsto.cuota) || '0 €') + ' <br><span class="sub">' + esc(explicacion) + '</span></p>' +
+    '<p><b>Ganado este mes:</b> ' + delMes(r.ganadoMes) + '</p>' +
+    '<p><b>Perdido este mes:</b> ' + delMes(r.perdidoMes) + (r.perdidoMes.n ? ' · motivos: ' + motivos : '') + '</p>';
 }
 function enlazarListas(ambito){
   document.querySelectorAll(ambito + ' [data-id]').forEach(li => {
@@ -2086,12 +2471,29 @@ function itemAgenda(o, hoy, conFecha){
     '<button type="button" class="mini" data-acc="aplazar">' + (conFecha ? 'Aplazar' : 'Poner fecha') + '</button><button type="button" class="mini" data-acc="anotar">Anotar</button></div>' +
     '<div class="en-linea" hidden></div></li>';
 }
+// Una oportunidad parada: el contacto, su producto y su fase, y hace cuánto que no pasa nada (p es un elemento de paradas(), en el motor).
+// «Anotar» abre la ficha con el cursor en «Qué ha pasado» y «Abrir» la abre, las dos en esa oportunidad.
+function itemParada(p){
+  const o = opPorId(p.id), c = o && contacto(o.contactoId); if(!o || !c) return '';
+  return '<li class="tarea parada" data-id="' + esc(c.id) + '" data-op="' + esc(o.id) + '" tabindex="0"><div class="t1">' + chip(o, true) + esc(nombre(c)) + '</div><div class="t2"><span class="hace">hace ' + plural(p.dias, 'día', 'días') + '</span> · ' +
+    esc(o.proximoPaso || 'Sin próximo paso') + (c.telefono ? ' · ' + esc(c.telefono) : '') + (c.localidad ? ' · ' + esc(c.localidad) : '') + '</div>' +
+    avisoDe(c) +
+    '<div class="acciones-tarea"><button type="button" class="mini primario" data-acc="anotar">Anotar</button><button type="button" class="mini" data-acc="abrir">Abrir</button></div>' +
+    '<div class="en-linea" hidden></div></li>';
+}
+// Lleva a una sección de la Agenda (hoy, la de las paradas): la deja arriba y le pasa el foco.
+function irASeccionAgenda(seccion){
+  const g = $('agenda').querySelector('[data-seccion="' + seccion + '"]'); if(!g) return;
+  g.scrollIntoView({ block: 'start' });
+  const h = g.querySelector('h3'); if(h) h.focus({ preventScroll: true });
+}
 function pintarAgenda(){
   const hoy = hoyISO(), man = sumarDias(hoy, 1), en7 = sumarDias(hoy, 7), en30 = sumarDias(hoy, 30);
   const guardado = capturarFormAgenda();   // si había un formulario abierto, que no se pierda al volver a pintar
   const ops = opsVisibles().filter(conAgenda).sort((a, b) => a.fechaProximo.localeCompare(b.fechaProximo) || prioIdx(a.prioridad) - prioIdx(b.prioridad));
-  const sinFecha = opsVisibles().filter(o => { const c = contacto(o.contactoId); return !c.excluido && vivaIdx(idxFase(o)) && !o.fechaProximo; });
-  // [título, lista, si tiene fecha, qué decir si está vacío]. Un grupo vacío solo sale si dice algo (lo atrasado y lo de hoy).
+  const paradasAhora = paradas(datosVisibles(), NEG, hoy), enParada = new Set(paradasAhora.map(p => p.id));
+  const sinFecha = opsVisibles().filter(o => { const c = contacto(o.contactoId); return !c.excluido && vivaIdx(idxFase(o)) && !o.fechaProximo && !enParada.has(o.id); });   // las paradas tienen su grupo: no se repiten
+  // [título, lista, si tiene fecha, qué decir si está vacío, sección]. Un grupo vacío solo sale si dice algo (lo atrasado, lo de hoy y las paradas).
   const grupos = [
     ['Atrasados', ops.filter(o => o.fechaProximo < hoy), true, 'Nada atrasado.'],
     ['Hoy, ' + fechaLarga(hoy), ops.filter(o => o.fechaProximo === hoy), true, 'Nada para hoy.'],
@@ -2099,11 +2501,12 @@ function pintarAgenda(){
     ['Resto de la semana', ops.filter(o => o.fechaProximo > man && o.fechaProximo <= en7), true, ''],
     ['Próximos 30 días', ops.filter(o => o.fechaProximo > en7 && o.fechaProximo <= en30), true, ''],
     ['Más adelante', ops.filter(o => o.fechaProximo > en30), true, ''],
+    ['Paradas (más de ' + diasParadaDe(NEG) + ' días sin movimiento)', paradasAhora, false, 'Ninguna oportunidad parada.', 'paradas'],
     ['Abiertas sin próximo paso', sinFecha, false, ''],
   ];
-  const guia = !ops.length && !sinFecha.length ? '<p class="guia-vacia">No hay próximos pasos. Anota qué ha pasado en un contacto y pon la fecha del siguiente paso: saldrá aquí.</p>' : '';
-  $('agenda').innerHTML = guia + grupos.filter(([, l, , vacio]) => l.length || vacio).map(([t, l, conFecha, vacio]) => '<div class="grupo"><h3>' + esc(t) + ' <span>' + l.length + '</span></h3>' +
-    (l.length ? '<ul class="lista-tareas">' + l.map(o => itemAgenda(o, hoy, conFecha)).join('') + '</ul>' : '<p class="vacio">' + vacio + '</p>') + '</div>').join('');
+  const guia = !ops.length && !sinFecha.length && !paradasAhora.length ? '<p class="guia-vacia">No hay próximos pasos. Anota qué ha pasado en un contacto y pon la fecha del siguiente paso: saldrá aquí.</p>' : '';
+  $('agenda').innerHTML = guia + grupos.filter(([, l, , vacio]) => l.length || vacio).map(([t, l, conFecha, vacio, seccion]) => '<div class="grupo"' + (seccion ? ' data-seccion="' + seccion + '"' : '') + '><h3' + (seccion ? ' tabindex="-1"' : '') + '>' + esc(t) + ' <span>' + l.length + '</span></h3>' +
+    (l.length ? '<ul class="lista-tareas">' + l.map(o => seccion === 'paradas' ? itemParada(o) : itemAgenda(o, hoy, conFecha)).join('') + '</ul>' : '<p class="vacio">' + vacio + '</p>') + '</div>').join('');
   restaurarFormAgenda(guardado);
   enlazarListas('#agenda');
 }
@@ -2167,6 +2570,7 @@ function accionAgenda(e){
   const acc = b.dataset.acc, opId = li.dataset.op;
   if(acc === 'hecho' || acc === 'aplazar') abrirFormAgenda(li, acc);
   else if(acc === 'anotar') abrirFicha(li.dataset.id, opId, { foco: 'anotar' });
+  else if(acc === 'abrir') abrirFicha(li.dataset.id, opId);
   else if(acc === 'cancelar') cerrarFormAgenda();
   else if(acc === 'aplazar-dias') aplazarOp(opId, Number(b.dataset.dias));
   else if(acc === 'aplazar-fecha'){ const campo = li.querySelector('[data-f="fecha"]'); if(campo.value) aplazarOp(opId, campo.value); else campo.focus(); }
@@ -2250,13 +2654,9 @@ function abrirFicha(id, opId, opciones){
     if(n.tagName === 'SELECT' && v && ![...n.options].some(o => o.value === v)) n.insertAdjacentHTML('beforeend', '<option>' + esc(v) + '</option>');
     n.value = v;
   });
-  const enl = [];
-  if(c.telefono) enl.push('<a href="tel:' + esc(c.telefono.replace(/[^\d+]/g, '')) + '">Llamar al ' + esc(c.telefono) + '</a>');
-  if(c.email) enl.push('<a href="mailto:' + esc(c.email.trim()) + '">Escribir a ' + esc(c.email) + '</a>');
-  if(c.web) enl.push('<a href="' + esc(/^https?:/.test(c.web) ? c.web : 'https://' + c.web) + '" target="_blank" rel="noopener">Abrir la web</a>');
-  if(c.fuente && /^https?:/.test(c.fuente)) enl.push('<a href="' + esc(c.fuente) + '" target="_blank" rel="noopener">Ver la fuente</a>');
-  $('enlaces').innerHTML = enl.join('');
-  $('enlaces').classList.toggle('oculto', !enl.length);
+  pintarEnlaces(c);
+  $('enlaceEstado').textContent = ''; $('enlaceEstado').classList.remove('error');
+  ['telefono', 'email'].forEach(quitarAvisoRepetida);
   $('bloqueGuion').classList.toggle('oculto', !c.guion);
   $('cGuion').textContent = c.guion || '';
   pintarPistaMasDatos(c);
@@ -2267,7 +2667,7 @@ function abrirFicha(id, opId, opciones){
   $('fichaEstado').textContent = '';
   if($('ficha').hidden){
     origenFoco = recordarOrigenFoco();
-    $('ficha').hidden = false; bloquearFondo(true);
+    $('ficha').hidden = false; bloquearFondo(true); apuntarPasoFicha();
     $('ficha').querySelector('.ficha-caja').scrollTop = 0;
     if(!esMovil() || (opciones && opciones.foco === 'anotar')) $('aTexto').focus(); else $('fichaTitulo').focus({ preventScroll: true });
   } else if(opciones && opciones.foco === 'anotar') $('aTexto').focus();
@@ -2275,8 +2675,103 @@ function abrirFicha(id, opId, opciones){
 }
 // «Más datos» va plegado: si el contacto tiene notas, lo dice en su título para que no queden escondidas.
 function pintarPistaMasDatos(c){ $('pistaMasDatos').textContent = c && c.notas ? '· con notas' : ''; }
+// La fila de enlaces de arriba de la ficha: llamar, WhatsApp, escribir, la web, la fuente y «Abrir carpeta o documento». Si ya tiene los mismos botones, solo se cambian sus
+// direcciones y textos, para que un clic en mitad de una edición no se pierda porque el botón se haya sustituido.
+function pintarEnlaces(c){
+  const items = [], wa = enlaceWhatsApp(c.telefono);
+  if(c.telefono) items.push(['tel', '<a href="tel:' + esc(String(c.telefono).replace(/[^\d+]/g, '')) + '">Llamar al ' + esc(c.telefono) + '</a>']);
+  if(wa) items.push(['wa', '<a href="' + esc(wa) + '" target="_blank" rel="noopener" data-whatsapp="1">WhatsApp</a>']);
+  if(c.email) items.push(['mail', '<a href="mailto:' + esc(String(c.email).trim()) + '">Escribir a ' + esc(c.email) + '</a>']);
+  if(c.web) items.push(['web', '<a href="' + esc(/^https?:/.test(c.web) ? c.web : 'https://' + c.web) + '" target="_blank" rel="noopener">Abrir la web</a>']);
+  if(c.fuente && /^https?:/.test(c.fuente)) items.push(['fuente', '<a href="' + esc(c.fuente) + '" target="_blank" rel="noopener">Ver la fuente</a>']);
+  if(destinoEnlace(c.enlace, null)) items.push(['enlace', '<button type="button" data-abrir-enlace="1">Abrir carpeta o documento</button>']);
+  const caja = $('enlaces'), claves = items.map(i => i[0]).join(), html = items.map(i => i[1]).join('');
+  if(claves && caja.dataset.claves === claves){
+    const t = document.createElement('div'); t.innerHTML = html;
+    [...caja.children].forEach((el, i) => { const nuevo = t.children[i]; if(nuevo.hasAttribute('href')) el.setAttribute('href', nuevo.getAttribute('href')); if(el.textContent !== nuevo.textContent) el.textContent = nuevo.textContent; });
+  } else caja.innerHTML = html;
+  caja.dataset.claves = claves;
+  caja.classList.toggle('oculto', !items.length);
+}
+// «WhatsApp», arriba de la ficha, abre el chat en otra pestaña (es un enlace con target="_blank") y deja elegido ese tipo en «Anotar lo que ha pasado» si el negocio lo tiene.
+// No guarda nada.
+function elegirTipoWhatsApp(){
+  if(![...$('aTipo').options].some(o => o.value === 'WhatsApp')) return;
+  $('aTipo').value = 'WhatsApp'; sugerirFase();
+}
+// «Abrir carpeta o documento»: una web se abre en otra pestaña; una ruta del PC la abre el servidor local si lo hay (con el permiso «abrir» que dio al arrancar la página); si no,
+// se copia la ruta. Lo que pasa se dice debajo de los botones y en la barra de estado.
+function avisoEnlace(texto, malo){
+  const e = $('enlaceEstado'); e.textContent = texto; e.classList.toggle('error', !!malo);
+  estado(texto, malo ? 'error' : '');
+}
+async function copiarTexto(t){
+  try { if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); return true; } } catch(e){}
+  const antes = document.activeElement, ta = document.createElement('textarea');
+  ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  let hecho = false; try { hecho = document.execCommand('copy'); } catch(e){}
+  ta.remove(); if(antes && antes.focus) antes.focus({ preventScroll: true });
+  return hecho;
+}
+async function abrirEnlace(){
+  const c = contacto(fichaId), d = c && destinoEnlace(c.enlace, conexion);
+  if(!d) return;
+  if(d.tipo === 'web'){ window.open(d.url, '_blank', 'noopener'); return; }
+  if(d.tipo === 'servidor'){
+    avisoEnlace('Abriéndolo en este ordenador...');
+    try {
+      const r = await fetch(conexion.apiBase.replace(/\/gh$/, '') + '/abrir', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CRM-Abrir': conexion.abrir }, body: JSON.stringify({ ruta: d.ruta }) });
+      if(r.status === 200){ avisoEnlace('Abierto en este ordenador'); return; }
+      let msg = ''; try { msg = String(((await r.json()) || {}).error || ''); } catch(e){}
+      avisoEnlace(msg || 'El ordenador no ha podido abrirlo (respuesta ' + r.status + ')', true);
+    } catch(e){ avisoEnlace('No se ha podido avisar al servidor de este ordenador: ' + ((e && e.message) || e), true); }
+    return;
+  }
+  if(await copiarTexto(d.ruta)) avisoEnlace('Ruta copiada: ábrela en este ordenador');
+  else avisoEnlace('No se ha podido copiar. La ruta es: ' + d.ruta, true);
+}
+// Debajo del correo o del teléfono de la ficha: si otra ficha tiene lo mismo, lo dice con un enlace que abre esa ficha. No impide nada.
+const QUE_REPETIDA = { email: 'Este correo', telefono: 'Este teléfono' };
+function quitarAvisoRepetida(k){ const s = document.querySelector('#datosFicha [data-aviso="' + k + '"]'); if(s){ s.hidden = true; s.innerHTML = ''; } }
+function avisoRepetida(k){
+  const c = contacto(fichaId), campo = document.querySelector('#datosFicha [data-c="' + k + '"]'), caja = document.querySelector('#datosFicha [data-aviso="' + k + '"]');
+  if(!c || !campo || !caja) return;
+  const par = campo.value.trim() ? fichasParecidas(datos, { [k]: campo.value }, c.id) : [];
+  if(!par.length){ quitarAvisoRepetida(k); return; }
+  caja.innerHTML = QUE_REPETIDA[k] + ' ya está en ' + par.slice(0, 3).map(p => '<a href="#" data-abrir-ficha="' + esc(p.contacto.id) + '">' + esc(etiquetaFicha(p.contacto)) + '</a>').join(', ') +
+    (par.length > 3 ? ' y en ' + plural(par.length - 3, 'ficha más', 'fichas más') : '');
+  caja.hidden = false;
+}
 // Cierra la ficha sin más: la esconde, deja de bloquear el fondo y se olvida de ella.
-function ocultarFicha(){ $('ficha').hidden = true; bloquearFondo(false); fichaId = null; opMarcada = null; historialCompleto = false; }
+function ocultarFicha(){ $('ficha').hidden = true; bloquearFondo(false); fichaId = null; opMarcada = null; historialCompleto = false; soltarPasoFicha(); }
+// El botón Atrás del móvil cierra la ficha en vez de salir de la página: al abrirla se apunta un paso en el historial del navegador
+// y «atrás» lo deshace. La página nunca da «atrás» por su cuenta (sería asíncrono y podría cerrar la ficha que se abre justo después):
+// si la ficha se cierra de otra manera (su botón, Escape, cambiar de negocio), el paso se queda marcado como libre y la próxima ficha
+// lo reutiliza, así que el historial crece como mucho en uno. La dirección (#NEGOCIO) la pone siempre ponerDireccion y se repone
+// tras cada «atrás», porque el paso al que se vuelve puede llevar la de antes.
+var pasoFicha = false, direccionPagina = location.href;
+function ponerDireccion(url){ direccionPagina = url; try { history.replaceState(history.state, '', url); } catch(e){} }
+function apuntarPasoFicha(){
+  if(pasoFicha) return;
+  try {
+    if(history.state && history.state.fichaLibre) history.replaceState({ ficha: 1 }, '', direccionPagina);
+    else history.pushState({ ficha: 1 }, '', direccionPagina);
+    pasoFicha = true;
+  } catch(e){}
+}
+function soltarPasoFicha(){
+  if(!pasoFicha) return;
+  pasoFicha = false;
+  try { if(history.state && history.state.ficha) history.replaceState({ fichaLibre: 1 }, '', direccionPagina); } catch(e){}
+}
+window.addEventListener('popstate', () => {
+  if(location.href !== direccionPagina){ try { history.replaceState(history.state, '', direccionPagina); } catch(e){} }
+  const e = history.state || {};
+  if(e.ficha || e.fichaLibre) return;                               // «adelante» hasta un paso de ficha: nada
+  pasoFicha = false;
+  if(!$('ficha').hidden) cerrarFicha();                             // la persona ha pulsado Atrás con la ficha abierta
+});
 function pintarOpsFicha(c){
   const ops = opsDe(c.id);
   $('opsFicha').innerHTML = ops.length ? ops.map(o => {
@@ -2347,6 +2842,7 @@ function cambioContacto(n){
   $('fichaTitulo').textContent = nombre(c);
   $('fichaAviso').innerHTML = avisoDe(c);
   pintarPistaMasDatos(c);
+  if(['telefono', 'email', 'web', 'fuente', 'enlace'].includes(k)) pintarEnlaces(c);
   programarGuardado();
 }
 function prepararAnotarSelect(c, mantener){
@@ -2463,19 +2959,91 @@ async function quitarOp(id){
     programarGuardado();
   });
 }
-// Un contacto nuevo con su primera oportunidad. Con «inicial» (lo que se escribió en «Añadir rápido») ya lleva esos datos y se guarda.
-function nuevoContacto(inicial){
-  const c = { id: nuevoId('N'), entidad: '', persona: '', rol: 'Cliente potencial', segmento: '', localidad: '', telefono: '', email: '', web: '', motivo: '', fuente: '', marca: '', canal: '', guion: '', permiso: 'No', permisoFecha: '', permisoDetalle: '', robinson: NEG.robinsonPorDefecto || 'Pendiente', excluido: false, motivoExclusion: '', notas: '', hilo: '', creado: hoyISO(), actualizado: hoyISO() };
-  if(inicial) Object.assign(c, inicial);
+// Una oportunidad nueva de un producto, en su primera fase.
+function nuevaOportunidad(cid, producto, proximoPaso){
+  return { id: nuevoId('O'), contactoId: cid, producto, servicio: '', fase: 'Pendiente', prioridad: 'B', semana: '', proximoPaso: proximoPaso || '', fechaProximo: '', alta: null, cuota: null, estadoServicio: '', fechaCierre: '', motivoPerdida: '', notas: '', fabricante: '', creado: hoyISO(), actualizado: hoyISO() };
+}
+// Un contacto nuevo con lo que se escribió en «Nuevo contacto» o en «Añadir rápido» (inicial) y su primera oportunidad, del producto que se diga o, si no, del elegido arriba o el
+// primero. Se guarda y se abre su ficha. Las fichas nuevas llevan el campo «enlace» (carpeta o documento) vacío.
+function nuevoContacto(inicial, producto){
+  const c = { id: nuevoId('N'), entidad: '', persona: '', rol: 'Cliente potencial', segmento: '', localidad: '', telefono: '', email: '', web: '', enlace: '', motivo: '', fuente: '', marca: '', canal: '', guion: '', permiso: 'No', permisoFecha: '', permisoDetalle: '', robinson: NEG.robinsonPorDefecto || 'Pendiente', excluido: false, motivoExclusion: '', notas: '', hilo: '', creado: hoyISO(), actualizado: hoyISO() };
+  Object.assign(c, inicial);
   datos.contactos.push(c);
-  const p = prod || CODIGOS[0];
-  const o = { id: nuevoId('O'), contactoId: c.id, producto: p, servicio: '', fase: 'Pendiente', prioridad: 'B', semana: '', proximoPaso: 'Primer contacto', fechaProximo: '', alta: null, cuota: null, estadoServicio: '', fechaCierre: '', motivoPerdida: '', notas: '', fabricante: '', creado: hoyISO(), actualizado: hoyISO() };
+  const o = nuevaOportunidad(c.id, PRODUCTOS[producto] ? producto : (prod || CODIGOS[0]), 'Primer contacto');
   datos.oportunidades.push(o);
   abrirFicha(c.id, o.id);
-  if(inicial){ programarGuardado(); $('fichaEstado').textContent = 'Contacto añadido. Completa lo que quieras: se guarda solo.'; }
-  else { $('ficha').querySelector('[data-c="entidad"]').focus(); $('fichaEstado').textContent = 'Rellena los datos; se guardan solos.'; }
+  programarGuardado();
+  $('fichaEstado').textContent = 'Contacto añadido. Completa lo que quieras: se guarda solo.';
 }
-// «Añadir rápido»: una línea «Empresa, persona, correo» (en cualquier orden: lo que lleva @ es el correo y lo que parece un número, el teléfono).
+
+// ---------- fichas repetidas ----------
+// «Nuevo contacto» y «Añadir rápido» miran, antes de crear nada, si ya hay una ficha parecida (fichasParecidas del motor: mismo correo, mismo teléfono o mismo nombre). Si la hay,
+// no crean nada: enseñan un aviso con una línea por ficha y dos botones, «Usar esa ficha» (rellena en ella lo que tenía vacío y, si falta, añade la oportunidad del producto)
+// y «Crear igualmente».
+const FRASE_MOTIVO = { 'mismo correo': 'ese correo', 'mismo teléfono': 'ese teléfono', 'mismo nombre': 'ese nombre' };
+const CAMPOS_AL_USAR = ['entidad', 'persona', 'telefono', 'email', 'web', 'localidad', 'segmento', 'notas'];
+// «Empresa X (Ana Pérez)»: cómo se nombra una ficha en estos avisos.
+function etiquetaFicha(c){ const e = String(c.entidad || '').trim(), p = personaCorta(c.persona); return e && p ? e + ' (' + p + ')' : (e || p || 'Sin nombre'); }
+function htmlParecidas(par){
+  const lineas = par.slice(0, 5), mas = par.length - lineas.length, una = par.length === 1;
+  const juntar = l => l.length < 2 ? l.join('') : l.slice(0, -1).join(', ') + ' y ' + l[l.length - 1];
+  return '<div class="aviso aten">' + lineas.map(x => '<div class="linea-parecida">Ya hay una ficha con ' + esc(juntar(x.motivos.map(m => FRASE_MOTIVO[m]))) + ': ' + esc(etiquetaFicha(x.contacto)) +
+      (una ? '' : ' <button type="button" class="mini" data-parecida="' + esc(x.contacto.id) + '">Usar esa ficha</button>') + '</div>').join('') +
+    (mas ? '<div class="sub">Y ' + plural(mas, 'ficha más', 'fichas más') + '.</div>' : '') +
+    '<div class="fila">' + (una ? '<button type="button" class="primario" data-parecida="' + esc(lineas[0].contacto.id) + '">Usar esa ficha</button>' : '') + '<button type="button" data-crear-igual="1">Crear igualmente</button></div></div>';
+}
+// «Usar esa ficha»: pone en la ficha que ya estaba lo que escribiste en los campos que tenía vacíos, añade la oportunidad del producto si no la tiene (solo si se dijo uno) y la
+// abre. Se guarda como cualquier otro cambio, sin anotación.
+function usarFicha(id, v, producto){
+  const c = contacto(id);
+  if(!c){ estado('Esa ficha ya no está. Vuelve a intentarlo.', 'error'); return; }
+  const puestos = [];
+  CAMPOS_AL_USAR.forEach(k => { if(v[k] && !String(c[k] ?? '').trim()){ c[k] = v[k]; puestos.push(NOMBRE_CAMPO[k] || k); } });
+  const o = producto && PRODUCTOS[producto] && !opsDe(c.id).some(x => x.producto === producto) ? nuevaOportunidad(c.id, producto, 'Primer contacto') : null;
+  if(o) datos.oportunidades.push(o);
+  if(puestos.length || o){ c.actualizado = hoyISO(); programarGuardado(); }
+  abrirFicha(c.id, o ? o.id : null);
+  const dicho = [];
+  if(puestos.length) dicho.push('Se ha completado con lo que escribiste: ' + puestos.join(', ') + '.');
+  if(o) dicho.push('Se ha añadido la oportunidad de ' + PRODUCTOS[o.producto].n + '.');
+  $('fichaEstado').textContent = dicho.join(' ') || 'Esta ficha ya tenía todo lo que escribiste: no se ha cambiado nada.';
+}
+// «Nuevo contacto»: un cuadro con los datos principales y el producto de la primera oportunidad. «Crear contacto» mira si hay fichas parecidas; si no, crea el contacto y abre su ficha.
+function abrirAlta(){
+  if(!datos) return;
+  quitarAvisoAlta();
+  $('formAlta').reset();
+  $('altaEtEntidad').textContent = NEG.textos.entidad || 'Empresa';
+  $('altaProducto').innerHTML = CODIGOS.map(k => '<option value="' + esc(k) + '">' + esc(PRODUCTOS[k].n) + '</option>').join('');
+  $('altaProducto').value = prod || CODIGOS[0];
+  $('alta').showModal();
+  document.querySelector('#formAlta [data-alta="entidad"]').focus();
+}
+function quitarAvisoAlta(){ altaPendiente = null; $('altaAviso').innerHTML = ''; $('bAltaCrear').classList.remove('oculto'); }
+function guardarAlta(){
+  const v = {}; document.querySelectorAll('#formAlta [data-alta]').forEach(n => { v[n.dataset.alta] = n.value.trim(); });
+  const producto = v.producto; delete v.producto;
+  if(!v.entidad && !v.persona && !v.email && !v.telefono){
+    $('altaAviso').innerHTML = '<div class="aviso aten">Escribe al menos uno de estos datos: ' + esc((NEG.textos.entidad || 'Empresa').toLowerCase()) + ', persona, correo o teléfono.</div>';
+    document.querySelector('#formAlta [data-alta="entidad"]').focus(); return;
+  }
+  const par = fichasParecidas(datos, v);
+  if(par.length){
+    altaPendiente = { valores: v, producto }; $('altaAviso').innerHTML = htmlParecidas(par); $('bAltaCrear').classList.add('oculto');
+    $('altaAviso').scrollIntoView({ block: 'nearest' });
+    $('altaAviso').querySelector('button').focus();   // «Crear contacto» ya no está a la vista: el foco pasa al aviso
+    return;
+  }
+  $('alta').close();
+  nuevoContacto(v, producto);
+}
+function accionAlta(e){
+  const b = e.target.closest('button'), p = altaPendiente; if(!b || !p) return;
+  if(b.dataset.parecida){ $('alta').close(); usarFicha(b.dataset.parecida, p.valores, p.producto); }
+  else if('crearIgual' in b.dataset){ $('alta').close(); nuevoContacto(p.valores, p.producto); }
+}
+// «Añadir rápido»: una línea «Empresa, persona, correo» (en cualquier orden: lo que lleva @ es el correo y lo que parece un número, el teléfono). Si ya hay una ficha parecida,
+// el aviso sale debajo de la línea y la línea se queda como está hasta decidir. El producto solo cuenta si hay uno elegido arriba a la derecha.
 function anadirRapido(texto){
   const v = { entidad: '', persona: '', email: '', telefono: '' }, sueltas = [];
   texto.split(',').map(s => s.trim()).filter(Boolean).forEach(p => {
@@ -2485,7 +3053,18 @@ function anadirRapido(texto){
   });
   v.entidad = sueltas[0] || ''; v.persona = sueltas[1] || '';
   if(sueltas.length > 2) v.notas = sueltas.slice(2).join(', ');
+  const par = fichasParecidas(datos, v);
+  if(par.length){ rapidoPendiente = { valores: v, producto: prod }; $('rapidoAviso').innerHTML = htmlParecidas(par); return; }
+  $('cRapido').value = ''; quitarAvisoRapido();
   nuevoContacto(v);
+}
+function quitarAvisoRapido(){ rapidoPendiente = null; $('rapidoAviso').innerHTML = ''; }
+function accionRapido(e){
+  const b = e.target.closest('button'), p = rapidoPendiente; if(!b || !p) return;
+  if(!b.dataset.parecida && !('crearIgual' in b.dataset)) return;
+  quitarAvisoRapido(); $('cRapido').value = '';
+  if(b.dataset.parecida) usarFicha(b.dataset.parecida, p.valores, p.producto);
+  else nuevoContacto(p.valores);
 }
 const recorte = (t, n) => { t = String(t || ''); return t.length > n ? t.slice(0, n - 1) + '…' : t; };
 // «Eliminar contacto» borra también sus oportunidades y anotaciones. Pide confirmación en un cuadro propio y deja «Deshacer» unos segundos.
@@ -2509,6 +3088,24 @@ async function borrarContacto(){
   });
 }
 inicio();
+})();
+</script>
+<script>
+// Registra el service worker de la página publicada (sw.js, junto a index.html).
+// Solo con https: en el PC, que abre la página en http://127.0.0.1, no se registra nada. Y si el registro falla, la página sigue igual.
+(function () {
+  function registrar() {
+    navigator.serviceWorker.register('./sw.js').catch(function (e) {
+      console.warn('CRM: no se pudo registrar el service worker (la página funciona igual):', e);
+    });
+  }
+  try {
+    if (!('serviceWorker' in navigator) || location.protocol !== 'https:') return;
+    if (document.readyState === 'complete') registrar();
+    else window.addEventListener('load', registrar);
+  } catch (e) {
+    console.warn('CRM: no se pudo registrar el service worker (la página funciona igual):', e);
+  }
 })();
 </script>
 </body>
