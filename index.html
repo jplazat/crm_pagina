@@ -1352,7 +1352,7 @@ async function crearEnGitHub(codigo){
 // Mensaje del commit en GitHub, en una línea: quién, hasta tres cambios con las mismas palabras del registro y cuántos más.
 function mensajeCommit(cambios){
   if(!cambios || !cambios.length) return AUTOR + ': datos nuevos';
-  const m = AUTOR + ': ' + cambios.slice(0, 3).map(textoCambio).join('; ') + (cambios.length > 3 ? ', y ' + (cambios.length - 3) + ' más' : '');
+  const m = AUTOR + ': ' + cambios.slice(0, 3).map(c => textoCambio(c)).join('; ') + (cambios.length > 3 ? ', y ' + (cambios.length - 3) + ' más' : '');
   const una = m.replace(/\s+/g, ' ').trim();
   return una.length > 500 ? una.slice(0, 499) + '…' : una;
 }
