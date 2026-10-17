@@ -98,6 +98,9 @@ button.kpi::after{content:"›";position:absolute;right:10px;top:6px;font-size:2
 .dinero p{margin:5px 0}
 .din-caja{overflow-x:auto;margin:6px 0 8px}
 table.din-tabla{display:table;width:100%;max-width:520px}
+.est{color:var(--muted);font-size:.85em}
+.din-tabla .est{display:inline-block;width:0;overflow:visible;margin-left:1px;text-align:left}   /* la marca «cuelga» a la derecha de la cifra: no ensancha la columna y las cifras siguen alineadas */
+.nota-est{margin:0 0 8px}
 .din-tabla thead{display:table-header-group}
 .din-tabla tbody{display:table-row-group}
 .din-tabla tbody tr{display:table-row;padding:0;margin:0;border:none;border-radius:0;background:transparent;cursor:default}
@@ -152,6 +155,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .grupo h3{font-size:14px;margin:0 0 8px;display:flex;gap:8px;align-items:baseline}
 .grupo h3 span{color:var(--muted);font-weight:400;font-size:12.5px}
 .grupo[data-seccion]{scroll-margin-top:70px}   /* al llevar a una sección desde el Panel, que la cabecera fija no la tape */
+details.plegable.pendientes{margin-top:2px}   /* «Pendientes de primer contacto»: plegado, al final de la Agenda */
 /* ficha */
 #ficha{position:fixed;inset:0;background:rgba(10,20,24,.45);display:flex;justify-content:flex-end;z-index:20}
 #ficha[hidden]{display:none}
@@ -234,6 +238,9 @@ details.plegable>summary .sub{font-weight:400;margin-left:8px}
 details.plegable>.cuerpo{padding:12px}
 .sub-titulo{font-size:12px;margin:14px 0 0;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .ver-todas{margin-top:8px}
+/* ficha: «¿Cuándo es lo siguiente?», justo debajo de «Anotar», sin tapar nada */
+.siguiente{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:10px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;background:var(--bg)}
+.siguiente>span{font-weight:600;margin-right:2px}
 /* inicio: hoy en todos los negocios */
 .hoy-todos{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
 .hoy-todos .fila{justify-content:space-between}
@@ -312,8 +319,10 @@ tr.fila-vacia:hover{background:transparent}
   .kpis{grid-template-columns:1fr 1fr}
   .barras div{grid-template-columns:96px 1fr 30px}
   .dinero{padding:8px 10px 4px}
+  .siguiente>span{flex:1 0 100%}   /* «¿Cuándo es lo siguiente?» en una línea y los botones debajo */
   .din-tabla{font-size:12.5px}
   .din-tabla th,.din-tabla td{padding:5px 4px}
+  .din-tabla th:last-child,.din-tabla td:last-child{padding-right:8px}   /* sitio para que la marca de la última columna no se salga */
   .din-tabla th{font-size:11px;letter-spacing:0;text-transform:none}
   .filtros select,.filtros input[type=search]{flex:1 1 100%;max-width:none;width:100%}
   .tabla-caja{overflow:visible}
@@ -565,6 +574,13 @@ tr.fila-vacia:hover{background:transparent}
         <label id="atajoRecordatorio">Atajo<button id="bRecordatorio" type="button"></button></label>
       </div>
       <div class="fila" style="margin-top:10px"><button id="bAnotar" class="primario" type="button">Anotar</button><span id="fichaEstado" class="sub" role="status"></span></div>
+      <div id="siguiente" class="siguiente oculto" role="group" aria-labelledby="siguientePregunta">
+        <span id="siguientePregunta">¿Cuándo es lo siguiente?</span>
+        <button type="button" class="mini" data-dias="3">En 3 días</button>
+        <button type="button" class="mini" data-dias="7">En una semana</button>
+        <button type="button" class="mini" data-dias="30">En un mes</button>
+        <button type="button" class="mini" data-dias="0">Nada por ahora</button>
+      </div>
       <h3 class="sub-titulo">Historial</h3>
       <ul id="historial" class="historial"></ul>
       <button id="bVerTodas" class="mini ver-todas oculto" type="button"></button>
@@ -927,6 +943,9 @@ if(typeof module !== 'undefined') module.exports = { NEGOCIOS, CRM_NEGOCIO, nego
 //  - «Previsto» pondera el alta y la cuota de las que están en juego con un tanto por ciento por fase (PESOS_FASE, o los ocho números de
 //    `pesosFase` del negocio, si los trae). Se suma sin redondear y se redondea una sola vez, a euros enteros, con la mitad hacia arriba.
 //  - «Ganado» y «perdido este mes» son las de i 5 y 7 cuya fecha de cierre (o, si está vacía, `actualizado`) cae en el mes de hoy.
+//  - Importe estimado: una oportunidad en juego sin alta ni cuota (las dos vacías o a 0) cuenta, en «en juego» y en «previsto» y nunca en «ganado» ni «perdido»,
+//    con el precio de su servicio o, si no lo tiene, con el del servicio más barato de su producto (importeEstimado). Lo estimado se cuenta aparte (altaEstimada, cuotaEstimada y
+//    nEstimadas) y ya está incluido en alta y cuota.
 //  - «Parada» es una de i de 1 a 4, sin `fechaProximo`, cuyo último movimiento es de hace más de `diasParada` días (del negocio; 30 si no lo dice).
 //    Último movimiento: la fecha mayor entre sus anotaciones, las generales de su contacto (sin oportunidad), su `actualizado` y su `creado`.
 //    Sin ninguna fecha válida no se puede saber desde cuándo, y no cuenta como parada. A igual número de días se respeta el orden del archivo.
@@ -949,12 +968,42 @@ function diasParadaDe(negocio){
   const n = negocio && negocio.diasParada;
   return typeof n === 'number' && Number.isFinite(n) && n > 0 ? n : DIAS_PARADA;
 }
+// El producto de un negocio por su código, esté o no registrado el negocio (con `mapa` o solo con `productos`); null si no lo tiene.
+function productoDe(negocio, cod){
+  const mapa = (negocio && negocio.mapa) || {};
+  return Object.prototype.hasOwnProperty.call(mapa, cod) ? mapa[cod] : (negocio && Array.isArray(negocio.productos) ? negocio.productos.find(x => x && x.codigo === cod) || null : null);
+}
 // Como idxFase, pero con el negocio que se le pasa en vez del activo: las fases de su producto, o las del negocio si el producto no se conoce.
 function idxFaseDe(negocio, o){
-  const cod = o && o.producto, mapa = (negocio && negocio.mapa) || {};
-  const p = Object.prototype.hasOwnProperty.call(mapa, cod) ? mapa[cod] : (negocio && Array.isArray(negocio.productos) ? negocio.productos.find(x => x && x.codigo === cod) : null);
+  const p = productoDe(negocio, o && o.producto);
   const i = ((p && p.fases) || (negocio && negocio.fases) || []).indexOf(o && o.fase);
   return i < 0 ? 0 : i;
+}
+// Importe estimado de una oportunidad sin importe (contrato B, igual que en herramientas/cifras.py). Una oportunidad está «sin importe» si su alta y su cuota
+// son 0 o están vacías las dos; esta función no lo comprueba, da lo que se le estimaría: { alta, cuota } (vacío cuenta 0), o null si no hay estimación.
+//  - Si su `servicio` coincide con el `n` de un servicio de su producto, el precio de ese servicio (si ese servicio no tiene precio, no hay estimación).
+//  - Si no tiene servicio o no coincide, el del servicio más barato de su producto: el de menor alta + 12 × cuota que sea mayor que 0; en un empate, el primero de la lista.
+//  - Si el producto no tiene ningún servicio con precio, no hay estimación.
+function importeEstimado(negocio, o){
+  const p = productoDe(negocio, o && o.producto), servicios = ((p && Array.isArray(p.servicios)) ? p.servicios : []).filter(s => s && typeof s === 'object');
+  const num = v => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
+  const precio = s => ({ alta: num(s.alta), cuota: num(s.cuota) });
+  const alAno = s => num(s.alta) + 12 * num(s.cuota);
+  const nombreServicio = o && typeof o.servicio === 'string' ? o.servicio : '';
+  const suyo = nombreServicio ? servicios.find(s => s.n === nombreServicio) : null;
+  if(suyo){ const v = precio(suyo); return v.alta !== 0 || v.cuota !== 0 ? v : null; }
+  let barato = null;
+  servicios.forEach(s => { if(alAno(s) > 0 && (!barato || alAno(s) < alAno(barato))) barato = s; });
+  return barato ? precio(barato) : null;
+}
+// La fecha (AAAA-MM-DD) de dentro de n días contados desde `desdeISO`; si cae en sábado o domingo, el lunes siguiente. Vacío si `desdeISO` no es una fecha.
+function fechaEnDias(desdeISO, n){
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(desdeISO == null ? '' : desdeISO));
+  if(!m) return '';
+  const f = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + Number(n)));
+  const dia = f.getUTCDay();   // 0 domingo, 6 sábado
+  if(dia === 6) f.setUTCDate(f.getUTCDate() + 2); else if(dia === 0) f.setUTCDate(f.getUTCDate() + 1);
+  return f.toISOString().slice(0, 10);
 }
 // La fecha AAAA-MM-DD de un valor (vale también una con hora, como las de `actualizado`); vacío si no es una fecha.
 function fechaDia(v){ const s = String(v == null ? '' : v).slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : ''; }
@@ -964,25 +1013,35 @@ function diasEntre(desde, hasta){
   return Math.round((t(hasta) - t(desde)) / 86400000);
 }
 // El dinero de un negocio. d son los datos (contactos, oportunidades y anotaciones; basta con las oportunidades), negocio su configuración
-// y hoyISO el día de hoy (AAAA-MM-DD). Devuelve { enJuego: { porFase: [{ i, fase, n, alta, cuota }] (solo las fases con algo), n, alta, cuota },
-// previsto: { alta, cuota }, ganadoMes: { n, alta, cuota }, perdidoMes: { n, alta, cuota, motivos: { motivo: recuento } }, hayImportes }.
-// `fase` es el nombre de la fase en el negocio. hayImportes dice si alguna oportunidad, en cualquier fase, tiene alta o cuota.
+// y hoyISO el día de hoy (AAAA-MM-DD). Devuelve { enJuego: { porFase: [{ i, fase, n, alta, cuota, altaEstimada, cuotaEstimada, nEstimadas }] (solo las fases con algo), n, alta, cuota,
+// altaEstimada, cuotaEstimada, nEstimadas }, previsto: { alta, cuota, altaEstimada, cuotaEstimada }, ganadoMes: { n, alta, cuota },
+// perdidoMes: { n, alta, cuota, motivos: { motivo: recuento } }, hayImportes }.
+// `fase` es el nombre de la fase en el negocio. altaEstimada y cuotaEstimada son la parte de alta y de cuota que sale de estimaciones (ya incluida en alta y cuota) y nEstimadas,
+// cuántas oportunidades se han estimado. En `previsto` la parte estimada se pondera y se redondea como el total. hayImportes dice si alguna oportunidad, en cualquier fase,
+// tiene alta o cuota, o si se ha estimado alguna.
 function dinero(d, negocio, hoyISO){
   const pesos = pesosDe(negocio), mes = fechaDia(hoyISO).slice(0, 7);
   const num = v => { const x = Number(v); return Number.isFinite(x) ? x : 0; };
   const fases = new Map(), motivos = new Map();
-  const juego = { porFase: [], n: 0, alta: 0, cuota: 0 }, ganado = { n: 0, alta: 0, cuota: 0 }, perdido = { n: 0, alta: 0, cuota: 0, motivos: {} };
-  let previstoAlta = 0, previstoCuota = 0, hayImportes = false;
+  const juego = { porFase: [], n: 0, alta: 0, cuota: 0, altaEstimada: 0, cuotaEstimada: 0, nEstimadas: 0 }, ganado = { n: 0, alta: 0, cuota: 0 }, perdido = { n: 0, alta: 0, cuota: 0, motivos: {} };
+  let previstoAlta = 0, previstoCuota = 0, previstoAltaEst = 0, previstoCuotaEst = 0, hayImportes = false;
   ((d && d.oportunidades) || []).forEach(o => {
     if(!o) return;
-    const alta = num(o.alta), cuota = num(o.cuota), i = idxFaseDe(negocio, o);
+    let alta = num(o.alta), cuota = num(o.cuota), altaEst = 0, cuotaEst = 0;
+    const i = idxFaseDe(negocio, o);
     if(alta !== 0 || cuota !== 0) hayImportes = true;
+    else if(i >= 1 && i <= 4){ const e = importeEstimado(negocio, o); if(e){ altaEst = alta = e.alta; cuotaEst = cuota = e.cuota; } }
     if(i >= 1 && i <= 4){
       let f = fases.get(i);
-      if(!f){ f = { i, fase: (negocio && negocio.fases && negocio.fases[i]) || '', n: 0, alta: 0, cuota: 0 }; fases.set(i, f); }
+      if(!f){ f = { i, fase: (negocio && negocio.fases && negocio.fases[i]) || '', n: 0, alta: 0, cuota: 0, altaEstimada: 0, cuotaEstimada: 0, nEstimadas: 0 }; fases.set(i, f); }
       f.n++; f.alta += alta; f.cuota += cuota;
       juego.n++; juego.alta += alta; juego.cuota += cuota;
+      if(altaEst !== 0 || cuotaEst !== 0){
+        f.nEstimadas++; f.altaEstimada += altaEst; f.cuotaEstimada += cuotaEst;
+        juego.nEstimadas++; juego.altaEstimada += altaEst; juego.cuotaEstimada += cuotaEst;
+      }
       previstoAlta += alta * pesos[i]; previstoCuota += cuota * pesos[i];
+      previstoAltaEst += altaEst * pesos[i]; previstoCuotaEst += cuotaEst * pesos[i];
     } else if((i === I_CLIENTE || i === I_PERDIDO) && mes && fechaDia(o.fechaCierre || o.actualizado).slice(0, 7) === mes){
       const x = i === I_CLIENTE ? ganado : perdido;
       x.n++; x.alta += alta; x.cuota += cuota;
@@ -991,7 +1050,9 @@ function dinero(d, negocio, hoyISO){
   });
   juego.porFase = [...fases.values()].sort((a, b) => a.i - b.i);
   perdido.motivos = Object.fromEntries(motivos);
-  return { enJuego: juego, previsto: { alta: Math.round(previstoAlta / 100), cuota: Math.round(previstoCuota / 100) }, ganadoMes: ganado, perdidoMes: perdido, hayImportes };
+  if(juego.nEstimadas > 0) hayImportes = true;
+  return { enJuego: juego, previsto: { alta: Math.round(previstoAlta / 100), cuota: Math.round(previstoCuota / 100), altaEstimada: Math.round(previstoAltaEst / 100), cuotaEstimada: Math.round(previstoCuotaEst / 100) },
+    ganadoMes: ganado, perdidoMes: perdido, hayImportes };
 }
 // Las oportunidades paradas, de más días a menos: [{ id (de la oportunidad), contactoId, contacto (entidad, o persona), producto, fase, dias }].
 function paradas(d, negocio, hoyISO){
@@ -1016,7 +1077,7 @@ function paradas(d, negocio, hoyISO){
   });
   return lista.sort((a, b) => b.dias - a.dias);
 }
-if(typeof module !== 'undefined') Object.assign(module.exports, { euros, dinero, paradas, pesosDe, diasParadaDe, idxFaseDe, diasEntre, PESOS_FASE, DIAS_PARADA });
+if(typeof module !== 'undefined') Object.assign(module.exports, { euros, dinero, paradas, pesosDe, diasParadaDe, idxFaseDe, productoDe, importeEstimado, fechaEnDias, diasEntre, PESOS_FASE, DIAS_PARADA });
 </script>
 
 <script>
@@ -1031,8 +1092,9 @@ let AUTOR = 'Jorge · navegador';
 try { AUTOR = localStorage.getItem('crm-global-autor') || NEGOCIOS.map(n => localStorage.getItem(n.bd + '-autor')).find(Boolean) || AUTOR; } catch(e){}
 let vista = 'panel', prod = '', opMarcada = null;
 // Pantalla: a qué elemento vuelve el foco al cerrar la ficha, lo último que se quitó (para «Deshacer» unos segundos), el formulario
-// abierto en la Agenda, las fases plegadas del embudo en el móvil, si el historial de la ficha se ve entero, y lo de «Hoy en todos».
-let origenFoco = null, pendienteDeshacer = null, formAgenda = null, plegadas = {}, historialCompleto = false, resolverCuadro = null;
+// abierto en la Agenda, las fases plegadas del embudo en el móvil, si el historial de la ficha se ve entero, si «Pendientes de primer contacto» está desplegado en la Agenda,
+// la oportunidad por la que se pregunta «¿Cuándo es lo siguiente?» en la ficha (siguiente: { contacto, op }), y lo de «Hoy en todos».
+let origenFoco = null, pendienteDeshacer = null, formAgenda = null, plegadas = {}, historialCompleto = false, resolverCuadro = null, pendientesAbiertos = false, siguiente = null;
 const lectoresHoy = new Map();
 let vecesHoy = 0, enRepoActual = null;
 // Fichas repetidas: lo escrito en «Nuevo contacto» o en «Añadir rápido» mientras se decide qué hacer con las parecidas. Buscar en todos los negocios (solo con GitHub):
@@ -1504,7 +1566,8 @@ async function inicio(){
   $('bAnotar').onclick = anotar;
   $('aTipo').onchange = sugerirFase;
   $('bRecordatorio').onclick = () => { if($('aProx').disabled || !NEG.recordatorio) return; $('aProx').value = NEG.recordatorio.texto; $('aProxFecha').value = sumarDias($('aFecha').value || hoyISO(), NEG.recordatorio.dias || 9); };
-  $('aOp').onchange = prepararAnotar;
+  $('aOp').onchange = () => { siguiente = null; pintarSiguiente(); prepararAnotar(); };   // otra oportunidad: la pregunta de la anterior ya no vale
+  $('siguiente').addEventListener('click', e => { const b = e.target.closest('button[data-dias]'); if(b) elegirSiguiente(Number(b.dataset.dias)); });
   $('bAddOp').onclick = anadirOp;
   $('bBorrar').onclick = borrarContacto;
   $('bVerTodas').onclick = () => { historialCompleto = !historialCompleto; const c = contacto(fichaId); if(c) pintarHistorial(c); };
@@ -2106,6 +2169,8 @@ function aplicarNegocio(){
   st.textContent = cssNegocio(n);
   try { prod = localStorage.getItem(n.bd + '-producto') || ''; } catch(e){ prod = ''; }
   if(prod && !PRODUCTOS[prod]) prod = '';
+  try { pendientesAbiertos = localStorage.getItem(n.bd + '-pendientes') === '1'; } catch(e){ pendientesAbiertos = false; }   // si se dejó desplegada la lista de pendientes de primer contacto
+  siguiente = null; $('siguiente').classList.add('oculto');
   $('selProducto').innerHTML = [['', 'Todos', 'todos']].concat(CODIGOS.map(k => [k, PRODUCTOS[k].n, PRODUCTOS[k].c]))
     .map(([k, nom, c]) => '<button type="button" data-prod="' + k + '" aria-pressed="' + (prod === k) + '"><i class="punto p-' + c + '"></i>' + esc(nom) + '</button>').join('');
   $('selProducto').querySelectorAll('button').forEach(b => b.onclick = () => ponerProducto(b.dataset.prod));
@@ -2273,8 +2338,17 @@ function textoImportes(alta, cuota){
   if(cuota) p.push(euros(cuota) + '/mes de cuota');
   return p.join(' y ');
 }
+// «2.345 € y 67 €/mes»: la versión corta, para decir cuánto de una cifra es estimado (vacío si no hay nada).
+function textoCorto(alta, cuota){
+  const p = [];
+  if(alta) p.push(euros(alta));
+  if(cuota) p.push(euros(cuota) + '/mes');
+  return p.join(' y ');
+}
 // El bloque «Dinero» del Panel: lo que hay en juego (con una tabla por fase), lo previsto, y lo ganado y perdido este mes. Sigue el producto elegido
-// arriba. Si ninguna oportunidad tiene alta ni cuota, es una sola línea que lo dice. Los cálculos son los de dinero(), en el motor.
+// arriba. Si ninguna oportunidad tiene alta ni cuota (ni se ha podido estimar), es una sola línea que lo dice. Los cálculos son los de dinero(), en el motor.
+// Lo que sale de estimar con el precio del servicio (oportunidades en juego sin importe) se dice aparte: en la línea de «En juego», con una marca en la tabla
+// y una nota debajo de ella, y en «Previsto». Si todo es real, no se ve nada de eso.
 function pintarDinero(hoy){
   const r = dinero(datosVisibles(), NEG, hoy), cuerpo = $('dineroCuerpo');
   if(!r.hayImportes){ cuerpo.innerHTML = '<p class="vacio">Sin importes todavía: ponlos en cada oportunidad (alta y cuota)</p>'; return; }
@@ -2285,11 +2359,16 @@ function pintarDinero(hoy){
   const explicacion = 'Cada oportunidad cuenta según su fase: ' + partes.slice(0, -1).join(', ') + ' y ' + partes[partes.length - 1] + '.';
   const delMes = x => x.n ? oportunidades(x.n) + ' (' + (textoImportes(x.alta, x.cuota) || 'sin importe') + ')' : 'nada';
   const motivos = Object.entries(r.perdidoMes.motivos).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es')).map(([m, n]) => esc(m) + ' (' + n + ')').join(', ');
-  const filas = juego.porFase.map(f => '<tr><td>' + esc(faseDe(f.i) || f.fase) + '</td><td class="num">' + f.n + '</td><td class="num">' + euros(f.alta) + '</td><td class="num">' + euros(f.cuota) + '/mes</td></tr>').join('');
+  const estimado = juego.nEstimadas > 0 ? textoCorto(juego.altaEstimada, juego.cuotaEstimada) : '';
+  const previstoEst = textoCorto(r.previsto.altaEstimada, r.previsto.cuotaEstimada);
+  const marca = hay => hay ? '<span class="est" title="Incluye importes estimados con el precio del servicio">*</span>' : '';
+  const filas = juego.porFase.map(f => '<tr><td>' + esc(faseDe(f.i) || f.fase) + '</td><td class="num">' + f.n + '</td><td class="num">' + euros(f.alta) + marca(f.altaEstimada) + '</td><td class="num">' + euros(f.cuota) + '/mes' + marca(f.cuotaEstimada) + '</td></tr>').join('');
   cuerpo.innerHTML =
-    '<p><b>En juego:</b> ' + (juego.n ? (imp ? imp + ' en ' + oportunidades(juego.n) : oportunidades(juego.n) + ', todavía sin importe') + ' <span class="sub">(de ' + esc(faseDe(1)) + ' a ' + esc(faseDe(4)) + ')</span>' : 'ninguna oportunidad') + '</p>' +
+    '<p><b>En juego:</b> ' + (juego.n ? (imp ? imp + ' en ' + oportunidades(juego.n) : oportunidades(juego.n) + ', todavía sin importe') + ' <span class="sub">(de ' + esc(faseDe(1)) + ' a ' + esc(faseDe(4)) + ')</span>' +
+      (estimado ? ' <br><span class="sub est-linea">(de ellos, ' + esc(estimado) + ' estimados con el precio del servicio en ' + oportunidades(juego.nEstimadas) + ')</span>' : '') : 'ninguna oportunidad') + '</p>' +
     (juego.n ? '<div class="din-caja"><table class="din-tabla" aria-label="Lo que hay en juego, por fase"><thead><tr><th>Fase</th><th><span class="txt-largo">Oportunidades</span><span class="txt-corto">Cuántas</span></th><th>Alta</th><th>Cuota</th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '') +
-    '<p title="' + esc(explicacion) + '"><b>Previsto:</b> ' + (textoImportes(r.previsto.alta, r.previsto.cuota) || '0 €') + ' <br><span class="sub">' + esc(explicacion) + '</span></p>' +
+    (estimado ? '<p class="sub nota-est">* Incluye importes estimados con el precio del servicio de cada oportunidad que todavía no tiene el suyo.</p>' : '') +
+    '<p title="' + esc(explicacion) + '"><b>Previsto:</b> ' + (textoImportes(r.previsto.alta, r.previsto.cuota) || '0 €') + (previstoEst ? ' <span class="sub">(de ellos, ' + esc(previstoEst) + ' estimados)</span>' : '') + ' <br><span class="sub">' + esc(explicacion) + '</span></p>' +
     '<p><b>Ganado este mes:</b> ' + delMes(r.ganadoMes) + '</p>' +
     '<p><b>Perdido este mes:</b> ' + delMes(r.perdidoMes) + (r.perdidoMes.n ? ' · motivos: ' + motivos : '') + '</p>';
 }
@@ -2483,6 +2562,10 @@ function itemParada(p){
     '<div class="acciones-tarea"><button type="button" class="mini primario" data-acc="anotar">Anotar</button><button type="button" class="mini" data-acc="abrir">Abrir</button></div>' +
     '<div class="en-linea" hidden></div></li>';
 }
+// Recuerda, por negocio y en este navegador, si «Pendientes de primer contacto» se ha dejado desplegado (por defecto va plegado).
+function guardarPendientesAbiertos(){
+  try { if(pendientesAbiertos) localStorage.setItem(NEG.bd + '-pendientes', '1'); else localStorage.removeItem(NEG.bd + '-pendientes'); } catch(e){}
+}
 // Lleva a una sección de la Agenda (hoy, la de las paradas): la deja arriba y le pasa el foco.
 function irASeccionAgenda(seccion){
   const g = $('agenda').querySelector('[data-seccion="' + seccion + '"]'); if(!g) return;
@@ -2492,9 +2575,14 @@ function irASeccionAgenda(seccion){
 function pintarAgenda(){
   const hoy = hoyISO(), man = sumarDias(hoy, 1), en7 = sumarDias(hoy, 7), en30 = sumarDias(hoy, 30);
   const guardado = capturarFormAgenda();   // si había un formulario abierto, que no se pierda al volver a pintar
+  const plegable = $('agenda').querySelector('details[data-seccion="pendientes"]');
+  if(plegable && plegable.open !== pendientesAbiertos){ pendientesAbiertos = plegable.open; guardarPendientesAbiertos(); }   // lo último que se vio, aunque el aviso de que se ha abierto todavía no haya llegado
   const ops = opsVisibles().filter(conAgenda).sort((a, b) => a.fechaProximo.localeCompare(b.fechaProximo) || prioIdx(a.prioridad) - prioIdx(b.prioridad));
   const paradasAhora = paradas(datosVisibles(), NEG, hoy), enParada = new Set(paradasAhora.map(p => p.id));
-  const sinFecha = opsVisibles().filter(o => { const c = contacto(o.contactoId); return !c.excluido && vivaIdx(idxFase(o)) && !o.fechaProximo && !enParada.has(o.id); });   // las paradas tienen su grupo: no se repiten
+  // Las abiertas sin fecha de próximo paso (sin contar a los excluidos ni las paradas, que tienen su grupo y no se repiten) se reparten en dos: las conversaciones en
+  // marcha (de la 2ª fase a la 2ª «en juego», índices 1 a 4) y las que aún no se han trabajado (índice 0, «Pendiente»), que van plegadas al final.
+  const sinFecha = opsVisibles().filter(o => { const c = contacto(o.contactoId); return !c.excluido && vivaIdx(idxFase(o)) && !o.fechaProximo && !enParada.has(o.id); });
+  const enMarcha = sinFecha.filter(o => idxFase(o) >= 1), pendientes = sinFecha.filter(o => idxFase(o) === 0);
   // [título, lista, si tiene fecha, qué decir si está vacío, sección]. Un grupo vacío solo sale si dice algo (lo atrasado, lo de hoy y las paradas).
   const grupos = [
     ['Atrasados', ops.filter(o => o.fechaProximo < hoy), true, 'Nada atrasado.'],
@@ -2504,11 +2592,15 @@ function pintarAgenda(){
     ['Próximos 30 días', ops.filter(o => o.fechaProximo > en7 && o.fechaProximo <= en30), true, ''],
     ['Más adelante', ops.filter(o => o.fechaProximo > en30), true, ''],
     ['Paradas (más de ' + diasParadaDe(NEG) + ' días sin movimiento)', paradasAhora, false, 'Ninguna oportunidad parada.', 'paradas'],
-    ['Abiertas sin próximo paso', sinFecha, false, ''],
+    ['En marcha sin próximo paso', enMarcha, false, ''],
   ];
-  const guia = !ops.length && !sinFecha.length && !paradasAhora.length ? '<p class="guia-vacia">No hay próximos pasos. Anota qué ha pasado en un contacto y pon la fecha del siguiente paso: saldrá aquí.</p>' : '';
+  const guia = !ops.length && !enMarcha.length && !paradasAhora.length ? '<p class="guia-vacia">No hay próximos pasos. Anota qué ha pasado en un contacto y pon la fecha del siguiente paso: saldrá aquí.</p>' : '';
   $('agenda').innerHTML = guia + grupos.filter(([, l, , vacio]) => l.length || vacio).map(([t, l, conFecha, vacio, seccion]) => '<div class="grupo"' + (seccion ? ' data-seccion="' + seccion + '"' : '') + '><h3' + (seccion ? ' tabindex="-1"' : '') + '>' + esc(t) + ' <span>' + l.length + '</span></h3>' +
-    (l.length ? '<ul class="lista-tareas">' + l.map(o => seccion === 'paradas' ? itemParada(o) : itemAgenda(o, hoy, conFecha)).join('') + '</ul>' : '<p class="vacio">' + vacio + '</p>') + '</div>').join('');
+    (l.length ? '<ul class="lista-tareas">' + l.map(o => seccion === 'paradas' ? itemParada(o) : itemAgenda(o, hoy, conFecha)).join('') + '</ul>' : '<p class="vacio">' + vacio + '</p>') + '</div>').join('') +
+    (pendientes.length ? '<details class="plegable pendientes" data-seccion="pendientes"' + (pendientesAbiertos ? ' open' : '') + '><summary>Pendientes de primer contacto (' + pendientes.length + ')</summary><div class="cuerpo"><ul class="lista-tareas">' +
+      pendientes.map(o => itemAgenda(o, hoy, false)).join('') + '</ul></div></details>' : '');
+  const det = $('agenda').querySelector('details[data-seccion="pendientes"]'), bd = NEG.bd;
+  if(det) det.addEventListener('toggle', () => { if(NEG.bd === bd && det.open !== pendientesAbiertos){ pendientesAbiertos = det.open; guardarPendientesAbiertos(); } });   // solo cuando lo cambia quien mira, no al pintarlo ya desplegado   // «toggle» no sube hasta #agenda: se escucha en el propio elemento
   restaurarFormAgenda(guardado);
   enlazarListas('#agenda');
 }
@@ -2643,6 +2735,7 @@ function abrirFicha(id, opId, opciones){
   const c = contacto(id); if(!c) return;
   const cambiaContacto = fichaId !== id;
   if(cambiaContacto) historialCompleto = false;
+  if(siguiente && (siguiente.contacto !== id || (opId && opId !== siguiente.op))) siguiente = null;   // otro contacto u otra oportunidad: ya no se pregunta
   fichaId = id; opMarcada = opId || (cambiaContacto ? null : opMarcada);
   $('fichaTitulo').textContent = nombre(c);
   const fabs = [...new Set(opsDe(c.id).map(o => o.fabricante).filter(Boolean))];
@@ -2666,6 +2759,7 @@ function abrirFicha(id, opId, opciones){
   prepararAnotarSelect(c);
   $('aFecha').value = hoyISO(); $('aTipo').value = NEG.tipoPorDefecto || TIPOS[0]; $('aTexto').value = ''; sugerirFase();
   pintarHistorial(c);
+  pintarSiguiente();
   $('fichaEstado').textContent = '';
   if($('ficha').hidden){
     origenFoco = recordarOrigenFoco();
@@ -2746,7 +2840,7 @@ function avisoRepetida(k){
   caja.hidden = false;
 }
 // Cierra la ficha sin más: la esconde, deja de bloquear el fondo y se olvida de ella.
-function ocultarFicha(){ $('ficha').hidden = true; bloquearFondo(false); fichaId = null; opMarcada = null; historialCompleto = false; soltarPasoFicha(); }
+function ocultarFicha(){ $('ficha').hidden = true; bloquearFondo(false); fichaId = null; opMarcada = null; historialCompleto = false; siguiente = null; $('siguiente').classList.add('oculto'); soltarPasoFicha(); }
 // El botón Atrás del móvil cierra la ficha en vez de salir de la página: al abrirla se apunta un paso en el historial del navegador
 // y «atrás» lo deshace. La página nunca da «atrás» por su cuenta (sería asíncrono y podría cerrar la ficha que se abre justo después):
 // si la ficha se cierra de otra manera (su botón, Escape, cambiar de negocio), el paso se queda marcado como libre y la próxima ficha
@@ -2816,6 +2910,7 @@ async function cambioOp(e){
   opMarcada = o.id;
   if(k === 'fase' || k === 'servicio'){ pintarOpsFicha(c); prepararAnotarSelect(c, true); pintarHistorial(c); }
   else if((k === 'proximoPaso' || k === 'fechaProximo') && $('aOp').value === o.id){ $('aProx').value = o.proximoPaso || ''; $('aProxFecha').value = o.fechaProximo || ''; }
+  pintarSiguiente();   // si la oportunidad ya tiene fecha de próximo paso, o ya no está abierta, la pregunta sobra
   programarGuardado();
 }
 // Al elegir un servicio se ponen los importes que trae. Si la oportunidad ya tenía otros, antes se pregunta.
@@ -2923,9 +3018,31 @@ async function anotar(){
     a.motivo = motivo; o = opPorId(id); c = contacto(fichaId); if(!o || !c) return;   // mientras se contestaba pudo llegar un archivo nuevo
   }
   registrarAnotacion(c, o, a);
-  if(o) opMarcada = o.id;
+  if(o){ opMarcada = o.id; siguiente = vivaIdx(idxFase(o)) && !o.fechaProximo ? { contacto: c.id, op: o.id } : null; }   // abierta y sin próximo paso: se pregunta cuándo es lo siguiente
   abrirFicha(c.id, o ? o.id : null);
   $('fichaEstado').textContent = 'Anotado.';
+  programarGuardado();
+}
+// «¿Cuándo es lo siguiente?»: tras anotar sobre una oportunidad abierta (de la fase 1ª a la 2ª «en juego») que se queda sin fecha de próximo paso, la ficha lo pregunta, debajo de
+// «Anotar» y sin bloquear nada. Solo sale mientras la ficha es la de ese contacto y la oportunidad sigue abierta y sin fecha; se va al cerrar la ficha o al cambiar de oportunidad.
+function pintarSiguiente(){
+  const o = siguiente && opPorId(siguiente.op), visible = !!o && fichaId === siguiente.contacto && o.contactoId === siguiente.contacto && !o.fechaProximo && vivaIdx(idxFase(o));
+  if(!visible) siguiente = null;
+  $('siguiente').classList.toggle('oculto', !visible);
+}
+// Los tres primeros botones ponen la fecha (hoy + 3, + 7 o + 30 días; un sábado o un domingo pasa al lunes) y, si no hay próximo paso escrito, «Seguimiento». «Nada por ahora» (0) solo cierra la línea.
+function elegirSiguiente(dias){
+  const o = siguiente && opPorId(siguiente.op), c = o && contacto(o.contactoId);
+  siguiente = null; $('siguiente').classList.add('oculto');
+  $('bAnotar').focus();   // el botón que se ha pulsado desaparece: el foco no se pierde
+  if(!o || !c || !(dias > 0)) return;
+  o.fechaProximo = fechaEnDias(hoyISO(), dias);
+  if(!String(o.proximoPaso || '').trim()) o.proximoPaso = 'Seguimiento';
+  o.actualizado = hoyISO(); opMarcada = o.id;
+  if($('aOp').value === o.id){ $('aProx').value = o.proximoPaso; $('aProxFecha').value = o.fechaProximo; }
+  const caja = $('opsFicha').querySelector('[data-opcaja="' + CSS.escape(o.id) + '"]');   // y los campos de la propia oportunidad, sin volver a pintar la ficha
+  if(caja) caja.querySelectorAll('[data-k="fechaProximo"], [data-k="proximoPaso"]').forEach(n => { n.value = n.dataset.k === 'fechaProximo' ? o.fechaProximo : o.proximoPaso; });
+  $('fichaEstado').textContent = 'Siguiente paso: ' + fechaLarga(o.fechaProximo) + '.';
   programarGuardado();
 }
 function anadirOp(){
